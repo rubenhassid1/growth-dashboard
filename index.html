@@ -31,14 +31,22 @@
     min-height: 100vh;
   }
 
-  /* ===== PIXEL ART SPRITES ===== */
+  /* ===== CHARACTER IMAGES ===== */
+  .char-img {
+    width: 48px; height: 48px;
+    object-fit: contain;
+    image-rendering: pixelated;
+    flex-shrink: 0;
+    border-radius: 6px;
+  }
+  .char-img-sm { width: 28px; height: 28px; }
+  /* Fallback CSS pixel art for characters without images */
   .sprite-wrap { position: relative; width: 42px; height: 42px; flex-shrink: 0; }
   .sprite {
     position: absolute;
     top: 0; left: 0;
     width: 3px; height: 3px;
     background: transparent;
-    /* Each character's box-shadows set via inline style */
   }
   .sprite-sm .sprite { width: 2px; height: 2px; }
   .sprite-sm { width: 28px; height: 28px; }
@@ -789,12 +797,44 @@ const PLATFORMS = {
   x:         { label: 'X (Twitter)',color: '#374151', dotClass: 'x' },
 };
 
-// ===== PIXEL ART SPRITES (box-shadow technique) =====
-// Each sprite is a 12x12 grid at 3px per pixel = 36x36
-const px = 3; // pixel size
-function spriteHTML(shadows, size) {
-  const s = size || px;
-  return `<div class="sprite-wrap" style="width:${12*s}px;height:${12*s}px"><div class="sprite" style="width:${s}px;height:${s}px;box-shadow:${shadows.map(([x,y,c])=>`${x*s}px ${y*s}px 0 0 ${c}`).join(',')}"></div></div>`;
+// ===== CHARACTER IMAGE SYSTEM =====
+// Real 16-bit pixel art images for all characters
+const px = 3;
+
+// Image URLs — muraldecal (transparent bg sticker style)
+const CHAR_IMAGES = {
+  ryu:    'https://www.muraldecal.com/en/img/arc244-png/folder/products-detalle-png/stickers-street-fighter-ryu-pixel-16-bits.png',
+  ken:    'https://www.muraldecal.com/en/img/arc243-png/folder/products-detalle-png/stickers-street-fighter-ken-pixel-16-bits.png',
+};
+
+// ShroomArts blog pixel art (dark bg, needs zoom)
+const CHAR_BG_IMAGES = {
+  chunli: { url: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg_y95GR-vRv8Mj4U5HP10Sl6yzt0ItvCxdS6CjfmynrCm5lGOCbm9hkB2-TKVNtn5pg0Ih2iFf-xRf2xuONDaCLpG_a1fL3A_4jQFtU-zwl_gkfja18FCR_SsSs7f5g3ty86Z6egUbZfy-/s1600/chunli.png', pos: 'center 30%', zoom: '320%' },
+  vega:   { url: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhbmo1AcE0gt41KTvErW_E4t3Yuij0pPccN-ubEsvX_LXDUboZeeSU4nn1t4D1CISH_4u9Gqhta4dAOP-e7ja_M1bR64yz1FEsBqpqmmfhNcfBTAm32Oqa8_Rgl93FEmbAqc8rz_3DR5An6/s1600/vega.png', pos: 'center 28%', zoom: '350%' },
+  balrog: { url: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgJOno8NKDsub6hu88VG9gnCZOgQ1zZnS9NlModtxIxBYK4fSqkpJJhLEyMBu59wWtn1Ea7THjS22n1mZ2d_JN6WXh5eqzSZvnWcVVaViSvE_U5L166O44nz-0bfVjKMPScEU1qyNCsYqvW/s1600/balrog.png', pos: 'center 35%', zoom: '320%' },
+  mbison: { url: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiZuLw1_BwvoT40YVW2swor3nbVCo80erbZ_SV_a_n_5A4kgXwV_O_BdWwk8aNqsxSGG9UhNvipxD3fBqwKeXzmcoZUl89ASvRZTfnP8JSHyqn5bsLcGp-Ijtwfexyokce0AdY6c5s1-CLj/s1600/mbison.png', pos: 'center 28%', zoom: '350%' },
+};
+
+function spriteHTML(imgKeyOrShadows, size) {
+  const sz = size === 2 ? 28 : 48;
+  // If string key, check image sources
+  if (typeof imgKeyOrShadows === 'string') {
+    // muraldecal transparent-bg images
+    if (CHAR_IMAGES[imgKeyOrShadows]) {
+      return `<img src="${CHAR_IMAGES[imgKeyOrShadows]}" class="char-img${size === 2 ? ' char-img-sm' : ''}" alt="" style="width:${sz}px;height:${sz}px">`;
+    }
+    // ShroomArts dark-bg images (background-image with zoom)
+    if (CHAR_BG_IMAGES[imgKeyOrShadows]) {
+      const bg = CHAR_BG_IMAGES[imgKeyOrShadows];
+      return `<div style="width:${sz}px;height:${sz}px;background:url('${bg.url}') ${bg.pos}/${bg.zoom} no-repeat #1d1d2b;border-radius:8px;flex-shrink:0"></div>`;
+    }
+  }
+  // Fallback: CSS pixel art (box-shadow technique) for Akuma etc.
+  if (Array.isArray(imgKeyOrShadows)) {
+    const s = size || 3;
+    return `<div class="sprite-wrap" style="width:${12*s}px;height:${12*s}px"><div class="sprite" style="width:${s}px;height:${s}px;box-shadow:${imgKeyOrShadows.map(([x,y,c])=>`${x*s}px ${y*s}px 0 0 ${c}`).join(',')}"></div></div>`;
+  }
+  return '';
 }
 
 // Ryu - blue gi, white headband, tan skin
@@ -910,21 +950,21 @@ const BISON_PIXELS = [
 ];
 
 const FIGHTERS = {
-  linkedin: { name: 'LINKE-LI',   pixels: RYU_PIXELS,    color: '#0a66c2', cardClass: 'linkedin-card' },
-  substack: { name: 'SUBS-TRON',  pixels: KEN_PIXELS,    color: '#ff6719', cardClass: 'substack-card' },
-  x:        { name: 'X-ELSIOR',   pixels: CHUNLI_PIXELS, color: '#374151', cardClass: 'x-card' },
-  all:      { name: 'ALL-IN-ONE', pixels: AKUMA_PIXELS,   color: '#7c3aed', cardClass: 'all-card' },
+  linkedin: { name: 'LINKE-LI',   img: 'ryu',    color: '#0a66c2', cardClass: 'linkedin-card' },
+  substack: { name: 'SUBS-TRON',  img: 'ken',    color: '#ff6719', cardClass: 'substack-card' },
+  x:        { name: 'X-ELSIOR',   img: 'chunli', color: '#374151', cardClass: 'x-card' },
+  all:      { name: 'ALL-IN-ONE', img: AKUMA_PIXELS, color: '#7c3aed', cardClass: 'all-card' },
 };
 
 // Boss milestone chain — each platform fights the NEXT boss above their current count
 const BOSS_CHAIN = [
-  { threshold: 100000,  name: 'VEGA',     pixels: VEGA_PIXELS },
-  { threshold: 250000,  name: 'BALROG',   pixels: BALROG_PIXELS },
-  { threshold: 500000,  name: 'BALROG',   pixels: BALROG_PIXELS },
-  { threshold: 750000,  name: 'M. BISON', pixels: BISON_PIXELS },
-  { threshold: 1000000, name: 'M. BISON', pixels: BISON_PIXELS },
+  { threshold: 100000,  name: 'VEGA',     img: 'vega' },
+  { threshold: 250000,  name: 'BALROG',   img: 'balrog' },
+  { threshold: 500000,  name: 'BALROG',   img: 'balrog' },
+  { threshold: 750000,  name: 'M. BISON', img: 'mbison' },
+  { threshold: 1000000, name: 'M. BISON', img: 'mbison' },
 ];
-const ALL_BOSS = { threshold: 2000000, name: 'DARK AKUMA', pixels: AKUMA_PIXELS };
+const ALL_BOSS = { threshold: 2000000, name: 'DARK AKUMA', img: AKUMA_PIXELS };
 
 function getNextBoss(count) {
   for (const boss of BOSS_CHAIN) {
@@ -1271,12 +1311,12 @@ function renderDashboard() {
       <div class="card ${f.cardClass}">
         <div class="fighter-header">
           <div class="fighter-name">
-            ${spriteHTML(f.pixels)}
+            ${spriteHTML(f.img)}
             <div>
               <div class="fighter-label">${f.name}</div>
             </div>
           </div>
-          <span class="rank-badge" style="background:${rank.bg}">${rank.label}</span>
+          <span class="rank-badge" style="background:${rank.bg}" title="Rank: ${rank.label} (${fmtFull(rank.min)} — ${rank.max === Infinity ? '∞' : fmtFull(rank.max)}). Grow to reach the next rank!">${rank.label}</span>
         </div>
         <div class="card-value" title="${fmtFull(count)}">${fmt(count)}</div>
         <div class="card-sub">${subHtml}</div>
@@ -1307,10 +1347,10 @@ function renderDashboard() {
     <div class="card all-card">
       <div class="fighter-header">
         <div class="fighter-name">
-          ${spriteHTML(af.pixels)}
+          ${spriteHTML(af.img)}
           <div><div class="fighter-label">${af.name}</div></div>
         </div>
-        <span class="rank-badge" style="background:${allRank.bg}">${allRank.label}</span>
+        <span class="rank-badge" style="background:${allRank.bg}" title="Combined rank based on average across all platforms">${allRank.label}</span>
       </div>
       <div class="card-value" title="${fmtFull(allCount)}">${fmt(allCount)}</div>
       <div class="card-sub">${allSubHtml}</div>
@@ -1364,7 +1404,7 @@ function renderDashboard() {
   const speedHtml = Object.entries(PLATFORMS).map(([key, p]) => {
     const f = FIGHTERS[key];
     return `<div class="speed-card">
-      <h3>${spriteHTML(f.pixels, 2)} ${p.label}</h3>
+      <h3>${spriteHTML(f.img, 2)} ${p.label}</h3>
       ${speedRow('Week / Week', getGainForPlatform(data, key, daysAgo(0), 7), getGainForPlatform(data, key, daysAgo(7), 7))}
       ${speedRow('Month / Month', getGainForPlatform(data, key, daysAgo(0), 30), getGainForPlatform(data, key, daysAgo(30), 30))}
     </div>`;
@@ -1378,7 +1418,7 @@ function renderDashboard() {
 
   document.getElementById('speed-cards').innerHTML = speedHtml + `
     <div class="speed-card">
-      <h3>${spriteHTML(FIGHTERS.all.pixels, 2)} All Socials</h3>
+      <h3>${spriteHTML(FIGHTERS.all.img, 2)} All Socials</h3>
       ${speedRow('Week / Week', getAllGain(daysAgo(0), 7), getAllGain(daysAgo(7), 7))}
       ${speedRow('Month / Month', getAllGain(daysAgo(0), 30), getAllGain(daysAgo(30), 30))}
     </div>`;
@@ -1412,24 +1452,24 @@ function renderDashboard() {
       return `<div class="vs-est-row"><span>${label}</span><span class="vs-est-date">${est.date} <span style="font-size:9px;color:var(--muted);font-weight:400">(${est.days}d)</span></span></div>`;
     }
 
-    return `<div class="vs-card">
+    return `<div class="vs-card" title="Boss Fight: ${f.name} (${fmtFull(count)} followers) is fighting to reach ${fmtFull(boss.threshold)}. The health bar shows how close you are to defeating this milestone boss. Weekly and monthly pace show estimated dates based on your current growth rate.">
       <div class="vs-fight">
-        <div class="vs-fighter">
-          ${spriteHTML(f.pixels)}
+        <div class="vs-fighter" title="${f.name}: Your fighter for ${p.label}. Current rank: ${rank.label} with ${fmtFull(count)} followers.">
+          ${spriteHTML(f.img)}
           <div class="vs-fighter-name">${f.name}</div>
           <div class="vs-fighter-rank" style="color:${rank.bg}">${rank.label}</div>
           <div class="vs-count" title="${fmtFull(count)}">${fmt(count)}</div>
         </div>
         <div class="vs-middle">VS</div>
-        <div class="vs-boss">
-          ${spriteHTML(boss.pixels)}
+        <div class="vs-boss" title="${boss.name}: The boss guarding the ${fmtFull(boss.threshold)} milestone. Defeat this boss by reaching ${fmtFull(boss.threshold)} followers!">
+          ${spriteHTML(boss.img)}
           <div class="vs-boss-name">${boss.name}</div>
           <div class="vs-count" style="color:var(--red)" title="${fmtFull(boss.threshold)}">${fmt(boss.threshold)}</div>
         </div>
       </div>
-      <div class="health-bar-wrap"><div class="health-bar-fill ${hpClass}" style="width:${progress}%"></div></div>
+      <div class="health-bar-wrap" title="Health bar: ${progress.toFixed(1)}% of the way to defeating ${boss.name}. ${remaining > 0 ? fmtFull(remaining) + ' followers still needed.' : 'DEFEATED!'}"><div class="health-bar-fill ${hpClass}" style="width:${progress}%"></div></div>
       <div class="health-bar-text"><span title="${fmtPct(progress)}">${progress.toFixed(1)}% damage</span><span title="${remaining > 0 ? fmtFull(remaining) : ''}">${remaining > 0 ? fmt(remaining) + ' to go' : 'DEFEATED!'}</span></div>
-      <div class="vs-est">${eRow('Weekly pace', we, weeklyGain)}${eRow('Monthly pace', me, monthlyGain)}</div>
+      <div class="vs-est" title="Estimated dates when you'll defeat this boss, based on your current weekly and monthly growth pace.">${eRow('Weekly pace', we, weeklyGain)}${eRow('Monthly pace', me, monthlyGain)}</div>
     </div>`;
   }).join('');
 
@@ -1443,15 +1483,15 @@ function renderDashboard() {
   function allERow(label, est) { if (allRem <= 0) return `<div class="vs-est-row"><span>${label}</span><span class="vs-est-date" style="color:var(--green)">DEFEATED!</span></div>`; if (!est) return `<div class="vs-est-row"><span>${label}</span><span class="badge neutral">--</span></div>`; return `<div class="vs-est-row"><span>${label}</span><span class="vs-est-date">${est.date} <span style="font-size:9px;color:var(--muted);font-weight:400">(${est.days}d)</span></span></div>`; }
 
   document.getElementById('vs-cards').innerHTML = vsHtml + `
-    <div class="vs-card">
+    <div class="vs-card" title="Boss Fight: ${FIGHTERS.all.name} (${fmtFull(allCount)} total followers across all platforms) is fighting to reach ${fmtFull(allBoss.threshold)}. The health bar shows how close you are to defeating this milestone boss. Weekly and monthly pace show estimated dates based on your current growth rate.">
       <div class="vs-fight">
-        <div class="vs-fighter">${spriteHTML(FIGHTERS.all.pixels)}<div class="vs-fighter-name">${FIGHTERS.all.name}</div><div class="vs-fighter-rank" style="color:${allRank.bg}">${allRank.label}</div><div class="vs-count" title="${fmtFull(allCount)}">${fmt(allCount)}</div></div>
+        <div class="vs-fighter" title="${FIGHTERS.all.name}: Your combined fighter across all platforms. Current rank: ${allRank.label} with ${fmtFull(allCount)} total followers.">${spriteHTML(FIGHTERS.all.img)}<div class="vs-fighter-name">${FIGHTERS.all.name}</div><div class="vs-fighter-rank" style="color:${allRank.bg}">${allRank.label}</div><div class="vs-count" title="${fmtFull(allCount)}">${fmt(allCount)}</div></div>
         <div class="vs-middle">VS</div>
-        <div class="vs-boss">${spriteHTML(allBoss.pixels)}<div class="vs-boss-name">${allBoss.name}</div><div class="vs-count" style="color:var(--red)" title="${fmtFull(allBoss.threshold)}">${fmt(allBoss.threshold)}</div></div>
+        <div class="vs-boss" title="${allBoss.name}: The boss guarding the ${fmtFull(allBoss.threshold)} combined milestone. Defeat this boss by reaching ${fmtFull(allBoss.threshold)} total followers!">${spriteHTML(allBoss.img)}<div class="vs-boss-name">${allBoss.name}</div><div class="vs-count" style="color:var(--red)" title="${fmtFull(allBoss.threshold)}">${fmt(allBoss.threshold)}</div></div>
       </div>
-      <div class="health-bar-wrap"><div class="health-bar-fill ${allHp}" style="width:${allProg}%"></div></div>
+      <div class="health-bar-wrap" title="Health bar: ${allProg.toFixed(1)}% of the way to defeating ${allBoss.name}. ${allRem > 0 ? fmtFull(allRem) + ' followers still needed.' : 'DEFEATED!'}"><div class="health-bar-fill ${allHp}" style="width:${allProg}%"></div></div>
       <div class="health-bar-text"><span title="${fmtPct(allProg)}">${allProg.toFixed(1)}% damage</span><span title="${allRem > 0 ? fmtFull(allRem) : ''}">${allRem > 0 ? fmt(allRem) + ' to go' : 'DEFEATED!'}</span></div>
-      <div class="vs-est">${allERow('Weekly pace', allEst(awg, 7))}${allERow('Monthly pace', allEst(amg, 30))}</div>
+      <div class="vs-est" title="Estimated dates when you'll defeat this boss, based on your combined weekly and monthly growth pace.">${allERow('Weekly pace', allEst(awg, 7))}${allERow('Monthly pace', allEst(amg, 30))}</div>
     </div>`;
 
   // ---- Achievements ----
@@ -1468,19 +1508,19 @@ function renderAchievements(data, ach) {
     MILESTONE_ACHIEVEMENTS.forEach(a => {
       const k = `${a.id}_${key}`;
       const u = ach[k];
-      html += `<div class="achievement-card ${u ? 'unlocked' : 'locked'}"><div class="achievement-emoji">${a.emoji}</div><div class="achievement-title">${a.title}</div><div class="achievement-desc">${PLATFORMS[key].label}: ${a.desc}</div>${u ? `<div class="achievement-date">${u.date}</div>` : ''}</div>`;
+      html += `<div class="achievement-card ${u ? 'unlocked' : 'locked'}" title="${u ? 'Unlocked on ' + u.date + '! ' : ''}${a.title}: Reach ${fmtFull(a.threshold)} followers on ${PLATFORMS[key].label}. ${u ? 'Achievement unlocked!' : 'Keep growing to unlock this!'}"><div class="achievement-emoji">${a.emoji}</div><div class="achievement-title">${a.title}</div><div class="achievement-desc">${PLATFORMS[key].label}: ${a.desc}</div>${u ? `<div class="achievement-date">${u.date}</div>` : ''}</div>`;
     });
   });
   // Speed
   SPEED_ACHIEVEMENTS.forEach(a => {
     let u = null;
     Object.keys(PLATFORMS).forEach(k => { if (ach[`${a.id}_${k}`] && !u) u = ach[`${a.id}_${k}`]; });
-    html += `<div class="achievement-card ${u ? 'unlocked' : 'locked'}"><div class="achievement-emoji">${a.emoji}</div><div class="achievement-title">${a.title}</div><div class="achievement-desc">${a.desc}</div>${u ? `<div class="achievement-date">${u.date}</div>` : ''}</div>`;
+    html += `<div class="achievement-card ${u ? 'unlocked' : 'locked'}" title="${u ? 'Unlocked on ' + u.date + '! ' : ''}${a.title}: ${a.desc}. ${u ? 'Achievement unlocked!' : 'Keep pushing to unlock!'}"><div class="achievement-emoji">${a.emoji}</div><div class="achievement-title">${a.title}</div><div class="achievement-desc">${a.desc}</div>${u ? `<div class="achievement-date">${u.date}</div>` : ''}</div>`;
   });
   // Combo
   COMBO_ACHIEVEMENTS.forEach(a => {
     const u = ach[a.id];
-    html += `<div class="achievement-card ${u ? 'unlocked' : 'locked'}"><div class="achievement-emoji">${a.emoji}</div><div class="achievement-title">${a.title}</div><div class="achievement-desc">${a.desc}</div>${u ? `<div class="achievement-date">${u.date}</div>` : ''}</div>`;
+    html += `<div class="achievement-card ${u ? 'unlocked' : 'locked'}" title="${u ? 'Unlocked on ' + u.date + '! ' : ''}${a.title}: ${a.desc}. ${u ? 'Achievement unlocked!' : 'Keep pushing to unlock!'}"><div class="achievement-emoji">${a.emoji}</div><div class="achievement-title">${a.title}</div><div class="achievement-desc">${a.desc}</div>${u ? `<div class="achievement-date">${u.date}</div>` : ''}</div>`;
   });
   grid.innerHTML = html;
 }
