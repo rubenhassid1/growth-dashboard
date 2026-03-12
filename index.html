@@ -646,6 +646,8 @@
     padding: 3px 6px; border-radius: 4px; font-size: 15px;
   }
   .delete-btn:hover { color: var(--red); background: rgba(220,38,38,0.1); }
+  .change-cell { white-space: nowrap; }
+  .change-cell .edit-btn { vertical-align: middle; margin-left: 2px; }
   .edit-btn {
     background: none; border: none; color: var(--muted); cursor: pointer;
     padding: 3px 6px; border-radius: 4px; font-size: 13px;
@@ -1653,8 +1655,11 @@ function renderHistory() {
     const idx = all.findIndex(d => d.date === entry.date);
     const prev = idx > 0 ? all[idx - 1] : null;
     let ch = '<span class="badge neutral">--</span>';
-    if (prev) { const diff = entry.count - prev.count; ch = `<span class="badge ${diff >= 0 ? 'up' : 'down'}" title="${diff >= 0 ? '+' : ''}${fmtFull(diff)}">${diff >= 0 ? '+' : ''}${fmt(diff)}</span>`; }
-    return `<tr><td>${entry.date}</td><td><span class="platform-tag ${entry.platform}">${p.label}</span></td><td class="count-cell" data-raw="${entry.count}" title="${fmtFull(entry.count)}">${fmt(entry.count)}</td><td>${ch}</td><td><button class="edit-btn" data-date="${entry.date}" data-platform="${entry.platform}">&#9998;</button><button class="delete-btn" data-date="${entry.date}" data-platform="${entry.platform}">&times;</button></td></tr>`;
+    const prevCount = prev ? prev.count : null;
+    const diff = prev ? entry.count - prev.count : null;
+    if (diff !== null) { ch = `<span class="badge ${diff >= 0 ? 'up' : 'down'}" title="${diff >= 0 ? '+' : ''}${fmtFull(diff)}">${diff >= 0 ? '+' : ''}${fmt(diff)}</span>`; }
+    const editBtn = prev ? `<button class="edit-btn" data-date="${entry.date}" data-platform="${entry.platform}" data-prev-count="${prevCount}" title="Edit change">&#9998;</button>` : '';
+    return `<tr><td>${entry.date}</td><td><span class="platform-tag ${entry.platform}">${p.label}</span></td><td title="${fmtFull(entry.count)}">${fmt(entry.count)}</td><td class="change-cell" data-raw-change="${diff !== null ? diff : ''}">${ch}${editBtn}</td><td><button class="delete-btn" data-date="${entry.date}" data-platform="${entry.platform}">&times;</button></td></tr>`;
   }).join('');
   if (sorted.length > 200) body.innerHTML += `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:12px">Showing 200 of ${sorted.length}</td></tr>`;
 }
@@ -1742,28 +1747,30 @@ document.getElementById('history-body').addEventListener('click', e => {
   if (idx >= 0) { data.splice(idx, 1); saveData(data); renderHistory(); showToast('Deleted'); }
 });
 
-// Edit button — transform count cell into inline input
+// Edit button — transform change cell into inline input
 document.getElementById('history-body').addEventListener('click', e => {
   const btn = e.target.closest('.edit-btn'); if (!btn) return;
   const row = btn.closest('tr');
-  const countCell = row.querySelector('.count-cell');
-  if (countCell.querySelector('.inline-edit')) return;
-  const rawValue = countCell.dataset.raw;
-  countCell.innerHTML = `<span class="inline-edit"><input type="number" class="edit-input" value="${rawValue}" min="0"><button class="save-edit" title="Save">&#10003;</button><button class="cancel-edit" title="Cancel">&#10007;</button></span>`;
-  const input = countCell.querySelector('.edit-input');
+  const changeCell = row.querySelector('.change-cell');
+  if (changeCell.querySelector('.inline-edit')) return;
+  const rawChange = changeCell.dataset.rawChange;
+  changeCell.innerHTML = `<span class="inline-edit"><input type="number" class="edit-input" value="${rawChange}" data-date="${btn.dataset.date}" data-platform="${btn.dataset.platform}" data-prev-count="${btn.dataset.prevCount}"><button class="save-edit" title="Save">&#10003;</button><button class="cancel-edit" title="Cancel">&#10007;</button></span>`;
+  const input = changeCell.querySelector('.edit-input');
   input.focus();
   input.select();
 });
 
-// Save edit
+// Save edit — calculate new count from previous count + new change
 document.getElementById('history-body').addEventListener('click', e => {
   const btn = e.target.closest('.save-edit'); if (!btn) return;
   const row = btn.closest('tr');
   const input = row.querySelector('.edit-input');
-  const newCount = parseInt(input.value);
-  if (isNaN(newCount) || newCount < 0) { showToast('Enter a valid count'); return; }
-  const ref = row.querySelector('.edit-btn') || row.querySelector('.delete-btn');
-  upsertEntries([{ date: ref.dataset.date, platform: ref.dataset.platform, count: newCount }]);
+  const newChange = parseInt(input.value);
+  if (isNaN(newChange)) { showToast('Enter a valid number'); return; }
+  const prevCount = parseInt(input.dataset.prevCount);
+  const newCount = prevCount + newChange;
+  if (newCount < 0) { showToast('Count cannot go below 0'); return; }
+  upsertEntries([{ date: input.dataset.date, platform: input.dataset.platform, count: newCount }]);
   renderHistory();
   renderDashboard();
   showToast('Updated!');
