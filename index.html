@@ -23,9 +23,7 @@
     --x: #374151;
     --all: #7c3aed;
   }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     background: var(--bg);
@@ -33,24 +31,34 @@
     min-height: 100vh;
   }
 
-  .pixel { font-family: 'Press Start 2P', monospace; }
+  /* ===== PIXEL ART SPRITES ===== */
+  .sprite-wrap { position: relative; width: 42px; height: 42px; flex-shrink: 0; }
+  .sprite {
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 3px;
+    background: transparent;
+    /* Each character's box-shadows set via inline style */
+  }
+  .sprite-sm .sprite { width: 2px; height: 2px; }
+  .sprite-sm { width: 28px; height: 28px; }
 
-  /* --- ANNOUNCEMENT TICKER --- */
+  /* ===== TICKER ===== */
   .ticker-wrap {
     background: linear-gradient(90deg, #1a1a2e, #2d1b69, #1a1a2e);
     overflow: hidden;
-    padding: 10px 0;
+    padding: 8px 0;
     border-bottom: 3px solid var(--yellow);
   }
   .ticker {
     display: flex;
-    animation: ticker-scroll 20s linear infinite;
+    animation: ticker-scroll 25s linear infinite;
     white-space: nowrap;
     gap: 60px;
   }
   .ticker-item {
     font-family: 'Press Start 2P', monospace;
-    font-size: 11px;
+    font-size: 10px;
     color: var(--yellow);
     text-shadow: 0 0 10px rgba(234,179,8,0.5);
     flex-shrink: 0;
@@ -60,34 +68,29 @@
     100% { transform: translateX(-50%); }
   }
 
-  /* --- HEADER --- */
+  /* ===== HEADER ===== */
   .header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 24px 32px;
+    padding: 20px 32px;
     background: linear-gradient(135deg, #1a1a2e 0%, #2d1b69 50%, #1a1a2e 100%);
     border-bottom: 4px solid var(--yellow);
   }
-  .header-title {
-    text-align: left;
-  }
   .header-title h1 {
     font-family: 'Press Start 2P', monospace;
-    font-size: 24px;
+    font-size: 22px;
     color: #fff;
     text-shadow: 3px 3px 0 #ff0033, -1px -1px 0 #0066ff;
     letter-spacing: 2px;
   }
   .header-title .subtitle {
     font-family: 'Press Start 2P', monospace;
-    font-size: 10px;
+    font-size: 9px;
     color: var(--yellow);
-    margin-top: 8px;
+    margin-top: 6px;
     text-shadow: 0 0 8px rgba(234,179,8,0.4);
   }
-
-  /* --- TABS --- */
   .tabs {
     display: flex;
     gap: 4px;
@@ -113,28 +116,30 @@
   }
   .tab-btn:hover:not(.active) { color: #fff; }
 
-  .tab-content { display: none; padding: 24px 32px 48px; }
+  .tab-content { display: none; padding: 20px 32px 40px; }
   .tab-content.active { display: block; }
 
-  /* --- FIGHTER CARDS --- */
+  /* ===== FIGHTER CARDS ===== */
   .cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 18px;
   }
+  @media (max-width: 1100px) { .cards { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .cards { grid-template-columns: 1fr; } }
   .card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 22px 24px;
+    border-radius: 12px;
+    padding: 18px 20px;
     border-left: 5px solid var(--border);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    transition: transform 0.15s, box-shadow 0.15s;
   }
   .card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
   }
   .card.linkedin-card { border-left-color: var(--linkedin); }
   .card.substack-card { border-left-color: var(--substack); }
@@ -145,46 +150,45 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
   .fighter-name {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
   }
-  .fighter-emoji { font-size: 24px; }
   .fighter-label {
     font-family: 'Press Start 2P', monospace;
-    font-size: 10px;
+    font-size: 9px;
     color: var(--text);
   }
   .fighter-platform {
     font-size: 11px;
     color: var(--muted);
-    margin-top: 2px;
+    margin-top: 1px;
   }
   .rank-badge {
     font-family: 'Press Start 2P', monospace;
-    font-size: 8px;
-    padding: 4px 10px;
+    font-size: 7px;
+    padding: 4px 8px;
     border-radius: 4px;
     color: #fff;
     text-transform: uppercase;
     white-space: nowrap;
   }
-
   .card-value {
-    font-size: 36px;
+    font-size: 34px;
     font-weight: 700;
     letter-spacing: -1px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
   .card-sub {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--muted);
     display: flex;
     align-items: center;
     gap: 6px;
+    flex-wrap: wrap;
   }
   .badge {
     display: inline-flex;
@@ -192,91 +196,87 @@
     gap: 3px;
     padding: 2px 8px;
     border-radius: 6px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
   }
   .badge.up { background: rgba(22,163,74,0.12); color: var(--green); }
   .badge.down { background: rgba(220,38,38,0.12); color: var(--red); }
   .badge.neutral { background: rgba(107,114,128,0.12); color: var(--muted); }
 
-  /* --- STREAKS & COMBOS SECTION --- */
-  .streaks-section {
-    margin-bottom: 24px;
-  }
-  .streaks-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-  }
-  .streak-card {
+  /* ===== STREAK BAR (compact) ===== */
+  .streak-bar {
+    display: flex;
+    align-items: center;
+    gap: 24px;
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 20px 24px;
-    text-align: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border-radius: 12px;
+    padding: 14px 24px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    flex-wrap: wrap;
   }
-  .streak-card.active-streak {
-    border-color: var(--yellow);
-    box-shadow: 0 0 20px rgba(234,179,8,0.15);
+  .streak-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
-  .streak-card.combo-active {
-    border-color: #ff0033;
-    box-shadow: 0 0 20px rgba(255,0,51,0.15);
-    background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);
-  }
-  .streak-value {
+  .streak-item .streak-num {
     font-family: 'Press Start 2P', monospace;
-    font-size: 28px;
+    font-size: 16px;
     color: var(--text);
-    margin: 8px 0;
   }
-  .streak-label {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 9px;
-    color: var(--muted);
-    margin-bottom: 4px;
-    text-transform: uppercase;
-  }
-  .streak-sub {
+  .streak-item .streak-desc {
     font-size: 12px;
     color: var(--muted);
-    margin-top: 6px;
+    line-height: 1.3;
   }
-  .combo-text {
+  .streak-divider {
+    width: 1px;
+    height: 28px;
+    background: var(--border);
+  }
+  .combo-flash {
     font-family: 'Press Start 2P', monospace;
-    font-size: 14px;
+    font-size: 11px;
     color: #ff0033;
-    text-shadow: 1px 1px 0 rgba(255,0,51,0.2);
+    animation: combo-pulse 0.5s ease-in-out infinite alternate;
+  }
+  @keyframes combo-pulse {
+    from { opacity: 1; }
+    to { opacity: 0.5; }
   }
 
-  /* --- SPEED TABLE --- */
-  .speed-section { margin-bottom: 24px; }
+  /* ===== SECTION TITLES ===== */
   .section-title {
     font-family: 'Press Start 2P', monospace;
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 600;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
     color: var(--text);
     text-transform: uppercase;
     letter-spacing: 1px;
   }
+
+  /* ===== SPEED CARDS ===== */
+  .speed-section { margin-bottom: 18px; }
   .speed-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
   }
+  @media (max-width: 1100px) { .speed-grid { grid-template-columns: repeat(2, 1fr); } }
   .speed-card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 20px 24px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border-radius: 12px;
+    padding: 16px 18px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
   }
   .speed-card h3 {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
-    margin-bottom: 14px;
+    margin-bottom: 10px;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -285,82 +285,65 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 0;
+    padding: 6px 0;
     border-bottom: 1px solid var(--border);
   }
   .speed-row:last-child { border-bottom: none; }
-  .speed-label { font-size: 13px; color: var(--muted); }
-  .speed-value { font-size: 14px; font-weight: 600; }
+  .speed-label { font-size: 12px; color: var(--muted); }
+  .speed-value { font-size: 13px; font-weight: 600; }
 
-  /* --- VS TARGET FIGHT SCREEN --- */
-  .vs-section { margin-bottom: 24px; }
+  /* ===== VS BOSS FIGHTS ===== */
+  .vs-section { margin-bottom: 18px; }
   .vs-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 14px;
   }
   .vs-card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 24px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    overflow: hidden;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
   }
   .vs-fight {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: 8px;
+    margin-bottom: 14px;
   }
-  .vs-fighter, .vs-boss {
-    text-align: center;
-    flex: 1;
-  }
-  .vs-fighter-emoji { font-size: 36px; }
-  .vs-fighter-name {
+  .vs-fighter, .vs-boss { text-align: center; flex: 1; }
+  .vs-fighter-name, .vs-boss-name {
     font-family: 'Press Start 2P', monospace;
-    font-size: 10px;
+    font-size: 9px;
     margin-top: 4px;
-    color: var(--text);
   }
+  .vs-fighter-name { color: var(--text); }
+  .vs-boss-name { color: #dc2626; }
   .vs-fighter-rank {
-    font-size: 10px;
+    font-size: 9px;
     color: var(--muted);
     margin-top: 2px;
   }
-  .vs-fighter-count {
-    font-size: 18px;
+  .vs-count {
+    font-size: 16px;
     font-weight: 700;
-    margin-top: 4px;
+    margin-top: 3px;
   }
   .vs-middle {
     font-family: 'Press Start 2P', monospace;
-    font-size: 24px;
+    font-size: 20px;
     color: #ff0033;
     text-shadow: 2px 2px 0 rgba(255,0,51,0.2);
     flex-shrink: 0;
-  }
-  .vs-boss-emoji { font-size: 36px; filter: brightness(0.3); }
-  .vs-boss-label {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 9px;
-    color: var(--muted);
-    margin-top: 4px;
-  }
-  .vs-boss-count {
-    font-size: 18px;
-    font-weight: 700;
-    margin-top: 4px;
-    color: var(--muted);
   }
 
   /* Health bar */
   .health-bar-wrap {
     background: #2a2d3a;
     border-radius: 4px;
-    height: 22px;
+    height: 20px;
     position: relative;
     overflow: hidden;
     border: 2px solid #1a1a2e;
@@ -370,57 +353,37 @@
     transition: width 0.5s;
     position: relative;
   }
-  .health-bar-fill.hp-high {
-    background: linear-gradient(180deg, #4ade80, #16a34a);
-  }
-  .health-bar-fill.hp-mid {
-    background: linear-gradient(180deg, #facc15, #eab308);
-  }
-  .health-bar-fill.hp-low {
-    background: linear-gradient(180deg, #f87171, #dc2626);
-  }
-  /* Segmented overlay */
+  .health-bar-fill.hp-high { background: linear-gradient(180deg, #4ade80, #16a34a); }
+  .health-bar-fill.hp-mid { background: linear-gradient(180deg, #facc15, #eab308); }
+  .health-bar-fill.hp-low { background: linear-gradient(180deg, #f87171, #dc2626); }
   .health-bar-fill::after {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: repeating-linear-gradient(
-      90deg,
-      transparent,
-      transparent 9%,
-      rgba(0,0,0,0.2) 9%,
-      rgba(0,0,0,0.2) 10%
-    );
+    background: repeating-linear-gradient(90deg, transparent, transparent 9%, rgba(0,0,0,0.2) 9%, rgba(0,0,0,0.2) 10%);
   }
   .health-bar-text {
     display: flex;
     justify-content: space-between;
-    font-size: 12px;
+    font-size: 11px;
     color: var(--muted);
-    margin-top: 6px;
+    margin-top: 5px;
   }
-  .vs-est {
-    margin-top: 12px;
-    font-size: 12px;
-    color: var(--muted);
-  }
+  .vs-est { margin-top: 10px; font-size: 11px; color: var(--muted); }
   .vs-est-row {
     display: flex;
     justify-content: space-between;
-    padding: 6px 0;
+    padding: 5px 0;
     border-bottom: 1px solid var(--border);
   }
   .vs-est-row:last-child { border-bottom: none; }
-  .vs-est-date {
-    font-weight: 700;
-    color: var(--text);
-  }
+  .vs-est-date { font-weight: 700; color: var(--text); }
 
-  /* --- ACHIEVEMENTS --- */
-  .achievements-section { margin-bottom: 24px; }
+  /* ===== ACHIEVEMENTS ===== */
+  .achievements-section { margin-bottom: 18px; }
   .achievements-toggle {
     font-family: 'Press Start 2P', monospace;
-    font-size: 13px;
+    font-size: 11px;
     background: none;
     border: none;
     color: var(--text);
@@ -428,222 +391,158 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
     text-transform: uppercase;
     letter-spacing: 1px;
   }
-  .achievements-toggle .arrow {
-    transition: transform 0.2s;
-    font-size: 10px;
-  }
+  .achievements-toggle .arrow { transition: transform 0.2s; font-size: 10px; }
   .achievements-toggle.open .arrow { transform: rotate(90deg); }
-  .achievements-body {
-    display: none;
-  }
+  .achievements-body { display: none; }
   .achievements-body.open { display: block; }
   .achievements-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 10px;
   }
   .achievement-card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
+    border-radius: 10px;
+    padding: 12px;
     text-align: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
   }
-  .achievement-card.locked {
-    opacity: 0.4;
-    filter: grayscale(1);
-  }
+  .achievement-card.locked { opacity: 0.35; filter: grayscale(1); }
   .achievement-card.unlocked {
     border-color: var(--yellow);
-    box-shadow: 0 0 12px rgba(234,179,8,0.2);
+    box-shadow: 0 0 10px rgba(234,179,8,0.2);
   }
-  .achievement-emoji { font-size: 28px; margin-bottom: 6px; }
+  .achievement-emoji { font-size: 24px; margin-bottom: 4px; }
   .achievement-title {
     font-family: 'Press Start 2P', monospace;
-    font-size: 8px;
+    font-size: 7px;
     color: var(--text);
-    margin-bottom: 4px;
+    margin-bottom: 3px;
   }
-  .achievement-desc {
-    font-size: 11px;
-    color: var(--muted);
-  }
-  .achievement-date {
-    font-size: 10px;
-    color: var(--green);
-    margin-top: 4px;
-    font-weight: 600;
-  }
+  .achievement-desc { font-size: 10px; color: var(--muted); }
+  .achievement-date { font-size: 9px; color: var(--green); margin-top: 3px; font-weight: 600; }
 
-  /* --- CHARTS --- */
-  .chart-section { margin-bottom: 24px; }
+  /* ===== CHART ===== */
+  .chart-section { margin-bottom: 18px; }
   .chart-wrap {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 24px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
   }
-  .chart-container {
-    position: relative;
-    height: 340px;
-  }
-
-  /* --- FILTER BUTTONS --- */
+  .chart-container { position: relative; height: 320px; }
   .filter-btns {
     display: flex;
-    gap: 4px;
+    gap: 3px;
     background: var(--bg);
     border-radius: 8px;
     padding: 3px;
   }
   .filter-btn {
-    padding: 6px 14px;
+    padding: 5px 12px;
     border: none;
     background: transparent;
     color: var(--muted);
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s;
   }
-  .filter-btn.active {
-    background: var(--text);
-    color: #fff;
-  }
+  .filter-btn.active { background: var(--text); color: #fff; }
   .filter-btn:hover:not(.active) { color: var(--text); }
-
   .time-range-row {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     flex-wrap: wrap;
   }
   .month-picker {
-    padding: 5px 10px;
+    padding: 4px 10px;
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 6px;
     color: var(--text);
-    font-size: 12px;
-    font-weight: 500;
+    font-size: 11px;
     outline: none;
     cursor: pointer;
-    transition: border 0.2s;
   }
-  .month-picker:focus { border-color: var(--accent); }
 
-  /* --- UPLOAD TAB --- */
+  /* ===== UPLOAD TAB ===== */
   .upload-columns {
     display: grid;
-    grid-template-columns: 420px 1fr;
-    gap: 24px;
+    grid-template-columns: 400px 1fr;
+    gap: 20px;
     align-items: start;
   }
-  @media (max-width: 900px) {
-    .upload-columns { grid-template-columns: 1fr; }
-  }
-  .left-panels { display: flex; flex-direction: column; gap: 16px; }
-
-  .form-card {
+  @media (max-width: 900px) { .upload-columns { grid-template-columns: 1fr; } }
+  .left-panels { display: flex; flex-direction: column; gap: 14px; }
+  .form-card, .import-card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 24px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
   }
-  .form-card h2 {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 16px;
-  }
-  .field { margin-bottom: 16px; }
-  .field label {
-    display: block;
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 6px;
-    font-weight: 500;
-  }
-  .field input, .field select {
-    width: 100%;
-    padding: 10px 14px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-size: 14px;
-    outline: none;
-    transition: border 0.2s;
-  }
-  .field input:focus, .field select:focus { border-color: var(--accent); }
-
-  .btn {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-primary {
-    background: linear-gradient(135deg, #ff0033, #cc0029);
-    color: #fff;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    box-shadow: 0 4px 12px rgba(255,0,51,0.3);
-  }
-  .btn-primary:hover { opacity: 0.9; box-shadow: 0 6px 20px rgba(255,0,51,0.4); }
-  .btn-danger {
-    background: rgba(220,38,38,0.12);
-    color: var(--red);
-    margin-top: 8px;
-  }
-  .btn-danger:hover { background: rgba(220,38,38,0.2); }
-
-  /* --- PLATFORM IMPORT CARDS --- */
-  .import-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 20px 24px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  }
+  .form-card h2 { font-size: 15px; font-weight: 600; margin-bottom: 14px; }
   .import-card h3 {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     margin-bottom: 4px;
     display: flex;
     align-items: center;
     gap: 8px;
   }
-  .import-card .hint {
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 14px;
-    line-height: 1.5;
+  .import-card .hint { font-size: 11px; color: var(--muted); margin-bottom: 12px; line-height: 1.5; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; font-weight: 500; }
+  .field input, .field select {
+    width: 100%;
+    padding: 9px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 13px;
+    outline: none;
   }
+  .field input:focus, .field select:focus { border-color: var(--accent); }
+  .btn {
+    width: 100%;
+    padding: 11px;
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #ff0033, #cc0029);
+    color: #fff;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 12px rgba(255,0,51,0.3);
+  }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-danger { background: rgba(220,38,38,0.12); color: var(--red); margin-top: 8px; }
+  .btn-danger:hover { background: rgba(220,38,38,0.2); }
   .drop-zone {
     border: 2px dashed var(--border);
     border-radius: 10px;
-    padding: 20px;
+    padding: 18px;
     text-align: center;
     cursor: pointer;
-    transition: all 0.2s;
     color: var(--muted);
-    font-size: 13px;
+    font-size: 12px;
+    transition: all 0.2s;
   }
   .drop-zone:hover, .drop-zone.drag-over {
     border-color: var(--accent);
@@ -651,63 +550,48 @@
     color: var(--text);
   }
   .drop-zone input { display: none; }
-  .import-result {
-    margin-top: 10px;
-    font-size: 13px;
-    color: var(--green);
-    display: none;
-  }
-  .x-follower-field {
-    margin-top: 12px;
-    display: flex;
-    gap: 8px;
-    align-items: end;
-  }
+  .import-result { margin-top: 8px; font-size: 12px; color: var(--green); display: none; }
+  .x-follower-field { margin-top: 10px; display: flex; gap: 8px; align-items: end; }
   .x-follower-field .field { flex: 1; margin-bottom: 0; }
-  .x-follower-field .btn { width: auto; padding: 10px 18px; }
+  .x-follower-field .btn { width: auto; padding: 9px 16px; }
 
-  /* --- History table --- */
+  /* ===== HISTORY TABLE ===== */
   .history-card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 24px;
+    border-radius: 12px;
+    padding: 20px;
     overflow-x: auto;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
   }
   .history-card h2 {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 10px;
   }
-
   table { width: 100%; border-collapse: collapse; }
   th {
     text-align: left;
-    font-size: 12px;
+    font-size: 11px;
     color: var(--muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    padding: 10px 12px;
+    padding: 8px 10px;
     border-bottom: 1px solid var(--border);
     font-weight: 500;
   }
-  td {
-    padding: 12px;
-    font-size: 14px;
-    border-bottom: 1px solid var(--border);
-  }
+  td { padding: 10px; font-size: 13px; border-bottom: 1px solid var(--border); }
   tr:last-child td { border-bottom: none; }
   .platform-tag {
     display: inline-block;
-    padding: 3px 10px;
-    border-radius: 6px;
-    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 5px;
+    font-size: 11px;
     font-weight: 600;
   }
   .platform-tag.linkedin { background: rgba(10,102,194,0.15); color: var(--linkedin); }
@@ -715,76 +599,38 @@
   .platform-tag.x { background: rgba(55,65,81,0.12); color: var(--x); }
   .platform-tag.all { background: rgba(124,58,237,0.15); color: var(--all); }
   .delete-btn {
-    background: none;
-    border: none;
-    color: var(--muted);
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 16px;
+    background: none; border: none; color: var(--muted); cursor: pointer;
+    padding: 3px 6px; border-radius: 4px; font-size: 15px;
   }
   .delete-btn:hover { color: var(--red); background: rgba(220,38,38,0.1); }
-  .empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--muted);
-  }
-  .empty-state p { margin-top: 8px; font-size: 14px; }
+  .empty-state { text-align: center; padding: 32px 16px; color: var(--muted); }
+  .empty-state p { margin-top: 6px; font-size: 13px; }
 
-  /* Toast */
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
   .toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    padding: 14px 20px;
-    background: var(--green);
-    color: #fff;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    transform: translateY(80px);
-    opacity: 0;
-    transition: all 0.3s;
-    z-index: 100;
+    position: fixed; bottom: 20px; right: 20px;
+    padding: 12px 18px; background: var(--green); color: #fff;
+    border-radius: 10px; font-size: 13px; font-weight: 600;
+    transform: translateY(80px); opacity: 0;
+    transition: all 0.3s; z-index: 100;
   }
   .toast.show { transform: translateY(0); opacity: 1; }
-
-  /* Export / manual entry buttons */
-  .io-btns {
-    display: flex;
-    gap: 8px;
-    margin-top: 16px;
-  }
+  .io-btns { display: flex; gap: 8px; margin-top: 14px; }
   .btn-outline {
-    flex: 1;
-    padding: 10px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: transparent;
-    color: var(--text);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
+    flex: 1; padding: 9px;
+    border: 1px solid var(--border); border-radius: 8px;
+    background: transparent; color: var(--text);
+    font-size: 12px; font-weight: 500; cursor: pointer;
   }
   .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
-  .hidden-input { display: none; }
-
-  .dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    display: inline-block;
-  }
 </style>
 </head>
 <body>
 
-<!-- ANNOUNCEMENT TICKER -->
+<!-- TICKER -->
 <div class="ticker-wrap">
-  <div class="ticker" id="ticker">
-    <span class="ticker-item">LOADING FIGHT DATA...</span>
-  </div>
+  <div class="ticker" id="ticker"><span class="ticker-item">LOADING FIGHT DATA...</span></div>
 </div>
 
 <!-- HEADER -->
@@ -799,30 +645,18 @@
   </div>
 </div>
 
-<!-- ================ DASHBOARD TAB ================ -->
+<!-- DASHBOARD -->
 <div id="tab-dashboard" class="tab-content active">
-  <!-- Fighter Cards -->
   <div class="cards" id="follower-cards"></div>
-
-  <!-- Streaks & Combos -->
-  <div class="streaks-section">
-    <div class="section-title">Streaks & Combos</div>
-    <div class="streaks-grid" id="streaks-area"></div>
-  </div>
-
-  <!-- Speed -->
+  <div id="streak-bar"></div>
   <div class="speed-section">
     <div class="section-title">Growth Speed</div>
     <div class="speed-grid" id="speed-cards"></div>
   </div>
-
-  <!-- VS Target Fights -->
   <div class="vs-section">
-    <div class="section-title">VS BOSS: 1,000,000</div>
+    <div class="section-title">VS BOSS FIGHTS</div>
     <div class="vs-grid" id="vs-cards"></div>
   </div>
-
-  <!-- Achievements -->
   <div class="achievements-section">
     <button class="achievements-toggle" id="achievements-toggle">
       <span class="arrow">&#9654;</span> Achievements
@@ -831,10 +665,8 @@
       <div class="achievements-grid" id="achievements-grid"></div>
     </div>
   </div>
-
-  <!-- Chart -->
   <div class="chart-section">
-    <div class="section-title" style="display:flex;align-items:center;justify-content:space-between">
+    <div class="section-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
       Growth Over Time
       <div class="filter-btns" id="chart-tabs">
         <button class="filter-btn active" data-chart="linkedin">LinkedIn</button>
@@ -845,97 +677,58 @@
     </div>
     <div class="time-range-row">
       <div class="filter-btns" id="time-range-tabs">
-        <button class="filter-btn" data-range="1d">Day</button>
-        <button class="filter-btn" data-range="1w">Week</button>
         <button class="filter-btn" data-range="1m">Month</button>
         <button class="filter-btn" data-range="3m">3 Mo</button>
-        <button class="filter-btn" data-range="6m">6 Mo</button>
-        <button class="filter-btn" data-range="12m">12 Mo</button>
-        <button class="filter-btn active" data-range="all">All Time</button>
+        <button class="filter-btn active" data-range="90d">90 Days</button>
+        <button class="filter-btn" data-range="all">All Time</button>
       </div>
-      <select id="month-picker" class="month-picker">
-        <option value="">Pick a month…</option>
-      </select>
+      <select id="month-picker" class="month-picker"><option value="">Pick a month…</option></select>
     </div>
     <div class="chart-wrap">
-      <div class="chart-container">
-        <canvas id="growthChart"></canvas>
-      </div>
+      <div class="chart-container"><canvas id="growthChart"></canvas></div>
     </div>
   </div>
 </div>
 
-<!-- ================ UPLOAD TAB ================ -->
+<!-- UPLOAD TAB -->
 <div id="tab-upload" class="tab-content">
   <div class="upload-columns">
     <div class="left-panels">
       <div class="import-card">
         <h3><span class="dot" style="background:var(--linkedin)"></span>LinkedIn</h3>
         <div class="hint">Upload your LinkedIn Analytics .xlsx file<br>(the one with "Content" in the name)</div>
-        <div class="drop-zone" id="drop-linkedin">
-          Click or drag .xlsx file here
-          <input type="file" accept=".xlsx,.xls">
-        </div>
+        <div class="drop-zone" id="drop-linkedin">Click or drag .xlsx file here<input type="file" accept=".xlsx,.xls"></div>
         <div class="import-result" id="result-linkedin"></div>
       </div>
-
       <div class="import-card">
         <h3><span class="dot" style="background:var(--substack)"></span>Substack</h3>
         <div class="hint">Upload your Substack subscribers .csv file<br>(the one with "ruben_emails" in the name)</div>
-        <div class="drop-zone" id="drop-substack">
-          Click or drag .csv file here
-          <input type="file" accept=".csv">
-        </div>
+        <div class="drop-zone" id="drop-substack">Click or drag .csv file here<input type="file" accept=".csv"></div>
         <div class="import-result" id="result-substack"></div>
       </div>
-
       <div class="import-card">
         <h3><span class="dot" style="background:var(--x)"></span>X (Twitter)</h3>
         <div class="hint">Upload your X Analytics .csv file<br>(the one with "account_overview" in the name)</div>
         <div class="x-follower-field">
-          <div class="field">
-            <label>Your current X follower count</label>
-            <input type="number" id="x-current-count" placeholder="e.g. 356000" min="0">
-          </div>
+          <div class="field"><label>Your current X follower count</label><input type="number" id="x-current-count" placeholder="e.g. 356000" min="0"></div>
         </div>
-        <div style="margin-top:12px">
-          <div class="drop-zone" id="drop-x">
-            Click or drag .csv file here
-            <input type="file" accept=".csv">
-          </div>
+        <div style="margin-top:10px">
+          <div class="drop-zone" id="drop-x">Click or drag .csv file here<input type="file" accept=".csv"></div>
         </div>
         <div class="import-result" id="result-x"></div>
       </div>
-
       <div class="form-card">
         <h2>Manual Entry</h2>
-        <div class="field">
-          <label>Date</label>
-          <input type="date" id="entry-date">
-        </div>
-        <div class="field">
-          <label>Platform</label>
-          <select id="entry-platform">
-            <option value="linkedin">LinkedIn</option>
-            <option value="substack">Substack</option>
-            <option value="x">X (Twitter)</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Followers / Subscribers</label>
-          <input type="number" id="entry-count" placeholder="e.g. 125000" min="0">
-        </div>
+        <div class="field"><label>Date</label><input type="date" id="entry-date"></div>
+        <div class="field"><label>Platform</label><select id="entry-platform"><option value="linkedin">LinkedIn</option><option value="substack">Substack</option><option value="x">X (Twitter)</option></select></div>
+        <div class="field"><label>Followers / Subscribers</label><input type="number" id="entry-count" placeholder="e.g. 125000" min="0"></div>
         <button class="btn btn-primary" id="add-btn">ADD ENTRY</button>
         <button class="btn btn-danger" id="clear-btn">Clear All Data</button>
-        <div class="io-btns">
-          <button class="btn-outline" id="export-btn">Export CSV</button>
-        </div>
+        <div class="io-btns"><button class="btn-outline" id="export-btn">Export CSV</button></div>
       </div>
     </div>
-
     <div class="history-card">
-      <h2>
-        History
+      <h2>History
         <div class="filter-btns">
           <button class="filter-btn active" data-filter="all">All</button>
           <button class="filter-btn" data-filter="linkedin">LinkedIn</button>
@@ -943,15 +736,8 @@
           <button class="filter-btn" data-filter="x">X</button>
         </div>
       </h2>
-      <table>
-        <thead>
-          <tr><th>Date</th><th>Platform</th><th>Count</th><th>Change</th><th></th></tr>
-        </thead>
-        <tbody id="history-body"></tbody>
-      </table>
-      <div class="empty-state" id="empty-msg" style="display:none">
-        <p>No data yet. Upload a file or add an entry!</p>
-      </div>
+      <table><thead><tr><th>Date</th><th>Platform</th><th>Count</th><th>Change</th><th></th></tr></thead><tbody id="history-body"></tbody></table>
+      <div class="empty-state" id="empty-msg" style="display:none"><p>No data yet. Upload a file or add an entry!</p></div>
     </div>
   </div>
 </div>
@@ -959,175 +745,263 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ======================== DATA LAYER ========================
+// ===================== DATA LAYER =====================
 const STORAGE_KEY = 'growth_dashboard_data';
 const ACHIEVEMENTS_KEY = 'growth_fighter_achievements';
 const STREAKS_KEY = 'growth_fighter_streaks';
-const TARGET = 1000000;
-const ALL_TARGET = 2000000;
 
 const PLATFORMS = {
-  linkedin:  { label: 'LinkedIn',     color: '#0a66c2', dotClass: 'linkedin' },
-  substack:  { label: 'Substack',     color: '#ff6719', dotClass: 'substack' },
-  x:         { label: 'X (Twitter)',   color: '#374151', dotClass: 'x' },
+  linkedin:  { label: 'LinkedIn',   color: '#0a66c2', dotClass: 'linkedin' },
+  substack:  { label: 'Substack',   color: '#ff6719', dotClass: 'substack' },
+  x:         { label: 'X (Twitter)',color: '#374151', dotClass: 'x' },
 };
+
+// ===== PIXEL ART SPRITES (box-shadow technique) =====
+// Each sprite is a 12x12 grid at 3px per pixel = 36x36
+const px = 3; // pixel size
+function spriteHTML(shadows, size) {
+  const s = size || px;
+  return `<div class="sprite-wrap" style="width:${12*s}px;height:${12*s}px"><div class="sprite" style="width:${s}px;height:${s}px;box-shadow:${shadows.map(([x,y,c])=>`${x*s}px ${y*s}px 0 0 ${c}`).join(',')}"></div></div>`;
+}
+
+// Ryu - blue gi, white headband, tan skin
+const RYU_PIXELS = [
+  [4,0,'#fff'],[5,0,'#fff'],[6,0,'#fff'],[7,0,'#fff'],
+  [3,1,'#fff'],[4,1,'#f4c587'],[5,1,'#f4c587'],[6,1,'#f4c587'],[7,1,'#f4c587'],[8,1,'#fff'],
+  [3,2,'#f4c587'],[4,2,'#1a1a2e'],[5,2,'#f4c587'],[6,2,'#f4c587'],[7,2,'#1a1a2e'],[8,2,'#f4c587'],
+  [3,3,'#f4c587'],[4,3,'#f4c587'],[5,3,'#f4c587'],[6,3,'#f4c587'],[7,3,'#f4c587'],[8,3,'#f4c587'],
+  [4,4,'#f4c587'],[5,4,'#c88a5a'],[6,4,'#c88a5a'],[7,4,'#f4c587'],
+  [3,5,'#0a66c2'],[4,5,'#0a66c2'],[5,5,'#0a66c2'],[6,5,'#0a66c2'],[7,5,'#0a66c2'],[8,5,'#0a66c2'],
+  [2,6,'#f4c587'],[3,6,'#0a66c2'],[4,6,'#0a66c2'],[5,6,'#0a66c2'],[6,6,'#0a66c2'],[7,6,'#0a66c2'],[8,6,'#0a66c2'],[9,6,'#f4c587'],
+  [1,7,'#f4c587'],[3,7,'#0a66c2'],[4,7,'#0a66c2'],[5,7,'#0a66c2'],[6,7,'#0a66c2'],[7,7,'#0a66c2'],[8,7,'#0a66c2'],[10,7,'#f4c587'],
+  [4,8,'#0a66c2'],[5,8,'#0a66c2'],[6,8,'#0a66c2'],[7,8,'#0a66c2'],
+  [3,9,'#0a66c2'],[4,9,'#0a66c2'],[5,9,'#f4c587'],[6,9,'#f4c587'],[7,9,'#0a66c2'],[8,9,'#0a66c2'],
+  [3,10,'#f4c587'],[4,10,'#f4c587'],[7,10,'#f4c587'],[8,10,'#f4c587'],
+  [2,11,'#8b4513'],[3,11,'#8b4513'],[8,11,'#8b4513'],[9,11,'#8b4513'],
+];
+
+// Ken - red gi, blonde hair
+const KEN_PIXELS = [
+  [4,0,'#ffd700'],[5,0,'#ffd700'],[6,0,'#ffd700'],[7,0,'#ffd700'],
+  [3,1,'#ffd700'],[4,1,'#f4c587'],[5,1,'#f4c587'],[6,1,'#f4c587'],[7,1,'#f4c587'],[8,1,'#ffd700'],
+  [3,2,'#f4c587'],[4,2,'#1a1a2e'],[5,2,'#f4c587'],[6,2,'#f4c587'],[7,2,'#1a1a2e'],[8,2,'#f4c587'],
+  [3,3,'#f4c587'],[4,3,'#f4c587'],[5,3,'#f4c587'],[6,3,'#f4c587'],[7,3,'#f4c587'],[8,3,'#f4c587'],
+  [4,4,'#f4c587'],[5,4,'#c88a5a'],[6,4,'#c88a5a'],[7,4,'#f4c587'],
+  [3,5,'#dc2626'],[4,5,'#dc2626'],[5,5,'#dc2626'],[6,5,'#dc2626'],[7,5,'#dc2626'],[8,5,'#dc2626'],
+  [2,6,'#f4c587'],[3,6,'#dc2626'],[4,6,'#dc2626'],[5,6,'#dc2626'],[6,6,'#dc2626'],[7,6,'#dc2626'],[8,6,'#dc2626'],[9,6,'#f4c587'],
+  [1,7,'#f4c587'],[3,7,'#dc2626'],[4,7,'#dc2626'],[5,7,'#dc2626'],[6,7,'#dc2626'],[7,7,'#dc2626'],[8,7,'#dc2626'],[10,7,'#f4c587'],
+  [4,8,'#dc2626'],[5,8,'#dc2626'],[6,8,'#dc2626'],[7,8,'#dc2626'],
+  [3,9,'#dc2626'],[4,9,'#dc2626'],[5,9,'#f4c587'],[6,9,'#f4c587'],[7,9,'#dc2626'],[8,9,'#dc2626'],
+  [3,10,'#f4c587'],[4,10,'#f4c587'],[7,10,'#f4c587'],[8,10,'#f4c587'],
+  [2,11,'#8b4513'],[3,11,'#8b4513'],[8,11,'#8b4513'],[9,11,'#8b4513'],
+];
+
+// Chun-Li - blue outfit, hair buns
+const CHUNLI_PIXELS = [
+  [3,0,'#1a1a2e'],[4,0,'#1a1a2e'],[7,0,'#1a1a2e'],[8,0,'#1a1a2e'],
+  [3,1,'#1a1a2e'],[4,1,'#1a1a2e'],[5,1,'#1a1a2e'],[6,1,'#1a1a2e'],[7,1,'#1a1a2e'],[8,1,'#1a1a2e'],
+  [3,2,'#f4c587'],[4,2,'#1a1a2e'],[5,2,'#f4c587'],[6,2,'#f4c587'],[7,2,'#1a1a2e'],[8,2,'#f4c587'],
+  [3,3,'#f4c587'],[4,3,'#f4c587'],[5,3,'#f4c587'],[6,3,'#f4c587'],[7,3,'#f4c587'],[8,3,'#f4c587'],
+  [4,4,'#f4c587'],[5,4,'#e88a8a'],[6,4,'#e88a8a'],[7,4,'#f4c587'],
+  [3,5,'#3b82f6'],[4,5,'#3b82f6'],[5,5,'#ffd700'],[6,5,'#ffd700'],[7,5,'#3b82f6'],[8,5,'#3b82f6'],
+  [2,6,'#f4c587'],[3,6,'#3b82f6'],[4,6,'#3b82f6'],[5,6,'#3b82f6'],[6,6,'#3b82f6'],[7,6,'#3b82f6'],[8,6,'#3b82f6'],[9,6,'#f4c587'],
+  [3,7,'#3b82f6'],[4,7,'#3b82f6'],[5,7,'#3b82f6'],[6,7,'#3b82f6'],[7,7,'#3b82f6'],[8,7,'#3b82f6'],
+  [3,8,'#3b82f6'],[4,8,'#3b82f6'],[5,8,'#3b82f6'],[6,8,'#3b82f6'],[7,8,'#3b82f6'],[8,8,'#3b82f6'],
+  [3,9,'#f4c587'],[4,9,'#f4c587'],[5,9,'#f4c587'],[6,9,'#f4c587'],[7,9,'#f4c587'],[8,9,'#f4c587'],
+  [3,10,'#f4c587'],[4,10,'#f4c587'],[7,10,'#f4c587'],[8,10,'#f4c587'],
+  [2,11,'#fff'],[3,11,'#fff'],[8,11,'#fff'],[9,11,'#fff'],
+];
+
+// Akuma - dark purple, red hair
+const AKUMA_PIXELS = [
+  [4,0,'#dc2626'],[5,0,'#dc2626'],[6,0,'#dc2626'],[7,0,'#dc2626'],
+  [3,1,'#dc2626'],[4,1,'#dc2626'],[5,1,'#dc2626'],[6,1,'#dc2626'],[7,1,'#dc2626'],[8,1,'#dc2626'],
+  [3,2,'#c88a5a'],[4,2,'#dc2626'],[5,2,'#c88a5a'],[6,2,'#c88a5a'],[7,2,'#dc2626'],[8,2,'#c88a5a'],
+  [3,3,'#c88a5a'],[4,3,'#c88a5a'],[5,3,'#c88a5a'],[6,3,'#c88a5a'],[7,3,'#c88a5a'],[8,3,'#c88a5a'],
+  [4,4,'#c88a5a'],[5,4,'#8b4513'],[6,4,'#8b4513'],[7,4,'#c88a5a'],
+  [3,5,'#4c1d95'],[4,5,'#4c1d95'],[5,5,'#4c1d95'],[6,5,'#4c1d95'],[7,5,'#4c1d95'],[8,5,'#4c1d95'],
+  [2,6,'#c88a5a'],[3,6,'#4c1d95'],[4,6,'#4c1d95'],[5,6,'#4c1d95'],[6,6,'#4c1d95'],[7,6,'#4c1d95'],[8,6,'#4c1d95'],[9,6,'#c88a5a'],
+  [1,7,'#c88a5a'],[3,7,'#4c1d95'],[4,7,'#4c1d95'],[5,7,'#4c1d95'],[6,7,'#4c1d95'],[7,7,'#4c1d95'],[8,7,'#4c1d95'],[10,7,'#c88a5a'],
+  [4,8,'#4c1d95'],[5,8,'#4c1d95'],[6,8,'#4c1d95'],[7,8,'#4c1d95'],
+  [3,9,'#4c1d95'],[4,9,'#4c1d95'],[5,9,'#c88a5a'],[6,9,'#c88a5a'],[7,9,'#4c1d95'],[8,9,'#4c1d95'],
+  [3,10,'#c88a5a'],[4,10,'#c88a5a'],[7,10,'#c88a5a'],[8,10,'#c88a5a'],
+  [2,11,'#1a1a2e'],[3,11,'#1a1a2e'],[8,11,'#1a1a2e'],[9,11,'#1a1a2e'],
+];
+
+// Vega - white outfit, mask, claw (100K boss)
+const VEGA_PIXELS = [
+  [4,0,'#c0c0c0'],[5,0,'#c0c0c0'],[6,0,'#c0c0c0'],[7,0,'#c0c0c0'],
+  [3,1,'#c0c0c0'],[4,1,'#c0c0c0'],[5,1,'#c0c0c0'],[6,1,'#c0c0c0'],[7,1,'#c0c0c0'],[8,1,'#c0c0c0'],
+  [3,2,'#c0c0c0'],[4,2,'#1a1a2e'],[5,2,'#c0c0c0'],[6,2,'#c0c0c0'],[7,2,'#1a1a2e'],[8,2,'#c0c0c0'],
+  [3,3,'#c0c0c0'],[4,3,'#c0c0c0'],[5,3,'#c0c0c0'],[6,3,'#c0c0c0'],[7,3,'#c0c0c0'],[8,3,'#c0c0c0'],
+  [4,4,'#c0c0c0'],[5,4,'#c0c0c0'],[6,4,'#c0c0c0'],[7,4,'#c0c0c0'],
+  [3,5,'#fff'],[4,5,'#fff'],[5,5,'#fff'],[6,5,'#fff'],[7,5,'#fff'],[8,5,'#fff'],
+  [2,6,'#f4c587'],[3,6,'#fff'],[4,6,'#fff'],[5,6,'#fff'],[6,6,'#fff'],[7,6,'#fff'],[8,6,'#fff'],[9,6,'#c0c0c0'],
+  [1,7,'#f4c587'],[3,7,'#fff'],[4,7,'#fff'],[5,7,'#fff'],[6,7,'#fff'],[7,7,'#fff'],[8,7,'#fff'],[9,7,'#c0c0c0'],[10,7,'#c0c0c0'],
+  [4,8,'#fff'],[5,8,'#fff'],[6,8,'#fff'],[7,8,'#fff'],
+  [3,9,'#fff'],[4,9,'#fff'],[5,9,'#f4c587'],[6,9,'#f4c587'],[7,9,'#fff'],[8,9,'#fff'],
+  [3,10,'#f4c587'],[4,10,'#f4c587'],[7,10,'#f4c587'],[8,10,'#f4c587'],
+  [2,11,'#dc2626'],[3,11,'#dc2626'],[8,11,'#dc2626'],[9,11,'#dc2626'],
+];
+
+// Balrog - red gloves, blue trunks (250K/500K boss)
+const BALROG_PIXELS = [
+  [4,0,'#1a1a2e'],[5,0,'#1a1a2e'],[6,0,'#1a1a2e'],[7,0,'#1a1a2e'],
+  [3,1,'#8b4513'],[4,1,'#8b4513'],[5,1,'#8b4513'],[6,1,'#8b4513'],[7,1,'#8b4513'],[8,1,'#8b4513'],
+  [3,2,'#8b4513'],[4,2,'#1a1a2e'],[5,2,'#8b4513'],[6,2,'#8b4513'],[7,2,'#1a1a2e'],[8,2,'#8b4513'],
+  [3,3,'#8b4513'],[4,3,'#8b4513'],[5,3,'#8b4513'],[6,3,'#8b4513'],[7,3,'#8b4513'],[8,3,'#8b4513'],
+  [4,4,'#8b4513'],[5,4,'#5a3510'],[6,4,'#5a3510'],[7,4,'#8b4513'],
+  [3,5,'#3b82f6'],[4,5,'#3b82f6'],[5,5,'#3b82f6'],[6,5,'#3b82f6'],[7,5,'#3b82f6'],[8,5,'#3b82f6'],
+  [1,6,'#dc2626'],[2,6,'#dc2626'],[3,6,'#3b82f6'],[4,6,'#3b82f6'],[5,6,'#3b82f6'],[6,6,'#3b82f6'],[7,6,'#3b82f6'],[8,6,'#3b82f6'],[9,6,'#dc2626'],[10,6,'#dc2626'],
+  [1,7,'#dc2626'],[2,7,'#dc2626'],[3,7,'#3b82f6'],[4,7,'#3b82f6'],[5,7,'#3b82f6'],[6,7,'#3b82f6'],[7,7,'#3b82f6'],[8,7,'#3b82f6'],[9,7,'#dc2626'],[10,7,'#dc2626'],
+  [4,8,'#3b82f6'],[5,8,'#3b82f6'],[6,8,'#3b82f6'],[7,8,'#3b82f6'],
+  [3,9,'#3b82f6'],[4,9,'#3b82f6'],[5,9,'#8b4513'],[6,9,'#8b4513'],[7,9,'#3b82f6'],[8,9,'#3b82f6'],
+  [3,10,'#8b4513'],[4,10,'#8b4513'],[7,10,'#8b4513'],[8,10,'#8b4513'],
+  [2,11,'#dc2626'],[3,11,'#dc2626'],[8,11,'#dc2626'],[9,11,'#dc2626'],
+];
+
+// M. Bison - red cape, silver shoulder pads (750K/1M boss)
+const BISON_PIXELS = [
+  [3,0,'#dc2626'],[4,0,'#dc2626'],[5,0,'#dc2626'],[6,0,'#dc2626'],[7,0,'#dc2626'],[8,0,'#dc2626'],
+  [3,1,'#f4c587'],[4,1,'#f4c587'],[5,1,'#f4c587'],[6,1,'#f4c587'],[7,1,'#f4c587'],[8,1,'#f4c587'],
+  [3,2,'#f4c587'],[4,2,'#fff'],[5,2,'#f4c587'],[6,2,'#f4c587'],[7,2,'#fff'],[8,2,'#f4c587'],
+  [3,3,'#f4c587'],[4,3,'#f4c587'],[5,3,'#f4c587'],[6,3,'#f4c587'],[7,3,'#f4c587'],[8,3,'#f4c587'],
+  [4,4,'#f4c587'],[5,4,'#c88a5a'],[6,4,'#c88a5a'],[7,4,'#f4c587'],
+  [2,5,'#c0c0c0'],[3,5,'#dc2626'],[4,5,'#dc2626'],[5,5,'#dc2626'],[6,5,'#dc2626'],[7,5,'#dc2626'],[8,5,'#dc2626'],[9,5,'#c0c0c0'],
+  [1,6,'#dc2626'],[2,6,'#c0c0c0'],[3,6,'#dc2626'],[4,6,'#dc2626'],[5,6,'#dc2626'],[6,6,'#dc2626'],[7,6,'#dc2626'],[8,6,'#dc2626'],[9,6,'#c0c0c0'],[10,6,'#dc2626'],
+  [0,7,'#dc2626'],[1,7,'#dc2626'],[3,7,'#dc2626'],[4,7,'#dc2626'],[5,7,'#dc2626'],[6,7,'#dc2626'],[7,7,'#dc2626'],[8,7,'#dc2626'],[10,7,'#dc2626'],[11,7,'#dc2626'],
+  [4,8,'#dc2626'],[5,8,'#dc2626'],[6,8,'#dc2626'],[7,8,'#dc2626'],
+  [3,9,'#dc2626'],[4,9,'#dc2626'],[5,9,'#f4c587'],[6,9,'#f4c587'],[7,9,'#dc2626'],[8,9,'#dc2626'],
+  [3,10,'#f4c587'],[4,10,'#f4c587'],[7,10,'#f4c587'],[8,10,'#f4c587'],
+  [2,11,'#dc2626'],[3,11,'#dc2626'],[8,11,'#dc2626'],[9,11,'#dc2626'],
+];
 
 const FIGHTERS = {
-  linkedin: { name: 'RYU', emoji: '🥋', color: '#0a66c2', cardClass: 'linkedin-card' },
-  substack: { name: 'KEN', emoji: '🔥', color: '#ff6719', cardClass: 'substack-card' },
-  x:        { name: 'CHUN-LI', emoji: '⚡', color: '#374151', cardClass: 'x-card' },
-  all:      { name: 'AKUMA', emoji: '👹', color: '#7c3aed', cardClass: 'all-card' },
+  linkedin: { name: 'RYU',     pixels: RYU_PIXELS,    color: '#0a66c2', cardClass: 'linkedin-card' },
+  substack: { name: 'KEN',     pixels: KEN_PIXELS,    color: '#ff6719', cardClass: 'substack-card' },
+  x:        { name: 'CHUN-LI', pixels: CHUNLI_PIXELS, color: '#374151', cardClass: 'x-card' },
+  all:      { name: 'AKUMA',   pixels: AKUMA_PIXELS,   color: '#7c3aed', cardClass: 'all-card' },
 };
 
+// Boss milestone chain — each platform fights the NEXT boss above their current count
+const BOSS_CHAIN = [
+  { threshold: 100000,  name: 'VEGA',     pixels: VEGA_PIXELS },
+  { threshold: 250000,  name: 'BALROG',   pixels: BALROG_PIXELS },
+  { threshold: 500000,  name: 'BALROG',   pixels: BALROG_PIXELS },
+  { threshold: 750000,  name: 'M. BISON', pixels: BISON_PIXELS },
+  { threshold: 1000000, name: 'M. BISON', pixels: BISON_PIXELS },
+];
+const ALL_BOSS = { threshold: 2000000, name: 'DARK AKUMA', pixels: AKUMA_PIXELS };
+
+function getNextBoss(count) {
+  for (const boss of BOSS_CHAIN) {
+    if (count < boss.threshold) return boss;
+  }
+  return BOSS_CHAIN[BOSS_CHAIN.length - 1]; // already won, show last
+}
+
 const RANKS = [
-  { min: 0,       max: 50000,   label: 'ROOKIE',         bg: '#6b7280' },
-  { min: 50000,   max: 100000,  label: 'FIGHTER',        bg: '#3b82f6' },
-  { min: 100000,  max: 250000,  label: 'WARRIOR',        bg: '#8b5cf6' },
-  { min: 250000,  max: 400000,  label: 'CHAMPION',       bg: '#f59e0b' },
-  { min: 400000,  max: 600000,  label: 'MASTER',         bg: '#ef4444' },
-  { min: 600000,  max: 800000,  label: 'GRAND MASTER',   bg: '#dc2626' },
-  { min: 800000,  max: 1000000, label: 'LEGEND',         bg: '#b91c1c' },
+  { min: 0,       max: 50000,   label: 'ROOKIE',       bg: '#6b7280' },
+  { min: 50000,   max: 100000,  label: 'FIGHTER',      bg: '#3b82f6' },
+  { min: 100000,  max: 250000,  label: 'WARRIOR',      bg: '#8b5cf6' },
+  { min: 250000,  max: 400000,  label: 'CHAMPION',     bg: '#f59e0b' },
+  { min: 400000,  max: 600000,  label: 'MASTER',       bg: '#ef4444' },
+  { min: 600000,  max: 800000,  label: 'GRAND MASTER', bg: '#dc2626' },
+  { min: 800000,  max: 1000000, label: 'LEGEND',       bg: '#b91c1c' },
   { min: 1000000, max: Infinity,label: 'WORLD CHAMPION', bg: '#ffd700' },
 ];
 
 function getRank(count) {
-  for (const r of RANKS) {
-    if (count >= r.min && count < r.max) return r;
-  }
+  for (const r of RANKS) if (count >= r.min && count < r.max) return r;
   return RANKS[RANKS.length - 1];
 }
 
-function loadData() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-  catch { return []; }
-}
-function saveData(data) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
-
-function loadAchievements() {
-  try { return JSON.parse(localStorage.getItem(ACHIEVEMENTS_KEY)) || {}; }
-  catch { return {}; }
-}
-function saveAchievements(a) {
-  localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(a));
-}
-
-function loadStreaks() {
-  try { return JSON.parse(localStorage.getItem(STREAKS_KEY)) || {}; }
-  catch { return {}; }
-}
-function saveStreaks(s) {
-  localStorage.setItem(STREAKS_KEY, JSON.stringify(s));
-}
+function loadData() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; } }
+function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+function loadAchievements() { try { return JSON.parse(localStorage.getItem(ACHIEVEMENTS_KEY)) || {}; } catch { return {}; } }
+function saveAchievements(a) { localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(a)); }
+function loadStreaks() { try { return JSON.parse(localStorage.getItem(STREAKS_KEY)) || {}; } catch { return {}; } }
+function saveStreaks(s) { localStorage.setItem(STREAKS_KEY, JSON.stringify(s)); }
 
 function upsertEntries(newEntries) {
   const data = loadData();
   let added = 0, updated = 0;
   newEntries.forEach(entry => {
     const idx = data.findIndex(d => d.date === entry.date && d.platform === entry.platform);
-    if (idx >= 0) {
-      data[idx].count = entry.count;
-      updated++;
-    } else {
-      data.push(entry);
-      added++;
-    }
+    if (idx >= 0) { data[idx].count = entry.count; updated++; }
+    else { data.push(entry); added++; }
   });
   saveData(data);
   return { added, updated, total: added + updated };
 }
 
-// ======================== HELPERS ========================
+// ===================== HELPERS =====================
 function fmt(n) {
   if (n >= 1000000) return (n / 1000000).toFixed(2) + 'M';
   if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
   return n.toLocaleString();
 }
-
-function pct(prev, curr) {
-  if (!prev || prev === 0) return null;
-  return ((curr - prev) / prev) * 100;
-}
-
 function getLatest(data, platform) {
   return data.filter(d => d.platform === platform).sort((a, b) => b.date.localeCompare(a.date))[0] || null;
 }
-
 function getEntryOnOrBefore(data, platform, dateStr) {
-  return data
-    .filter(d => d.platform === platform && d.date <= dateStr)
-    .sort((a, b) => b.date.localeCompare(a.date))[0] || null;
+  return data.filter(d => d.platform === platform && d.date <= dateStr).sort((a, b) => b.date.localeCompare(a.date))[0] || null;
 }
-
 function daysAgo(n) {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return d.toISOString().split('T')[0];
+  const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().split('T')[0];
 }
-
-function daysBetween(d1, d2) {
-  return Math.round((new Date(d2) - new Date(d1)) / 86400000);
+function daysBetween(d1, d2) { return Math.round((new Date(d2) - new Date(d1)) / 86400000); }
+function getGainForPlatform(data, key, endDate, days) {
+  const end = getEntryOnOrBefore(data, key, endDate);
+  if (!end) return null;
+  const startDate = (() => { const d = new Date(endDate); d.setDate(d.getDate() - days); return d.toISOString().split('T')[0]; })();
+  const start = getEntryOnOrBefore(data, key, startDate);
+  if (!start || start.date === end.date) return null;
+  return end.count - start.count;
 }
 
 function toISO(dateStr) {
   const s = dateStr.replace(/"/g, '').trim();
-  if (/^\d{4}[\/\-]\d{2}[\/\-]\d{2}$/.test(s)) {
-    return s.replace(/\//g, '-');
-  }
+  if (/^\d{4}[\/\-]\d{2}[\/\-]\d{2}$/.test(s)) return s.replace(/\//g, '-');
   if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
     const [m, d, y] = s.split('/');
     return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
   }
-  const months = { jan:1, feb:2, mar:3, apr:4, may:5, jun:6, jul:7, aug:8, sep:9, oct:10, nov:11, dec:12 };
+  const months = { jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12 };
   const longMatch = s.match(/(\w{3})\s+(\d{1,2}),?\s+(\d{4})/);
   if (longMatch) {
     const mon = months[longMatch[1].toLowerCase()];
-    if (mon) {
-      return `${longMatch[3]}-${String(mon).padStart(2,'0')}-${longMatch[2].padStart(2,'0')}`;
-    }
+    if (mon) return `${longMatch[3]}-${String(mon).padStart(2,'0')}-${longMatch[2].padStart(2,'0')}`;
   }
   return null;
 }
 
 function showToast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
+  t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-// ======================== PLATFORM FILE PARSERS ========================
+// ===================== FILE PARSERS =====================
 function parseLinkedInXLSX(arrayBuffer) {
   const wb = XLSX.read(arrayBuffer, { type: 'array' });
-  const followersSheet = wb.Sheets['FOLLOWERS'];
-  if (!followersSheet) {
-    throw new Error('No FOLLOWERS sheet found. Make sure this is a LinkedIn Analytics export.');
-  }
-  const rows = XLSX.utils.sheet_to_json(followersSheet, { header: 1 });
-  const totalFollowers = rows[0] && rows[0][1] ? Number(rows[0][1]) : null;
-  if (!totalFollowers) throw new Error('Could not find total follower count in FOLLOWERS sheet.');
-  const headerText = String(rows[0][0] || '');
-  const dateMatch = headerText.match(/(\d{1,2}\/\d{1,2}\/\d{4})/);
-  const totalDate = dateMatch ? toISO(dateMatch[1]) : null;
-  const dailyData = [];
+  const fs = wb.Sheets['FOLLOWERS'];
+  if (!fs) throw new Error('No FOLLOWERS sheet found.');
+  const rows = XLSX.utils.sheet_to_json(fs, { header: 1 });
+  const total = rows[0] && rows[0][1] ? Number(rows[0][1]) : null;
+  if (!total) throw new Error('Could not find total follower count.');
+  const daily = [];
   for (let i = 3; i < rows.length; i++) {
-    const row = rows[i];
-    if (!row || !row[0]) continue;
+    const row = rows[i]; if (!row || !row[0]) continue;
     const date = toISO(String(row[0]));
-    const newFollowers = Number(row[1]) || 0;
-    if (date) {
-      dailyData.push({ date, newFollowers });
-    }
+    if (date) daily.push({ date, newFollowers: Number(row[1]) || 0 });
   }
-  dailyData.sort((a, b) => a.date.localeCompare(b.date));
+  daily.sort((a, b) => a.date.localeCompare(b.date));
   const entries = [];
-  let running = totalFollowers;
-  for (let i = dailyData.length - 1; i >= 0; i--) {
-    entries.unshift({ date: dailyData[i].date, platform: 'linkedin', count: running });
-    if (i > 0) {
-      running -= dailyData[i].newFollowers;
-    }
+  let running = total;
+  for (let i = daily.length - 1; i >= 0; i--) {
+    entries.unshift({ date: daily[i].date, platform: 'linkedin', count: running });
+    if (i > 0) running -= daily[i].newFollowers;
   }
   return entries;
 }
@@ -1136,13 +1010,9 @@ function parseSubstackCSV(text) {
   const lines = text.split('\n').map(l => l.trim()).filter(l => l);
   const entries = [];
   for (const line of lines) {
-    const parts = line.split(',');
-    if (parts.length < 2) continue;
-    const date = toISO(parts[0]);
-    const count = parseInt(parts[1]);
-    if (date && !isNaN(count) && count > 0) {
-      entries.push({ date, platform: 'substack', count });
-    }
+    const parts = line.split(','); if (parts.length < 2) continue;
+    const date = toISO(parts[0]), count = parseInt(parts[1]);
+    if (date && !isNaN(count) && count > 0) entries.push({ date, platform: 'substack', count });
   }
   return entries;
 }
@@ -1154,386 +1024,212 @@ function parseXCSV(text, currentTotal) {
   const dateIdx = header.indexOf('date');
   const newFollowsIdx = header.findIndex(h => h === 'new follows');
   const unfollowsIdx = header.indexOf('unfollows');
-  if (dateIdx < 0 || newFollowsIdx < 0) {
-    throw new Error('Could not find Date or New follows columns in X CSV');
-  }
-  const dailyData = [];
+  if (dateIdx < 0 || newFollowsIdx < 0) throw new Error('Could not find Date or New follows columns');
+  const daily = [];
   for (let i = 1; i < lines.length; i++) {
-    const parts = [];
-    let current = '';
-    let inQuotes = false;
-    for (const ch of lines[i]) {
-      if (ch === '"') { inQuotes = !inQuotes; continue; }
-      if (ch === ',' && !inQuotes) { parts.push(current.trim()); current = ''; continue; }
-      current += ch;
-    }
-    parts.push(current.trim());
+    const parts = []; let cur = '', inQ = false;
+    for (const ch of lines[i]) { if (ch === '"') { inQ = !inQ; continue; } if (ch === ',' && !inQ) { parts.push(cur.trim()); cur = ''; continue; } cur += ch; }
+    parts.push(cur.trim());
     if (parts.length <= Math.max(dateIdx, newFollowsIdx)) continue;
     const date = toISO(parts[dateIdx]);
-    const newFollows = parseInt(parts[newFollowsIdx]) || 0;
-    const unfollows = unfollowsIdx >= 0 ? (parseInt(parts[unfollowsIdx]) || 0) : 0;
-    if (date) {
-      dailyData.push({ date, net: newFollows - unfollows });
-    }
+    const net = (parseInt(parts[newFollowsIdx]) || 0) - (unfollowsIdx >= 0 ? (parseInt(parts[unfollowsIdx]) || 0) : 0);
+    if (date) daily.push({ date, net });
   }
-  dailyData.sort((a, b) => a.date.localeCompare(b.date));
+  daily.sort((a, b) => a.date.localeCompare(b.date));
   const entries = [];
   let running = currentTotal;
-  for (let i = dailyData.length - 1; i >= 0; i--) {
-    entries.unshift({ date: dailyData[i].date, platform: 'x', count: running });
-    if (i > 0) {
-      running -= dailyData[i].net;
-    }
+  for (let i = daily.length - 1; i >= 0; i--) {
+    entries.unshift({ date: daily[i].date, platform: 'x', count: running });
+    if (i > 0) running -= daily[i].net;
   }
   return entries;
 }
 
-// ======================== DROP ZONE SETUP ========================
 function setupDropZone(zoneId, resultId, handler) {
   const zone = document.getElementById(zoneId);
   const input = zone.querySelector('input');
   const resultEl = document.getElementById(resultId);
   zone.addEventListener('click', () => input.click());
-  zone.addEventListener('dragover', e => {
-    e.preventDefault();
-    zone.classList.add('drag-over');
-  });
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
   zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-  zone.addEventListener('drop', e => {
-    e.preventDefault();
-    zone.classList.remove('drag-over');
-    if (e.dataTransfer.files.length) {
-      handleFile(e.dataTransfer.files[0]);
-    }
-  });
-  input.addEventListener('change', () => {
-    if (input.files.length) handleFile(input.files[0]);
-    input.value = '';
-  });
-  function handleFile(file) {
-    handler(file, resultEl);
-  }
+  zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag-over'); if (e.dataTransfer.files.length) handler(e.dataTransfer.files[0], resultEl); });
+  input.addEventListener('change', () => { if (input.files.length) handler(input.files[0], resultEl); input.value = ''; });
 }
 
-// ======================== STREAKS & COMBOS ENGINE ========================
+// ===================== STREAKS ENGINE =====================
 function computeStreaksAndCombos(data) {
-  const result = {
-    perPlatform: {},
-    bestOverall: 0,
-    currentOverall: 0,
-    bestOverallPlatform: '',
-    currentOverallPlatform: '',
-    comboToday: false,
-    superComboToday: false,
-    combosLast30: 0,
-  };
-
+  const result = { perPlatform: {}, bestOverall: 0, currentOverall: 0, bestOverallPlatform: '', currentOverallPlatform: '', comboToday: false, superComboToday: false, combosLast30: 0 };
   const today = daysAgo(0);
   const platformKeys = Object.keys(PLATFORMS);
 
-  // Per-platform velocity streaks
   platformKeys.forEach(key => {
     const sorted = data.filter(d => d.platform === key).sort((a, b) => a.date.localeCompare(b.date));
-    if (sorted.length < 2) {
-      result.perPlatform[key] = { current: 0, best: 0 };
-      return;
-    }
-
-    // Compute daily gains
+    if (sorted.length < 2) { result.perPlatform[key] = { current: 0, best: 0 }; return; }
     const dailyGains = [];
     for (let i = 1; i < sorted.length; i++) {
       const days = daysBetween(sorted[i-1].date, sorted[i].date);
       if (days <= 0) continue;
-      const gain = sorted[i].count - sorted[i-1].count;
-      const dailyGain = gain / days;
-      dailyGains.push({ date: sorted[i].date, dailyGain });
+      dailyGains.push({ date: sorted[i].date, dailyGain: (sorted[i].count - sorted[i-1].count) / days });
     }
-
-    // Compute velocity streaks: day where dailyGain >= 7-day rolling avg
-    let currentStreak = 0;
-    let bestStreak = 0;
-
+    let currentStreak = 0, bestStreak = 0;
     for (let i = 0; i < dailyGains.length; i++) {
-      // Compute 7-day rolling average (using previous entries, not including current)
-      let sum = 0, count = 0;
-      for (let j = Math.max(0, i - 7); j < i; j++) {
-        sum += dailyGains[j].dailyGain;
-        count++;
-      }
-
-      if (count === 0) {
-        // Not enough history, just count as streak if positive
-        if (dailyGains[i].dailyGain > 0) {
-          currentStreak++;
-        } else {
-          currentStreak = 0;
-        }
-      } else {
-        const avg = sum / count;
-        if (dailyGains[i].dailyGain >= avg) {
-          currentStreak++;
-        } else {
-          currentStreak = 0;
-        }
-      }
+      let sum = 0, cnt = 0;
+      for (let j = Math.max(0, i - 7); j < i; j++) { sum += dailyGains[j].dailyGain; cnt++; }
+      if (cnt === 0) { if (dailyGains[i].dailyGain > 0) currentStreak++; else currentStreak = 0; }
+      else { if (dailyGains[i].dailyGain >= sum / cnt) currentStreak++; else currentStreak = 0; }
       bestStreak = Math.max(bestStreak, currentStreak);
     }
-
     result.perPlatform[key] = { current: currentStreak, best: bestStreak };
-
-    if (currentStreak > result.currentOverall) {
-      result.currentOverall = currentStreak;
-      result.currentOverallPlatform = key;
-    }
-    if (bestStreak > result.bestOverall) {
-      result.bestOverall = bestStreak;
-      result.bestOverallPlatform = key;
-    }
+    if (currentStreak > result.currentOverall) { result.currentOverall = currentStreak; result.currentOverallPlatform = key; }
+    if (bestStreak > result.bestOverall) { result.bestOverall = bestStreak; result.bestOverallPlatform = key; }
   });
 
-  // Combo detection: all platforms beat their 7-day avg on the same day
-  // Check last 30 days
-  const allDates = new Set();
-  data.forEach(d => allDates.add(d.date));
-  const sortedDates = [...allDates].sort();
-  const last30Dates = sortedDates.filter(d => d >= daysAgo(30));
-
-  let comboDays = 0;
-  last30Dates.forEach(date => {
-    let allBeatAvg = true;
-    let allBeat2x = true;
-    let platformsWithData = 0;
-
+  // Combo detection
+  const allDates = [...new Set(data.map(d => d.date))].sort().filter(d => d >= daysAgo(30));
+  allDates.forEach(date => {
+    let allBeat = true, allBeat2x = true, withData = 0;
     platformKeys.forEach(key => {
       const sorted = data.filter(d => d.platform === key).sort((a, b) => a.date.localeCompare(b.date));
       const idx = sorted.findIndex(d => d.date === date);
-      if (idx < 1) { allBeatAvg = false; allBeat2x = false; return; }
-      platformsWithData++;
-
+      if (idx < 1) { allBeat = false; allBeat2x = false; return; }
+      withData++;
       const days = daysBetween(sorted[idx-1].date, sorted[idx].date);
-      if (days <= 0) { allBeatAvg = false; allBeat2x = false; return; }
+      if (days <= 0) { allBeat = false; allBeat2x = false; return; }
       const todayGain = (sorted[idx].count - sorted[idx-1].count) / days;
-
-      // Compute 7-day avg for this platform
       let sum = 0, cnt = 0;
       for (let j = Math.max(0, idx - 7); j < idx; j++) {
-        const d = daysBetween(sorted[j > 0 ? j-1 : j].date, sorted[j].date);
-        if (d > 0 && j > 0) {
-          sum += (sorted[j].count - sorted[j-1].count) / d;
-          cnt++;
-        }
+        if (j > 0) { const d = daysBetween(sorted[j-1].date, sorted[j].date); if (d > 0) { sum += (sorted[j].count - sorted[j-1].count) / d; cnt++; } }
       }
-
       if (cnt === 0) return;
       const avg = sum / cnt;
-      if (todayGain < avg) allBeatAvg = false;
+      if (todayGain < avg) allBeat = false;
       if (todayGain < avg * 2) allBeat2x = false;
     });
-
-    if (allBeatAvg && platformsWithData >= 2) {
-      comboDays++;
+    if (allBeat && withData >= 2) {
+      result.combosLast30++;
       if (date === today) result.comboToday = true;
       if (allBeat2x && date === today) result.superComboToday = true;
     }
   });
 
-  result.combosLast30 = comboDays;
-
-  // Persist best streaks
   const saved = loadStreaks();
   platformKeys.forEach(key => {
-    const savedBest = (saved[key] && saved[key].best) || 0;
-    if (result.perPlatform[key].best > savedBest) {
-      if (!saved[key]) saved[key] = {};
-      saved[key].best = result.perPlatform[key].best;
-    } else {
-      result.perPlatform[key].best = Math.max(result.perPlatform[key].best, savedBest);
-    }
+    const sb = (saved[key] && saved[key].best) || 0;
+    if (result.perPlatform[key].best > sb) { if (!saved[key]) saved[key] = {}; saved[key].best = result.perPlatform[key].best; }
+    else result.perPlatform[key].best = Math.max(result.perPlatform[key].best, sb);
   });
-  const savedOverall = saved.overallBest || 0;
-  if (result.bestOverall > savedOverall) {
-    saved.overallBest = result.bestOverall;
-  } else {
-    result.bestOverall = Math.max(result.bestOverall, savedOverall);
-  }
+  if (result.bestOverall > (saved.overallBest || 0)) saved.overallBest = result.bestOverall;
+  else result.bestOverall = Math.max(result.bestOverall, saved.overallBest || 0);
   saveStreaks(saved);
-
   return result;
 }
 
-// ======================== ACHIEVEMENTS ENGINE ========================
+// ===================== ACHIEVEMENTS ENGINE =====================
 const MILESTONE_ACHIEVEMENTS = [
-  { id: 'first_blood',     emoji: '🥊', title: 'FIRST BLOOD',       threshold: 1000,    desc: 'Reach 1,000 followers' },
-  { id: 'power_up',        emoji: '💪', title: 'POWER UP',          threshold: 10000,   desc: 'Reach 10,000 followers' },
-  { id: 'on_fire',         emoji: '🔥', title: 'ON FIRE',           threshold: 50000,   desc: 'Reach 50,000 followers' },
-  { id: 'super_move',      emoji: '⚡', title: 'SUPER MOVE',        threshold: 100000,  desc: 'Reach 100,000 followers' },
-  { id: 'ultra_combo',     emoji: '🌟', title: 'ULTRA COMBO',       threshold: 250000,  desc: 'Reach 250,000 followers' },
-  { id: 'diamond_fist',    emoji: '💎', title: 'DIAMOND FIST',      threshold: 500000,  desc: 'Reach 500,000 followers' },
-  { id: 'king_of_fighters',emoji: '👑', title: 'KING OF FIGHTERS',  threshold: 750000,  desc: 'Reach 750,000 followers' },
-  { id: 'world_champion',  emoji: '🏆', title: 'WORLD CHAMPION',    threshold: 1000000, desc: 'Reach 1,000,000 followers' },
+  { id: 'first_blood', emoji: '🥊', title: 'FIRST BLOOD', threshold: 1000, desc: 'Reach 1K' },
+  { id: 'power_up', emoji: '💪', title: 'POWER UP', threshold: 10000, desc: 'Reach 10K' },
+  { id: 'on_fire', emoji: '🔥', title: 'ON FIRE', threshold: 50000, desc: 'Reach 50K' },
+  { id: 'super_move', emoji: '⚡', title: 'SUPER MOVE', threshold: 100000, desc: 'Reach 100K' },
+  { id: 'ultra_combo', emoji: '🌟', title: 'ULTRA COMBO', threshold: 250000, desc: 'Reach 250K' },
+  { id: 'diamond_fist', emoji: '💎', title: 'DIAMOND FIST', threshold: 500000, desc: 'Reach 500K' },
+  { id: 'king_of_fighters', emoji: '👑', title: 'KING OF FIGHTERS', threshold: 750000, desc: 'Reach 750K' },
+  { id: 'world_champion', emoji: '🏆', title: 'WORLD CHAMPION', threshold: 1000000, desc: 'Reach 1M' },
 ];
-
 const SPEED_ACHIEVEMENTS = [
-  { id: 'hadouken',   emoji: '🚀', title: 'HADOUKEN!',    desc: 'Gain 10K+ in a single week' },
-  { id: 'shoryuken',  emoji: '🌪️', title: 'SHORYUKEN!',   desc: 'Gain 5K+ in a single day' },
+  { id: 'hadouken', emoji: '🚀', title: 'HADOUKEN!', desc: 'Gain 10K+ in a week' },
+  { id: 'shoryuken', emoji: '🌪️', title: 'SHORYUKEN!', desc: 'Gain 5K+ in a day' },
   { id: 'streak_master', emoji: '🔥', title: 'STREAK MASTER', desc: '7-day velocity streak' },
-  { id: 'unstoppable',   emoji: '⚡', title: 'UNSTOPPABLE',   desc: '30-day velocity streak' },
+  { id: 'unstoppable', emoji: '⚡', title: 'UNSTOPPABLE', desc: '30-day velocity streak' },
 ];
-
 const COMBO_ACHIEVEMENTS = [
-  { id: 'perfect_round',  emoji: '🎯', title: 'PERFECT ROUND!',  desc: 'All platforms beat their pace on the same day' },
-  { id: 'flawless_victory', emoji: '💥', title: 'FLAWLESS VICTORY', desc: 'Combo every day for a full week' },
-  { id: 'super_combo_ach',  emoji: '🔥', title: 'SUPER COMBO',      desc: 'All platforms hit 2x their pace' },
+  { id: 'perfect_round', emoji: '🎯', title: 'PERFECT ROUND!', desc: 'All platforms outpace themselves' },
+  { id: 'flawless_victory', emoji: '💥', title: 'FLAWLESS VICTORY', desc: 'Combo every day for a week' },
+  { id: 'super_combo_ach', emoji: '🔥', title: 'SUPER COMBO', desc: 'All platforms 2x their pace' },
 ];
 
 function checkAndUpdateAchievements(data, streaks) {
-  const achievements = loadAchievements();
+  const ach = loadAchievements();
   const today = daysAgo(0);
-
-  // Milestone achievements per platform
   Object.keys(PLATFORMS).forEach(key => {
-    const latest = getLatest(data, key);
-    if (!latest) return;
-    MILESTONE_ACHIEVEMENTS.forEach(ach => {
-      const achKey = `${ach.id}_${key}`;
-      if (!achievements[achKey] && latest.count >= ach.threshold) {
-        achievements[achKey] = { date: today, platform: key };
-      }
-    });
-  });
-
-  // Speed achievements
-  Object.keys(PLATFORMS).forEach(key => {
-    // Weekly gain 10K+
-    const weekGain = getGainForPlatform(data, key, daysAgo(0), 7);
-    if (weekGain !== null && weekGain >= 10000 && !achievements[`hadouken_${key}`]) {
-      achievements[`hadouken_${key}`] = { date: today, platform: key };
-    }
-    // Daily gain 5K+
-    const dayGain = getGainForPlatform(data, key, daysAgo(0), 1);
-    if (dayGain !== null && dayGain >= 5000 && !achievements[`shoryuken_${key}`]) {
-      achievements[`shoryuken_${key}`] = { date: today, platform: key };
-    }
-  });
-
-  // Streak achievements
-  Object.keys(PLATFORMS).forEach(key => {
+    const latest = getLatest(data, key); if (!latest) return;
+    MILESTONE_ACHIEVEMENTS.forEach(a => { const k = `${a.id}_${key}`; if (!ach[k] && latest.count >= a.threshold) ach[k] = { date: today, platform: key }; });
+    const wg = getGainForPlatform(data, key, daysAgo(0), 7);
+    if (wg !== null && wg >= 10000 && !ach[`hadouken_${key}`]) ach[`hadouken_${key}`] = { date: today, platform: key };
+    const dg = getGainForPlatform(data, key, daysAgo(0), 1);
+    if (dg !== null && dg >= 5000 && !ach[`shoryuken_${key}`]) ach[`shoryuken_${key}`] = { date: today, platform: key };
     const ps = streaks.perPlatform[key];
-    if (ps && ps.best >= 7 && !achievements[`streak_master_${key}`]) {
-      achievements[`streak_master_${key}`] = { date: today, platform: key };
-    }
-    if (ps && ps.best >= 30 && !achievements[`unstoppable_${key}`]) {
-      achievements[`unstoppable_${key}`] = { date: today, platform: key };
-    }
+    if (ps && ps.best >= 7 && !ach[`streak_master_${key}`]) ach[`streak_master_${key}`] = { date: today, platform: key };
+    if (ps && ps.best >= 30 && !ach[`unstoppable_${key}`]) ach[`unstoppable_${key}`] = { date: today, platform: key };
   });
-
-  // Combo achievements
-  if (streaks.combosLast30 > 0 && !achievements['perfect_round']) {
-    achievements['perfect_round'] = { date: today };
-  }
-  if (streaks.superComboToday && !achievements['super_combo_ach']) {
-    achievements['super_combo_ach'] = { date: today };
-  }
-  // Flawless victory: we'd need 7 consecutive combo days - approximate check
-  if (streaks.combosLast30 >= 7 && !achievements['flawless_victory']) {
-    achievements['flawless_victory'] = { date: today };
-  }
-
-  saveAchievements(achievements);
-  return achievements;
+  if (streaks.combosLast30 > 0 && !ach['perfect_round']) ach['perfect_round'] = { date: today };
+  if (streaks.superComboToday && !ach['super_combo_ach']) ach['super_combo_ach'] = { date: today };
+  if (streaks.combosLast30 >= 7 && !ach['flawless_victory']) ach['flawless_victory'] = { date: today };
+  saveAchievements(ach);
+  return ach;
 }
 
-function getGainForPlatform(data, key, endDate, days) {
-  const end = getEntryOnOrBefore(data, key, endDate);
-  if (!end) return null;
-  const startDate = (() => { const d = new Date(endDate); d.setDate(d.getDate() - days); return d.toISOString().split('T')[0]; })();
-  const start = getEntryOnOrBefore(data, key, startDate);
-  if (!start || start.date === end.date) return null;
-  return end.count - start.count;
-}
-
-// ======================== ANNOUNCEMENT TICKER ========================
-function buildTickerMessages(data, streaks, achievements) {
-  const messages = [];
-
-  // Rank announcements
+// ===================== TICKER =====================
+function buildTickerMessages(data, streaks) {
+  const msgs = [];
   Object.keys(PLATFORMS).forEach(key => {
-    const latest = getLatest(data, key);
-    if (!latest) return;
+    const latest = getLatest(data, key); if (!latest) return;
     const rank = getRank(latest.count);
     const f = FIGHTERS[key];
-    messages.push(`${f.emoji} ${PLATFORMS[key].label} is ${rank.label}! ${fmt(latest.count)} power level!`);
+    msgs.push(`${f.name} is ${rank.label}! ${fmt(latest.count)} power level!`);
   });
-
-  // Streak announcements
   if (streaks.currentOverall > 0) {
     const pKey = streaks.currentOverallPlatform;
-    const f = FIGHTERS[pKey];
-    messages.push(`${f.emoji} ${streaks.currentOverall}-DAY VELOCITY STREAK! ${PLATFORMS[pKey].label} is on fire!`);
+    msgs.push(`${streaks.currentOverall}-DAY VELOCITY STREAK! ${PLATFORMS[pKey].label} growing faster than last week!`);
   }
-
-  // Combo
-  if (streaks.comboToday) {
-    messages.push('💥 C-C-COMBO! All platforms beat their pace today!');
-  }
-  if (streaks.superComboToday) {
-    messages.push('🔥🔥 SUPER COMBO! All platforms at 2x pace!');
-  }
-
-  // Combo count
-  if (streaks.combosLast30 > 0) {
-    messages.push(`🎯 ${streaks.combosLast30} COMBO DAYS in the last 30 days!`);
-  }
-
-  // Recent achievements
-  const achKeys = Object.keys(achievements);
-  const recent = achKeys.filter(k => achievements[k].date === daysAgo(0));
-  recent.forEach(k => {
-    messages.push(`🏆 NEW ACHIEVEMENT UNLOCKED TODAY!`);
-  });
-
-  if (messages.length === 0) {
-    messages.push('👊 READY TO FIGHT! Upload data to begin your journey!');
-    messages.push('🎮 INSERT COIN... Upload your analytics files to start!');
-  }
-
-  return messages;
+  if (streaks.comboToday) msgs.push('C-C-COMBO! All platforms outpacing themselves today!');
+  if (streaks.combosLast30 > 0) msgs.push(`${streaks.combosLast30} COMBO DAYS in the last 30 days!`);
+  if (msgs.length === 0) { msgs.push('READY TO FIGHT! Upload data to begin!'); msgs.push('INSERT COIN... Upload your analytics files!'); }
+  return msgs;
 }
 
-function renderTicker(messages) {
-  const ticker = document.getElementById('ticker');
-  // Duplicate for seamless loop
-  const all = [...messages, ...messages];
-  ticker.innerHTML = all.map(m => `<span class="ticker-item">${m}</span>`).join('');
+function renderTicker(msgs) {
+  const t = document.getElementById('ticker');
+  const all = [...msgs, ...msgs];
+  t.innerHTML = all.map(m => `<span class="ticker-item">${m}</span>`).join('');
 }
 
-// ======================== RENDER DASHBOARD ========================
+// ===================== RENDER DASHBOARD =====================
 function renderDashboard() {
   const data = loadData();
   const streaks = computeStreaksAndCombos(data);
   const achievements = checkAndUpdateAchievements(data, streaks);
 
-  // --- Fighter Cards ---
+  // ---- Fighter Cards (weekly gain, not "vs previous entry") ----
   const cardsHtml = Object.entries(PLATFORMS).map(([key, p]) => {
     const latest = getLatest(data, key);
-    const prev = latest ? getEntryOnOrBefore(data, key, daysAgo(1)) : null;
     const count = latest ? latest.count : 0;
-    const change = (prev && latest && prev.date !== latest.date) ? pct(prev.count, latest.count) : null;
     const f = FIGHTERS[key];
     const rank = getRank(count);
 
-    let badgeHtml = '<span class="badge neutral">No data</span>';
-    if (change !== null) {
-      const cls = change >= 0 ? 'up' : 'down';
-      const arrow = change >= 0 ? '&#9650;' : '&#9660;';
-      badgeHtml = `<span class="badge ${cls}">${arrow} ${Math.abs(change).toFixed(2)}%</span>`;
+    // Weekly gain (7 days)
+    const weekGain = getGainForPlatform(data, key, daysAgo(0), 7);
+    // WoW acceleration: this week's gain vs last week's gain
+    const lastWeekGain = getGainForPlatform(data, key, daysAgo(7), 7);
+
+    let subHtml;
+    if (weekGain !== null) {
+      const sign = weekGain >= 0 ? '+' : '';
+      subHtml = `<span class="badge up">${sign}${fmt(weekGain)} this week</span>`;
+      if (lastWeekGain !== null && lastWeekGain !== 0) {
+        const ch = ((weekGain - lastWeekGain) / Math.abs(lastWeekGain)) * 100;
+        const cls = ch >= 0 ? 'up' : 'down';
+        const arrow = ch >= 0 ? '&#9650;' : '&#9660;';
+        subHtml += ` <span class="badge ${cls}">${arrow} ${Math.abs(ch).toFixed(0)}% WoW</span>`;
+      }
+    } else {
+      subHtml = '<span class="badge neutral">No weekly data yet</span>';
     }
 
     return `
       <div class="card ${f.cardClass}">
         <div class="fighter-header">
           <div class="fighter-name">
-            <span class="fighter-emoji">${f.emoji}</span>
+            ${spriteHTML(f.pixels)}
             <div>
               <div class="fighter-label">${f.name}</div>
               <div class="fighter-platform">${p.label}</div>
@@ -1542,338 +1238,227 @@ function renderDashboard() {
           <span class="rank-badge" style="background:${rank.bg}">${rank.label}</span>
         </div>
         <div class="card-value">${fmt(count)}</div>
-        <div class="card-sub">${badgeHtml} <span>vs previous entry</span></div>
+        <div class="card-sub">${subHtml}</div>
       </div>`;
   }).join('');
 
-  // --- All Socials Card ---
-  const allCount = Object.keys(PLATFORMS).reduce((sum, key) => {
-    const l = getLatest(data, key);
-    return sum + (l ? l.count : 0);
-  }, 0);
-  const allPrevCount = Object.keys(PLATFORMS).reduce((sum, key) => {
-    const p = getEntryOnOrBefore(data, key, daysAgo(1));
-    return sum + (p ? p.count : 0);
-  }, 0);
-  const allChange = (allPrevCount > 0 && allPrevCount !== allCount) ? pct(allPrevCount, allCount) : null;
-  const allRank = getRank(Math.round(allCount / 3)); // Avg per platform for rank
-  let allBadge = '<span class="badge neutral">No data</span>';
-  if (allChange !== null) {
-    const cls = allChange >= 0 ? 'up' : 'down';
-    const arrow = allChange >= 0 ? '&#9650;' : '&#9660;';
-    allBadge = `<span class="badge ${cls}">${arrow} ${Math.abs(allChange).toFixed(2)}%</span>`;
+  // All Socials card
+  const allCount = Object.keys(PLATFORMS).reduce((s, k) => s + (getLatest(data, k)?.count || 0), 0);
+  const allRank = getRank(Math.round(allCount / 3));
+  const allWeekGain = (() => { let t = 0, h = false; Object.keys(PLATFORMS).forEach(k => { const g = getGainForPlatform(data, k, daysAgo(0), 7); if (g !== null) { t += g; h = true; } }); return h ? t : null; })();
+  const allLastWeekGain = (() => { let t = 0, h = false; Object.keys(PLATFORMS).forEach(k => { const g = getGainForPlatform(data, k, daysAgo(7), 7); if (g !== null) { t += g; h = true; } }); return h ? t : null; })();
+
+  let allSubHtml;
+  if (allWeekGain !== null) {
+    allSubHtml = `<span class="badge up">+${fmt(allWeekGain)} this week</span>`;
+    if (allLastWeekGain !== null && allLastWeekGain !== 0) {
+      const ch = ((allWeekGain - allLastWeekGain) / Math.abs(allLastWeekGain)) * 100;
+      const cls = ch >= 0 ? 'up' : 'down';
+      const arrow = ch >= 0 ? '&#9650;' : '&#9660;';
+      allSubHtml += ` <span class="badge ${cls}">${arrow} ${Math.abs(ch).toFixed(0)}% WoW</span>`;
+    }
+  } else {
+    allSubHtml = '<span class="badge neutral">No weekly data yet</span>';
   }
-  const allCard = `
+
+  const af = FIGHTERS.all;
+  document.getElementById('follower-cards').innerHTML = cardsHtml + `
     <div class="card all-card">
       <div class="fighter-header">
         <div class="fighter-name">
-          <span class="fighter-emoji">${FIGHTERS.all.emoji}</span>
-          <div>
-            <div class="fighter-label">${FIGHTERS.all.name}</div>
-            <div class="fighter-platform">All Socials</div>
-          </div>
+          ${spriteHTML(af.pixels)}
+          <div><div class="fighter-label">${af.name}</div><div class="fighter-platform">All Socials</div></div>
         </div>
         <span class="rank-badge" style="background:${allRank.bg}">${allRank.label}</span>
       </div>
       <div class="card-value">${fmt(allCount)}</div>
-      <div class="card-sub">${allBadge} <span>vs previous entry</span></div>
-    </div>`;
-  document.getElementById('follower-cards').innerHTML = cardsHtml + allCard;
-
-  // --- Streaks & Combos ---
-  const bestPlatformLabel = streaks.currentOverallPlatform ? PLATFORMS[streaks.currentOverallPlatform]?.label : '--';
-  const streakActive = streaks.currentOverall > 2;
-  const comboActive = streaks.comboToday;
-
-  document.getElementById('streaks-area').innerHTML = `
-    <div class="streak-card ${streakActive ? 'active-streak' : ''}">
-      <div class="streak-label">Velocity Streak</div>
-      <div class="streak-value">${streaks.currentOverall > 0 ? '🔥 ' + streaks.currentOverall : '0'}</div>
-      <div class="streak-sub">${streaks.currentOverall > 0 ? bestPlatformLabel + ' is on pace' : 'Beat your 7-day avg to start'}</div>
-    </div>
-    <div class="streak-card">
-      <div class="streak-label">Best Streak</div>
-      <div class="streak-value">🏅 ${streaks.bestOverall}</div>
-      <div class="streak-sub">All-time record</div>
-    </div>
-    <div class="streak-card ${comboActive ? 'combo-active' : ''}">
-      <div class="streak-label">Combo Today</div>
-      <div class="streak-value">${streaks.comboToday ? '<span class="combo-text">C-C-COMBO!</span>' : '—'}</div>
-      <div class="streak-sub">${streaks.comboToday ? 'All platforms above pace!' : 'All platforms must beat avg'}</div>
-    </div>
-    <div class="streak-card">
-      <div class="streak-label">Combos (30 days)</div>
-      <div class="streak-value">🎯 ${streaks.combosLast30}</div>
-      <div class="streak-sub">${streaks.combosLast30 > 0 ? streaks.combosLast30 + ' combo days' : 'No combo days yet'}</div>
+      <div class="card-sub">${allSubHtml}</div>
     </div>`;
 
-  // --- Speed Cards (compare growth rates) ---
-  const speedHtml = Object.entries(PLATFORMS).map(([key, p]) => {
-    function getGain(endDate, days) {
-      return getGainForPlatform(data, key, endDate, days);
-    }
+  // ---- Streak Bar (compact) ----
+  const bestPlatformLabel = streaks.currentOverallPlatform ? PLATFORMS[streaks.currentOverallPlatform]?.label : '';
+  const streakDesc = streaks.currentOverall > 0
+    ? `${bestPlatformLabel} growing faster than its last 7 days`
+    : 'Grow faster than your last 7 days to start';
 
-    function speedCompareRow(label, current, previous) {
-      const noData = `<div class="speed-row"><span class="speed-label">${label}</span><span class="speed-value badge neutral">--</span></div>`;
-      if (current === null) return noData;
-      const sign = current >= 0 ? '+' : '';
-      let html = `<div class="speed-row"><span class="speed-label">${label}</span><span class="speed-value">`;
-      html += `<span style="color:var(--text);font-size:13px">${sign}${fmt(current)}</span>`;
-      if (previous !== null && previous !== 0) {
-        const ch = ((current - previous) / Math.abs(previous)) * 100;
-        const cls = ch >= 0 ? 'up' : 'down';
-        const arrow = ch >= 0 ? '&#9650;' : '&#9660;';
-        html += ` <span class="badge ${cls}" style="margin-left:6px">${arrow} ${Math.abs(ch).toFixed(1)}%</span>`;
-      }
-      html += `</span></div>`;
-      return html;
-    }
+  document.getElementById('streak-bar').innerHTML = `
+    <div class="streak-bar">
+      <div class="streak-item">
+        <span class="streak-num">${streaks.currentOverall > 0 ? '🔥 ' + streaks.currentOverall : '0'}</span>
+        <div class="streak-desc">Velocity Streak<br><span style="font-size:10px;color:var(--muted)">${streakDesc}</span></div>
+      </div>
+      <div class="streak-divider"></div>
+      <div class="streak-item">
+        <span class="streak-num">🏅 ${streaks.bestOverall}</span>
+        <span class="streak-desc">Best Ever</span>
+      </div>
+      <div class="streak-divider"></div>
+      <div class="streak-item">
+        ${streaks.comboToday
+          ? '<span class="combo-flash">C-C-COMBO!</span>'
+          : '<span class="streak-num">—</span>'}
+        <span class="streak-desc">Combo Today</span>
+      </div>
+      <div class="streak-divider"></div>
+      <div class="streak-item">
+        <span class="streak-num">🎯 ${streaks.combosLast30}</span>
+        <span class="streak-desc">Combos (30d)</span>
+      </div>
+    </div>`;
 
-    const f = FIGHTERS[key];
-    return `
-      <div class="speed-card">
-        <h3><span style="font-size:18px">${f.emoji}</span> ${p.label}</h3>
-        ${speedCompareRow('Day over Day', getGain(daysAgo(0), 1), getGain(daysAgo(1), 1))}
-        ${speedCompareRow('Week over Week', getGain(daysAgo(0), 7), getGain(daysAgo(7), 7))}
-        ${speedCompareRow('Month over Month', getGain(daysAgo(0), 30), getGain(daysAgo(30), 30))}
-      </div>`;
-  }).join('');
-
-  // All Socials Speed Card
-  function getAllGain(endDate, days) {
-    let total = 0, hasAny = false;
-    Object.keys(PLATFORMS).forEach(key => {
-      const g = getGainForPlatform(data, key, endDate, days);
-      if (g !== null) { total += g; hasAny = true; }
-    });
-    return hasAny ? total : null;
-  }
-  function allSpeedRow(label, current, previous) {
-    const noData = `<div class="speed-row"><span class="speed-label">${label}</span><span class="speed-value badge neutral">--</span></div>`;
-    if (current === null) return noData;
+  // ---- Speed Cards (WoW + MoM only, no DoD) ----
+  function speedRow(label, current, previous) {
+    if (current === null) return `<div class="speed-row"><span class="speed-label">${label}</span><span class="speed-value badge neutral">--</span></div>`;
     const sign = current >= 0 ? '+' : '';
-    let html = `<div class="speed-row"><span class="speed-label">${label}</span><span class="speed-value">`;
-    html += `<span style="color:var(--text);font-size:13px">${sign}${fmt(current)}</span>`;
+    let html = `<div class="speed-row"><span class="speed-label">${label}</span><span class="speed-value"><span style="color:var(--text);font-size:12px">${sign}${fmt(current)}</span>`;
     if (previous !== null && previous !== 0) {
       const ch = ((current - previous) / Math.abs(previous)) * 100;
       const cls = ch >= 0 ? 'up' : 'down';
       const arrow = ch >= 0 ? '&#9650;' : '&#9660;';
-      html += ` <span class="badge ${cls}" style="margin-left:6px">${arrow} ${Math.abs(ch).toFixed(1)}%</span>`;
+      html += ` <span class="badge ${cls}" style="margin-left:4px">${arrow} ${Math.abs(ch).toFixed(1)}%</span>`;
     }
-    html += `</span></div>`;
-    return html;
+    return html + `</span></div>`;
   }
-  const allSpeedCard = `
-    <div class="speed-card">
-      <h3><span style="font-size:18px">${FIGHTERS.all.emoji}</span> All Socials</h3>
-      ${allSpeedRow('Day over Day', getAllGain(daysAgo(0), 1), getAllGain(daysAgo(1), 1))}
-      ${allSpeedRow('Week over Week', getAllGain(daysAgo(0), 7), getAllGain(daysAgo(7), 7))}
-      ${allSpeedRow('Month over Month', getAllGain(daysAgo(0), 30), getAllGain(daysAgo(30), 30))}
-    </div>`;
-  document.getElementById('speed-cards').innerHTML = speedHtml + allSpeedCard;
 
-  // --- VS Target Fight Screens ---
+  const speedHtml = Object.entries(PLATFORMS).map(([key, p]) => {
+    const f = FIGHTERS[key];
+    return `<div class="speed-card">
+      <h3>${spriteHTML(f.pixels, 2)} ${p.label}</h3>
+      ${speedRow('Week / Week', getGainForPlatform(data, key, daysAgo(0), 7), getGainForPlatform(data, key, daysAgo(7), 7))}
+      ${speedRow('Month / Month', getGainForPlatform(data, key, daysAgo(0), 30), getGainForPlatform(data, key, daysAgo(30), 30))}
+    </div>`;
+  }).join('');
+
+  function getAllGain(endDate, days) {
+    let t = 0, h = false;
+    Object.keys(PLATFORMS).forEach(k => { const g = getGainForPlatform(data, k, endDate, days); if (g !== null) { t += g; h = true; } });
+    return h ? t : null;
+  }
+
+  document.getElementById('speed-cards').innerHTML = speedHtml + `
+    <div class="speed-card">
+      <h3>${spriteHTML(FIGHTERS.all.pixels, 2)} All Socials</h3>
+      ${speedRow('Week / Week', getAllGain(daysAgo(0), 7), getAllGain(daysAgo(7), 7))}
+      ${speedRow('Month / Month', getAllGain(daysAgo(0), 30), getAllGain(daysAgo(30), 30))}
+    </div>`;
+
+  // ---- VS Boss Fights (per-platform next milestone) ----
   const vsHtml = Object.entries(PLATFORMS).map(([key, p]) => {
     const sorted = data.filter(d => d.platform === key).sort((a, b) => a.date.localeCompare(b.date));
     const latest = sorted[sorted.length - 1];
     const count = latest ? latest.count : 0;
-    const progress = Math.min((count / TARGET) * 100, 100);
-    const remaining = TARGET - count;
     const f = FIGHTERS[key];
     const rank = getRank(count);
-
+    const boss = getNextBoss(count);
+    const progress = Math.min((count / boss.threshold) * 100, 100);
+    const remaining = Math.max(boss.threshold - count, 0);
     const hpClass = progress >= 60 ? 'hp-high' : progress >= 30 ? 'hp-mid' : 'hp-low';
 
     const weeklyGain = getGainForPlatform(data, key, daysAgo(0), 7);
     const monthlyGain = getGainForPlatform(data, key, daysAgo(0), 30);
 
-    function estimateDate(gain, periodDays) {
+    function estDate(gain, periodDays) {
       if (!gain || gain <= 0 || remaining <= 0) return null;
-      const dailyRate = gain / periodDays;
-      const daysNeeded = Math.ceil(remaining / dailyRate);
-      const target = new Date();
-      target.setDate(target.getDate() + daysNeeded);
-      return { days: daysNeeded, date: target.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) };
+      const dn = Math.ceil(remaining / (gain / periodDays));
+      const t = new Date(); t.setDate(t.getDate() + dn);
+      return { days: dn, date: t.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) };
     }
+    const we = estDate(weeklyGain, 7), me = estDate(monthlyGain, 30);
 
-    const weekEst = estimateDate(weeklyGain, 7);
-    const monthEst = estimateDate(monthlyGain, 30);
-
-    function estRow(label, est, gain) {
-      if (remaining <= 0) return `<div class="vs-est-row"><span>${label}</span><span class="vs-est-date" style="color:var(--green)">DEFEATED! 🏆</span></div>`;
+    function eRow(label, est, gain) {
+      if (remaining <= 0) return `<div class="vs-est-row"><span>${label}</span><span class="vs-est-date" style="color:var(--green)">DEFEATED!</span></div>`;
       if (!est) return `<div class="vs-est-row"><span>${label}</span><span class="badge neutral">--</span></div>`;
-      return `<div class="vs-est-row"><span>${label} <span style="font-size:10px;color:var(--muted)">(${fmt(gain)}/period)</span></span><span class="vs-est-date">${est.date}<br><span style="font-size:10px;color:var(--muted);font-weight:400">${est.days.toLocaleString()} days</span></span></div>`;
+      return `<div class="vs-est-row"><span>${label}</span><span class="vs-est-date">${est.date} <span style="font-size:9px;color:var(--muted);font-weight:400">(${est.days}d)</span></span></div>`;
     }
 
-    return `
-      <div class="vs-card">
-        <div class="vs-fight">
-          <div class="vs-fighter">
-            <div class="vs-fighter-emoji">${f.emoji}</div>
-            <div class="vs-fighter-name">${f.name}</div>
-            <div class="vs-fighter-rank" style="color:${rank.bg}">${rank.label}</div>
-            <div class="vs-fighter-count">${fmt(count)}</div>
-          </div>
-          <div class="vs-middle">VS</div>
-          <div class="vs-boss">
-            <div class="vs-boss-emoji">👤</div>
-            <div class="vs-boss-label">BOSS</div>
-            <div class="vs-boss-count">${fmt(TARGET)}</div>
-          </div>
-        </div>
-        <div class="health-bar-wrap">
-          <div class="health-bar-fill ${hpClass}" style="width:${progress}%"></div>
-        </div>
-        <div class="health-bar-text">
-          <span>${progress.toFixed(1)}% damage dealt</span>
-          <span>${remaining > 0 ? fmt(remaining) + ' remaining' : 'DEFEATED!'}</span>
-        </div>
-        <div class="vs-est">
-          ${estRow('At weekly speed', weekEst, weeklyGain)}
-          ${estRow('At monthly speed', monthEst, monthlyGain)}
-        </div>
-      </div>`;
-  }).join('');
-
-  // All Socials VS card
-  const allLatestCount = Object.keys(PLATFORMS).reduce((sum, key) => {
-    const sorted = data.filter(d => d.platform === key).sort((a, b) => a.date.localeCompare(b.date));
-    return sum + (sorted.length ? sorted[sorted.length - 1].count : 0);
-  }, 0);
-  const allProgress = Math.min((allLatestCount / ALL_TARGET) * 100, 100);
-  const allRemaining = ALL_TARGET - allLatestCount;
-  const allHpClass = allProgress >= 60 ? 'hp-high' : allProgress >= 30 ? 'hp-mid' : 'hp-low';
-  const allWeeklyGain = getAllGain(daysAgo(0), 7);
-  const allMonthlyGain = getAllGain(daysAgo(0), 30);
-  const allRankForVs = getRank(Math.round(allLatestCount / 3));
-
-  function allEstDate(gain, periodDays) {
-    if (!gain || gain <= 0 || allRemaining <= 0) return null;
-    const dailyRate = gain / periodDays;
-    const daysNeeded = Math.ceil(allRemaining / dailyRate);
-    const target = new Date();
-    target.setDate(target.getDate() + daysNeeded);
-    return { days: daysNeeded, date: target.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) };
-  }
-
-  function allEstRow(label, est, gain) {
-    if (allRemaining <= 0) return `<div class="vs-est-row"><span>${label}</span><span class="vs-est-date" style="color:var(--green)">DEFEATED! 🏆</span></div>`;
-    if (!est) return `<div class="vs-est-row"><span>${label}</span><span class="badge neutral">--</span></div>`;
-    return `<div class="vs-est-row"><span>${label} <span style="font-size:10px;color:var(--muted)">(${fmt(gain)}/period)</span></span><span class="vs-est-date">${est.date}<br><span style="font-size:10px;color:var(--muted);font-weight:400">${est.days.toLocaleString()} days</span></span></div>`;
-  }
-
-  const allVsCard = `
-    <div class="vs-card">
+    return `<div class="vs-card">
       <div class="vs-fight">
         <div class="vs-fighter">
-          <div class="vs-fighter-emoji">${FIGHTERS.all.emoji}</div>
-          <div class="vs-fighter-name">${FIGHTERS.all.name}</div>
-          <div class="vs-fighter-rank" style="color:${allRankForVs.bg}">${allRankForVs.label}</div>
-          <div class="vs-fighter-count">${fmt(allLatestCount)}</div>
+          ${spriteHTML(f.pixels)}
+          <div class="vs-fighter-name">${f.name}</div>
+          <div class="vs-fighter-rank" style="color:${rank.bg}">${rank.label}</div>
+          <div class="vs-count">${fmt(count)}</div>
         </div>
         <div class="vs-middle">VS</div>
         <div class="vs-boss">
-          <div class="vs-boss-emoji">👤</div>
-          <div class="vs-boss-label">MEGA BOSS</div>
-          <div class="vs-boss-count">${fmt(ALL_TARGET)}</div>
+          ${spriteHTML(boss.pixels)}
+          <div class="vs-boss-name">${boss.name}</div>
+          <div class="vs-count" style="color:var(--red)">${fmt(boss.threshold)}</div>
         </div>
       </div>
-      <div class="health-bar-wrap">
-        <div class="health-bar-fill ${allHpClass}" style="width:${allProgress}%"></div>
-      </div>
-      <div class="health-bar-text">
-        <span>${allProgress.toFixed(1)}% damage dealt</span>
-        <span>${allRemaining > 0 ? fmt(allRemaining) + ' remaining' : 'DEFEATED!'}</span>
-      </div>
-      <div class="vs-est">
-        ${allEstRow('At weekly speed', allEstDate(allWeeklyGain, 7), allWeeklyGain)}
-        ${allEstRow('At monthly speed', allEstDate(allMonthlyGain, 30), allMonthlyGain)}
-      </div>
+      <div class="health-bar-wrap"><div class="health-bar-fill ${hpClass}" style="width:${progress}%"></div></div>
+      <div class="health-bar-text"><span>${progress.toFixed(1)}% damage</span><span>${remaining > 0 ? fmt(remaining) + ' to go' : 'DEFEATED!'}</span></div>
+      <div class="vs-est">${eRow('Weekly pace', we, weeklyGain)}${eRow('Monthly pace', me, monthlyGain)}</div>
     </div>`;
-  document.getElementById('vs-cards').innerHTML = vsHtml + allVsCard;
+  }).join('');
 
-  // --- Achievements ---
+  // All Socials VS
+  const allBoss = ALL_BOSS;
+  const allProg = Math.min((allCount / allBoss.threshold) * 100, 100);
+  const allRem = Math.max(allBoss.threshold - allCount, 0);
+  const allHp = allProg >= 60 ? 'hp-high' : allProg >= 30 ? 'hp-mid' : 'hp-low';
+  const awg = getAllGain(daysAgo(0), 7), amg = getAllGain(daysAgo(0), 30);
+  function allEst(gain, pd) { if (!gain || gain <= 0 || allRem <= 0) return null; const dn = Math.ceil(allRem / (gain / pd)); const t = new Date(); t.setDate(t.getDate() + dn); return { days: dn, date: t.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }; }
+  function allERow(label, est) { if (allRem <= 0) return `<div class="vs-est-row"><span>${label}</span><span class="vs-est-date" style="color:var(--green)">DEFEATED!</span></div>`; if (!est) return `<div class="vs-est-row"><span>${label}</span><span class="badge neutral">--</span></div>`; return `<div class="vs-est-row"><span>${label}</span><span class="vs-est-date">${est.date} <span style="font-size:9px;color:var(--muted);font-weight:400">(${est.days}d)</span></span></div>`; }
+
+  document.getElementById('vs-cards').innerHTML = vsHtml + `
+    <div class="vs-card">
+      <div class="vs-fight">
+        <div class="vs-fighter">${spriteHTML(FIGHTERS.all.pixels)}<div class="vs-fighter-name">AKUMA</div><div class="vs-fighter-rank" style="color:${allRank.bg}">${allRank.label}</div><div class="vs-count">${fmt(allCount)}</div></div>
+        <div class="vs-middle">VS</div>
+        <div class="vs-boss">${spriteHTML(allBoss.pixels)}<div class="vs-boss-name">${allBoss.name}</div><div class="vs-count" style="color:var(--red)">${fmt(allBoss.threshold)}</div></div>
+      </div>
+      <div class="health-bar-wrap"><div class="health-bar-fill ${allHp}" style="width:${allProg}%"></div></div>
+      <div class="health-bar-text"><span>${allProg.toFixed(1)}% damage</span><span>${allRem > 0 ? fmt(allRem) + ' to go' : 'DEFEATED!'}</span></div>
+      <div class="vs-est">${allERow('Weekly pace', allEst(awg, 7))}${allERow('Monthly pace', allEst(amg, 30))}</div>
+    </div>`;
+
+  // ---- Achievements ----
   renderAchievements(data, achievements);
-
-  // --- Ticker ---
-  const tickerMessages = buildTickerMessages(data, streaks, achievements);
-  renderTicker(tickerMessages);
-
-  // --- Chart ---
+  renderTicker(buildTickerMessages(data, streaks));
   renderChart(data, currentChartPlatform);
 }
 
-function renderAchievements(data, achievements) {
+function renderAchievements(data, ach) {
   const grid = document.getElementById('achievements-grid');
   let html = '';
-
-  // Milestone achievements per platform
-  html += '<div style="grid-column:1/-1;margin-bottom:4px"><div class="section-title" style="font-size:10px;margin-bottom:8px">Milestone Badges</div></div>';
+  // Milestones
   Object.keys(PLATFORMS).forEach(key => {
-    const f = FIGHTERS[key];
-    MILESTONE_ACHIEVEMENTS.forEach(ach => {
-      const achKey = `${ach.id}_${key}`;
-      const unlocked = achievements[achKey];
-      html += `
-        <div class="achievement-card ${unlocked ? 'unlocked' : 'locked'}">
-          <div class="achievement-emoji">${ach.emoji}</div>
-          <div class="achievement-title">${ach.title}</div>
-          <div class="achievement-desc">${f.emoji} ${PLATFORMS[key].label}: ${ach.desc}</div>
-          ${unlocked ? `<div class="achievement-date">Unlocked ${unlocked.date}</div>` : ''}
-        </div>`;
+    MILESTONE_ACHIEVEMENTS.forEach(a => {
+      const k = `${a.id}_${key}`;
+      const u = ach[k];
+      html += `<div class="achievement-card ${u ? 'unlocked' : 'locked'}"><div class="achievement-emoji">${a.emoji}</div><div class="achievement-title">${a.title}</div><div class="achievement-desc">${PLATFORMS[key].label}: ${a.desc}</div>${u ? `<div class="achievement-date">${u.date}</div>` : ''}</div>`;
     });
   });
-
-  // Speed achievements
-  html += '<div style="grid-column:1/-1;margin-top:16px;margin-bottom:4px"><div class="section-title" style="font-size:10px;margin-bottom:8px">Speed & Power</div></div>';
-  SPEED_ACHIEVEMENTS.forEach(ach => {
-    // Check if any platform has it
-    let unlocked = null;
-    Object.keys(PLATFORMS).forEach(key => {
-      const achKey = `${ach.id}_${key}`;
-      if (achievements[achKey] && !unlocked) unlocked = achievements[achKey];
-    });
-    html += `
-      <div class="achievement-card ${unlocked ? 'unlocked' : 'locked'}">
-        <div class="achievement-emoji">${ach.emoji}</div>
-        <div class="achievement-title">${ach.title}</div>
-        <div class="achievement-desc">${ach.desc}</div>
-        ${unlocked ? `<div class="achievement-date">Unlocked ${unlocked.date}</div>` : ''}
-      </div>`;
+  // Speed
+  SPEED_ACHIEVEMENTS.forEach(a => {
+    let u = null;
+    Object.keys(PLATFORMS).forEach(k => { if (ach[`${a.id}_${k}`] && !u) u = ach[`${a.id}_${k}`]; });
+    html += `<div class="achievement-card ${u ? 'unlocked' : 'locked'}"><div class="achievement-emoji">${a.emoji}</div><div class="achievement-title">${a.title}</div><div class="achievement-desc">${a.desc}</div>${u ? `<div class="achievement-date">${u.date}</div>` : ''}</div>`;
   });
-
-  // Combo achievements
-  html += '<div style="grid-column:1/-1;margin-top:16px;margin-bottom:4px"><div class="section-title" style="font-size:10px;margin-bottom:8px">Combo Moves</div></div>';
-  COMBO_ACHIEVEMENTS.forEach(ach => {
-    const unlocked = achievements[ach.id];
-    html += `
-      <div class="achievement-card ${unlocked ? 'unlocked' : 'locked'}">
-        <div class="achievement-emoji">${ach.emoji}</div>
-        <div class="achievement-title">${ach.title}</div>
-        <div class="achievement-desc">${ach.desc}</div>
-        ${unlocked ? `<div class="achievement-date">Unlocked ${unlocked.date}</div>` : ''}
-      </div>`;
+  // Combo
+  COMBO_ACHIEVEMENTS.forEach(a => {
+    const u = ach[a.id];
+    html += `<div class="achievement-card ${u ? 'unlocked' : 'locked'}"><div class="achievement-emoji">${a.emoji}</div><div class="achievement-title">${a.title}</div><div class="achievement-desc">${a.desc}</div>${u ? `<div class="achievement-date">${u.date}</div>` : ''}</div>`;
   });
-
   grid.innerHTML = html;
 }
 
-// ======================== CHART ========================
+// ===================== CHART =====================
 let growthChartInstance = null;
 let currentChartPlatform = 'linkedin';
-let currentTimeRange = 'all';
+let currentTimeRange = '90d';
 let currentMonth = '';
 
 function filterByTimeRange(data) {
   if (currentMonth) {
     const [y, m] = currentMonth.split('-').map(Number);
     const start = currentMonth + '-01';
-    const lastDay = new Date(y, m, 0).getDate();
-    const end = currentMonth + '-' + String(lastDay).padStart(2, '0');
+    const end = currentMonth + '-' + String(new Date(y, m, 0).getDate()).padStart(2, '0');
     return data.filter(d => d.date >= start && d.date <= end);
   }
   if (currentTimeRange === 'all') return data;
-  const ranges = { '1d': 1, '1w': 7, '1m': 30, '3m': 90, '6m': 180, '12m': 365 };
+  const ranges = { '1m': 30, '3m': 90, '90d': 90 };
   const days = ranges[currentTimeRange];
   if (!days) return data;
   return data.filter(d => d.date >= daysAgo(days));
@@ -1886,8 +1471,7 @@ function populateMonthPicker(data, platformKey) {
   picker.innerHTML = '<option value="">Pick a month\u2026</option>';
   months.forEach(m => {
     const [y, mo] = m.split('-');
-    const label = new Date(y, mo - 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-    picker.innerHTML += `<option value="${m}">${label}</option>`;
+    picker.innerHTML += `<option value="${m}">${new Date(y, mo - 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</option>`;
   });
   picker.value = currentMonth;
 }
@@ -1895,155 +1479,74 @@ function populateMonthPicker(data, platformKey) {
 function renderChart(data, platformKey) {
   populateMonthPicker(data, platformKey);
   data = filterByTimeRange(data);
-
   const ctx = document.getElementById('growthChart').getContext('2d');
   if (growthChartInstance) growthChartInstance.destroy();
-
   let datasets, allDates;
 
   if (platformKey === 'all') {
     const dateSet = new Set();
     const platMaps = {};
-    Object.keys(PLATFORMS).forEach(key => {
-      platMaps[key] = {};
-      data.filter(d => d.platform === key).sort((a, b) => a.date.localeCompare(b.date)).forEach(d => {
-        platMaps[key][d.date] = d.count;
-        dateSet.add(d.date);
-      });
+    Object.keys(PLATFORMS).forEach(k => {
+      platMaps[k] = {};
+      data.filter(d => d.platform === k).sort((a, b) => a.date.localeCompare(b.date)).forEach(d => { platMaps[k][d.date] = d.count; dateSet.add(d.date); });
     });
     allDates = [...dateSet].sort();
-
     const lastKnown = {};
     const combined = allDates.map(date => {
       let sum = 0;
-      Object.keys(PLATFORMS).forEach(key => {
-        if (platMaps[key][date] !== undefined) lastKnown[key] = platMaps[key][date];
-        sum += (lastKnown[key] || 0);
-      });
+      Object.keys(PLATFORMS).forEach(k => { if (platMaps[k][date] !== undefined) lastKnown[k] = platMaps[k][date]; sum += (lastKnown[k] || 0); });
       return sum;
     });
-
-    datasets = [{
-      label: 'All Socials',
-      data: combined,
-      borderColor: '#7c3aed',
-      backgroundColor: '#7c3aed22',
-      tension: 0.35,
-      pointRadius: 0,
-      pointHoverRadius: 5,
-      borderWidth: 2.5,
-      fill: true,
-    }];
+    datasets = [{ label: 'All Socials', data: combined, borderColor: '#7c3aed', backgroundColor: '#7c3aed22', tension: 0.35, pointRadius: 0, pointHoverRadius: 5, borderWidth: 2.5, fill: true }];
   } else {
     const p = PLATFORMS[platformKey];
     const entries = data.filter(d => d.platform === platformKey).sort((a, b) => a.date.localeCompare(b.date));
     allDates = entries.map(e => e.date);
-    datasets = [{
-      label: p.label,
-      data: entries.map(e => e.count),
-      borderColor: p.color,
-      backgroundColor: p.color + '22',
-      tension: 0.35,
-      pointRadius: allDates.length > 60 ? 0 : 3,
-      pointHoverRadius: 5,
-      borderWidth: 2.5,
-      fill: true,
-    }];
+    datasets = [{ label: p.label, data: entries.map(e => e.count), borderColor: p.color, backgroundColor: p.color + '22', tension: 0.35, pointRadius: allDates.length > 60 ? 0 : 3, pointHoverRadius: 5, borderWidth: 2.5, fill: true }];
   }
 
   growthChartInstance = new Chart(ctx, {
     type: 'line',
     data: { labels: allDates, datasets },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { display: false },
-        tooltip: {
-          backgroundColor: '#1a1a2e',
-          borderColor: '#2a2d3a',
-          borderWidth: 1,
-          titleColor: '#e4e4e7',
-          bodyColor: '#e4e4e7',
-          padding: 12,
-          titleFont: { family: "'Press Start 2P', monospace", size: 9 },
-          bodyFont: { size: 13 },
-          callbacks: {
-            label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y != null ? ctx.parsed.y.toLocaleString() : '--'}`
-          }
-        }
+        tooltip: { backgroundColor: '#1a1a2e', borderColor: '#2a2d3a', borderWidth: 1, titleColor: '#e4e4e7', bodyColor: '#e4e4e7', padding: 10, titleFont: { family: "'Press Start 2P', monospace", size: 8 }, bodyFont: { size: 12 }, callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y != null ? ctx.parsed.y.toLocaleString() : '--'}` } }
       },
       scales: {
-        x: {
-          grid: { color: 'rgba(0,0,0,0.05)' },
-          ticks: {
-            color: '#6b7280',
-            font: { size: 11 },
-            maxRotation: 45,
-            maxTicksLimit: 15,
-          }
-        },
-        y: {
-          grid: { color: 'rgba(0,0,0,0.08)' },
-          ticks: { color: '#6b7280', font: { size: 12 }, callback: v => fmt(v) },
-          beginAtZero: false
-        }
+        x: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: '#6b7280', font: { size: 10 }, maxRotation: 45, maxTicksLimit: 12 } },
+        y: { grid: { color: 'rgba(0,0,0,0.08)' }, ticks: { color: '#6b7280', font: { size: 11 }, callback: v => fmt(v) }, beginAtZero: false }
       }
     }
   });
 }
 
-// ======================== HISTORY TABLE ========================
+// ===================== HISTORY TABLE =====================
 let currentFilter = 'all';
-
 function renderHistory() {
   const data = loadData();
   const filtered = currentFilter === 'all' ? data : data.filter(d => d.platform === currentFilter);
   const sorted = filtered.sort((a, b) => b.date.localeCompare(a.date) || a.platform.localeCompare(b.platform));
-
   const body = document.getElementById('history-body');
   const empty = document.getElementById('empty-msg');
-
-  if (sorted.length === 0) {
-    body.innerHTML = '';
-    empty.style.display = 'block';
-    return;
-  }
+  if (sorted.length === 0) { body.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
-
   const shown = sorted.slice(0, 200);
-
-  body.innerHTML = shown.map((entry) => {
+  body.innerHTML = shown.map(entry => {
     const p = PLATFORMS[entry.platform];
-    const allForPlatform = data.filter(d => d.platform === entry.platform).sort((a, b) => a.date.localeCompare(b.date));
-    const idx = allForPlatform.findIndex(d => d.date === entry.date);
-    const prev = idx > 0 ? allForPlatform[idx - 1] : null;
-    let changeHtml = '<span class="badge neutral">--</span>';
-    if (prev) {
-      const diff = entry.count - prev.count;
-      const sign = diff >= 0 ? '+' : '';
-      const cls = diff >= 0 ? 'up' : 'down';
-      changeHtml = `<span class="badge ${cls}">${sign}${fmt(diff)}</span>`;
-    }
-
-    return `<tr>
-      <td>${entry.date}</td>
-      <td><span class="platform-tag ${entry.platform}">${p.label}</span></td>
-      <td>${entry.count.toLocaleString()}</td>
-      <td>${changeHtml}</td>
-      <td><button class="delete-btn" data-date="${entry.date}" data-platform="${entry.platform}" title="Delete">&times;</button></td>
-    </tr>`;
+    const all = data.filter(d => d.platform === entry.platform).sort((a, b) => a.date.localeCompare(b.date));
+    const idx = all.findIndex(d => d.date === entry.date);
+    const prev = idx > 0 ? all[idx - 1] : null;
+    let ch = '<span class="badge neutral">--</span>';
+    if (prev) { const diff = entry.count - prev.count; ch = `<span class="badge ${diff >= 0 ? 'up' : 'down'}">${diff >= 0 ? '+' : ''}${fmt(diff)}</span>`; }
+    return `<tr><td>${entry.date}</td><td><span class="platform-tag ${entry.platform}">${p.label}</span></td><td>${entry.count.toLocaleString()}</td><td>${ch}</td><td><button class="delete-btn" data-date="${entry.date}" data-platform="${entry.platform}">&times;</button></td></tr>`;
   }).join('');
-
-  if (sorted.length > 200) {
-    body.innerHTML += `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px">Showing 200 of ${sorted.length} entries</td></tr>`;
-  }
+  if (sorted.length > 200) body.innerHTML += `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:12px">Showing 200 of ${sorted.length}</td></tr>`;
 }
 
-// ======================== EVENT HANDLERS ========================
-
-// Tabs
+// ===================== EVENT HANDLERS =====================
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -2055,7 +1558,6 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-// Chart platform tabs
 document.querySelectorAll('#chart-tabs .filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('#chart-tabs .filter-btn').forEach(b => b.classList.remove('active'));
@@ -2065,7 +1567,6 @@ document.querySelectorAll('#chart-tabs .filter-btn').forEach(btn => {
   });
 });
 
-// Time range tabs
 document.querySelectorAll('#time-range-tabs .filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('#time-range-tabs .filter-btn').forEach(b => b.classList.remove('active'));
@@ -2077,31 +1578,24 @@ document.querySelectorAll('#time-range-tabs .filter-btn').forEach(btn => {
   });
 });
 
-// Month picker
-document.getElementById('month-picker').addEventListener('change', (e) => {
+document.getElementById('month-picker').addEventListener('change', e => {
   const val = e.target.value;
   if (val) {
-    currentMonth = val;
-    currentTimeRange = '';
+    currentMonth = val; currentTimeRange = '';
     document.querySelectorAll('#time-range-tabs .filter-btn').forEach(b => b.classList.remove('active'));
   } else {
-    currentMonth = '';
-    currentTimeRange = 'all';
+    currentMonth = ''; currentTimeRange = '90d';
     document.querySelectorAll('#time-range-tabs .filter-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector('#time-range-tabs .filter-btn[data-range="all"]').classList.add('active');
+    document.querySelector('#time-range-tabs .filter-btn[data-range="90d"]').classList.add('active');
   }
   renderChart(loadData(), currentChartPlatform);
 });
 
-// Achievements toggle
 document.getElementById('achievements-toggle').addEventListener('click', () => {
-  const toggle = document.getElementById('achievements-toggle');
-  const body = document.getElementById('achievements-body');
-  toggle.classList.toggle('open');
-  body.classList.toggle('open');
+  document.getElementById('achievements-toggle').classList.toggle('open');
+  document.getElementById('achievements-body').classList.toggle('open');
 });
 
-// History filter buttons
 document.querySelectorAll('.history-card .filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.history-card .filter-btn').forEach(b => b.classList.remove('active'));
@@ -2111,127 +1605,45 @@ document.querySelectorAll('.history-card .filter-btn').forEach(btn => {
   });
 });
 
-// --- PLATFORM FILE IMPORTS ---
-setupDropZone('drop-linkedin', 'result-linkedin', (file, resultEl) => {
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const entries = parseLinkedInXLSX(e.target.result);
-      const result = upsertEntries(entries);
-      resultEl.textContent = `Imported ${result.total} days of LinkedIn data`;
-      resultEl.style.display = 'block';
-      renderHistory();
-      showToast(`LinkedIn: ${result.total} entries imported!`);
-    } catch (err) {
-      showToast('Error: ' + err.message);
-    }
-  };
-  reader.readAsArrayBuffer(file);
-});
+setupDropZone('drop-linkedin', 'result-linkedin', (file, r) => { const reader = new FileReader(); reader.onload = e => { try { const entries = parseLinkedInXLSX(e.target.result); const res = upsertEntries(entries); r.textContent = `Imported ${res.total} days`; r.style.display = 'block'; renderHistory(); showToast(`LinkedIn: ${res.total} entries!`); } catch(err) { showToast('Error: ' + err.message); } }; reader.readAsArrayBuffer(file); });
+setupDropZone('drop-substack', 'result-substack', (file, r) => { const reader = new FileReader(); reader.onload = e => { try { const entries = parseSubstackCSV(e.target.result); if (!entries.length) throw new Error('No data found'); const res = upsertEntries(entries); r.textContent = `Imported ${res.total} days`; r.style.display = 'block'; renderHistory(); showToast(`Substack: ${res.total} entries!`); } catch(err) { showToast('Error: ' + err.message); } }; reader.readAsText(file); });
+setupDropZone('drop-x', 'result-x', (file, r) => { const ct = parseInt(document.getElementById('x-current-count').value); if (!ct || ct <= 0) { showToast('Enter your current X follower count first'); return; } const reader = new FileReader(); reader.onload = e => { try { const entries = parseXCSV(e.target.result, ct); if (!entries.length) throw new Error('No data found'); const res = upsertEntries(entries); r.textContent = `Imported ${res.total} days`; r.style.display = 'block'; renderHistory(); showToast(`X: ${res.total} entries!`); } catch(err) { showToast('Error: ' + err.message); } }; reader.readAsText(file); });
 
-setupDropZone('drop-substack', 'result-substack', (file, resultEl) => {
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const entries = parseSubstackCSV(e.target.result);
-      if (entries.length === 0) throw new Error('No valid data found in CSV');
-      const result = upsertEntries(entries);
-      resultEl.textContent = `Imported ${result.total} days of Substack data`;
-      resultEl.style.display = 'block';
-      renderHistory();
-      showToast(`Substack: ${result.total} entries imported!`);
-    } catch (err) {
-      showToast('Error: ' + err.message);
-    }
-  };
-  reader.readAsText(file);
-});
-
-setupDropZone('drop-x', 'result-x', (file, resultEl) => {
-  const currentTotal = parseInt(document.getElementById('x-current-count').value);
-  if (!currentTotal || currentTotal <= 0) {
-    showToast('Please enter your current X follower count first');
-    return;
-  }
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const entries = parseXCSV(e.target.result, currentTotal);
-      if (entries.length === 0) throw new Error('No valid data found in CSV');
-      const result = upsertEntries(entries);
-      resultEl.textContent = `Imported ${result.total} days of X data`;
-      resultEl.style.display = 'block';
-      renderHistory();
-      showToast(`X: ${result.total} entries imported!`);
-    } catch (err) {
-      showToast('Error: ' + err.message);
-    }
-  };
-  reader.readAsText(file);
-});
-
-// --- MANUAL ENTRY ---
 document.getElementById('add-btn').addEventListener('click', () => {
   const date = document.getElementById('entry-date').value;
   const platform = document.getElementById('entry-platform').value;
   const count = parseInt(document.getElementById('entry-count').value);
-
-  if (!date) { showToast('Please select a date'); return; }
-  if (!count && count !== 0) { showToast('Please enter a follower count'); return; }
+  if (!date) { showToast('Select a date'); return; }
+  if (!count && count !== 0) { showToast('Enter a count'); return; }
   if (count < 0) { showToast('Count must be positive'); return; }
-
-  const result = upsertEntries([{ date, platform, count }]);
+  const res = upsertEntries([{ date, platform, count }]);
   document.getElementById('entry-count').value = '';
   renderHistory();
-  showToast(result.added ? 'Entry added!' : 'Entry updated!');
+  showToast(res.added ? 'Added!' : 'Updated!');
 });
 
-// Delete entry
 document.getElementById('history-body').addEventListener('click', e => {
-  const btn = e.target.closest('.delete-btn');
-  if (!btn) return;
-  const date = btn.dataset.date;
-  const platform = btn.dataset.platform;
+  const btn = e.target.closest('.delete-btn'); if (!btn) return;
   const data = loadData();
-  const idx = data.findIndex(d => d.date === date && d.platform === platform);
-  if (idx >= 0) {
-    data.splice(idx, 1);
-    saveData(data);
-    renderHistory();
-    showToast('Entry deleted');
-  }
+  const idx = data.findIndex(d => d.date === btn.dataset.date && d.platform === btn.dataset.platform);
+  if (idx >= 0) { data.splice(idx, 1); saveData(data); renderHistory(); showToast('Deleted'); }
 });
 
-// Clear all
 document.getElementById('clear-btn').addEventListener('click', () => {
-  if (confirm('Delete all data? This cannot be undone.')) {
-    saveData([]);
-    renderHistory();
-    renderDashboard();
-    showToast('All data cleared');
-  }
+  if (confirm('Delete all data? Cannot be undone.')) { saveData([]); renderHistory(); renderDashboard(); showToast('All data cleared'); }
 });
 
-// Export CSV
 document.getElementById('export-btn').addEventListener('click', () => {
   const data = loadData();
-  if (data.length === 0) { showToast('No data to export'); return; }
-  const rows = [['date', 'platform', 'count']];
-  data.sort((a, b) => a.date.localeCompare(b.date) || a.platform.localeCompare(b.platform))
-      .forEach(d => rows.push([d.date, d.platform, d.count]));
-  const csv = rows.map(r => r.join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'growth_data.csv'; a.click();
-  URL.revokeObjectURL(url);
-  showToast('CSV exported!');
+  if (!data.length) { showToast('No data'); return; }
+  const rows = [['date','platform','count']];
+  data.sort((a, b) => a.date.localeCompare(b.date) || a.platform.localeCompare(b.platform)).forEach(d => rows.push([d.date, d.platform, d.count]));
+  const blob = new Blob([rows.map(r => r.join(',')).join('\n')], { type: 'text/csv' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'growth_data.csv'; a.click();
+  showToast('Exported!');
 });
 
-// Set default date to today
 document.getElementById('entry-date').value = new Date().toISOString().split('T')[0];
-
-// Initial render
 renderDashboard();
 renderHistory();
 </script>
