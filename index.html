@@ -806,6 +806,7 @@ const px = 3;
 const CHAR_IMAGES = {
   ryu:    'https://www.muraldecal.com/en/img/arc244-png/folder/products-detalle-png/stickers-street-fighter-ryu-pixel-16-bits.png',
   ken:    'https://www.muraldecal.com/en/img/arc243-png/folder/products-detalle-png/stickers-street-fighter-ken-pixel-16-bits.png',
+  akuma:  'https://i.imgur.com/MNVOm.gif',
 };
 
 // ShroomArts blog pixel art (dark bg, needs zoom)
@@ -954,7 +955,7 @@ const FIGHTERS = {
   linkedin: { name: 'LINKE-LI',   img: 'ryu',    color: '#0a66c2', cardClass: 'linkedin-card' },
   substack: { name: 'SUBS-TRON',  img: 'ken',    color: '#ff6719', cardClass: 'substack-card' },
   x:        { name: 'X-ELSIOR',   img: 'chunli', color: '#374151', cardClass: 'x-card' },
-  all:      { name: 'ALL-IN-ONE', img: AKUMA_PIXELS, color: '#7c3aed', cardClass: 'all-card' },
+  all:      { name: 'ALL-IN-ONE', img: 'akuma', color: '#7c3aed', cardClass: 'all-card' },
 };
 
 // Boss milestone chain — each platform fights the NEXT boss above their current count
@@ -965,7 +966,7 @@ const BOSS_CHAIN = [
   { threshold: 750000,  name: 'M. BISON', img: 'mbison' },
   { threshold: 1000000, name: 'M. BISON', img: 'mbison' },
 ];
-const ALL_BOSS = { threshold: 2000000, name: 'DARK AKUMA', img: AKUMA_PIXELS };
+const ALL_BOSS = { threshold: 2000000, name: 'DARK AKUMA', img: 'akuma' };
 
 function getNextBoss(count) {
   for (const boss of BOSS_CHAIN) {
