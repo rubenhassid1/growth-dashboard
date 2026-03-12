@@ -308,16 +308,27 @@
   }
   .vs-fight {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
+    align-items: stretch;
+    justify-content: center;
+    gap: 0;
     margin-bottom: 14px;
   }
-  .vs-fighter, .vs-boss { text-align: center; flex: 1; }
+  .vs-fighter, .vs-boss {
+    text-align: center;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 8px 4px;
+    min-height: 120px;
+  }
+  .vs-fighter .sprite-wrap, .vs-boss .sprite-wrap { margin-bottom: 6px; }
   .vs-fighter-name, .vs-boss-name {
     font-family: 'Press Start 2P', monospace;
     font-size: 9px;
-    margin-top: 4px;
+    margin-top: 0;
+    line-height: 1.4;
   }
   .vs-fighter-name { color: var(--text); }
   .vs-boss-name { color: #dc2626; }
@@ -329,7 +340,8 @@
   .vs-count {
     font-size: 16px;
     font-weight: 700;
-    margin-top: 3px;
+    margin-top: auto;
+    padding-top: 4px;
   }
   .vs-middle {
     font-family: 'Press Start 2P', monospace;
@@ -337,6 +349,9 @@
     color: #ff0033;
     text-shadow: 2px 2px 0 rgba(255,0,51,0.2);
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
   }
 
   /* Health bar */
@@ -430,11 +445,11 @@
   /* ===== CHART ===== */
   .chart-section { margin-bottom: 18px; }
   .chart-wrap {
-    background: var(--card);
-    border: 1px solid var(--border);
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%);
+    border: 2px solid #2d1b69;
     border-radius: 12px;
     padding: 20px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 0 20px rgba(45,27,105,0.3);
   }
   .chart-container { position: relative; height: 320px; }
   .filter-btns {
@@ -444,6 +459,19 @@
     border-radius: 8px;
     padding: 3px;
   }
+  .chart-section .filter-btns {
+    background: rgba(26,26,46,0.6);
+    border: 1px solid rgba(234,179,8,0.2);
+  }
+  .chart-section .filter-btn {
+    color: rgba(255,255,255,0.5);
+  }
+  .chart-section .filter-btn.active {
+    background: var(--yellow);
+    color: #1a1a2e;
+    box-shadow: 0 0 8px rgba(234,179,8,0.3);
+  }
+  .chart-section .filter-btn:hover:not(.active) { color: #fff; }
   .filter-btn {
     padding: 5px 12px;
     border: none;
@@ -457,6 +485,12 @@
   }
   .filter-btn.active { background: var(--text); color: #fff; }
   .filter-btn:hover:not(.active) { color: var(--text); }
+  .chart-section .section-title { color: var(--text); }
+  .chart-section .time-range-row .month-picker {
+    background: rgba(26,26,46,0.6);
+    color: #fff;
+    border-color: rgba(234,179,8,0.3);
+  }
   .time-range-row {
     display: flex;
     align-items: center;
@@ -678,8 +712,7 @@
     <div class="time-range-row">
       <div class="filter-btns" id="time-range-tabs">
         <button class="filter-btn" data-range="1m">Month</button>
-        <button class="filter-btn" data-range="3m">3 Mo</button>
-        <button class="filter-btn active" data-range="90d">90 Days</button>
+        <button class="filter-btn active" data-range="3m">3 Mo</button>
         <button class="filter-btn" data-range="all">All Time</button>
       </div>
       <select id="month-picker" class="month-picker"><option value="">Pick a month…</option></select>
@@ -877,10 +910,10 @@ const BISON_PIXELS = [
 ];
 
 const FIGHTERS = {
-  linkedin: { name: 'RYU',     pixels: RYU_PIXELS,    color: '#0a66c2', cardClass: 'linkedin-card' },
-  substack: { name: 'KEN',     pixels: KEN_PIXELS,    color: '#ff6719', cardClass: 'substack-card' },
-  x:        { name: 'CHUN-LI', pixels: CHUNLI_PIXELS, color: '#374151', cardClass: 'x-card' },
-  all:      { name: 'AKUMA',   pixels: AKUMA_PIXELS,   color: '#7c3aed', cardClass: 'all-card' },
+  linkedin: { name: 'LINKE-LI',   pixels: RYU_PIXELS,    color: '#0a66c2', cardClass: 'linkedin-card' },
+  substack: { name: 'SUBS-TRON',  pixels: KEN_PIXELS,    color: '#ff6719', cardClass: 'substack-card' },
+  x:        { name: 'X-ELSIOR',   pixels: CHUNLI_PIXELS, color: '#374151', cardClass: 'x-card' },
+  all:      { name: 'ALL-IN-ONE', pixels: AKUMA_PIXELS,   color: '#7c3aed', cardClass: 'all-card' },
 };
 
 // Boss milestone chain — each platform fights the NEXT boss above their current count
@@ -937,9 +970,18 @@ function upsertEntries(newEntries) {
 
 // ===================== HELPERS =====================
 function fmt(n) {
-  if (n >= 1000000) return (n / 1000000).toFixed(2) + 'M';
-  if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
-  return n.toLocaleString();
+  if (Math.abs(n) >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+  if (Math.abs(n) >= 1000) return (n / 1000).toFixed(1) + 'K';
+  return n.toLocaleString('en-US');
+}
+function fmtFull(n) {
+  return Number(n).toLocaleString('en-US', { maximumFractionDigits: 1 });
+}
+function fmtPct(n) {
+  return Number(n).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+}
+function fmtTitle(n) {
+  return `title="${fmtFull(n)}"`;
 }
 function getLatest(data, platform) {
   return data.filter(d => d.platform === platform).sort((a, b) => b.date.localeCompare(a.date))[0] || null;
@@ -1214,12 +1256,12 @@ function renderDashboard() {
     let subHtml;
     if (weekGain !== null) {
       const sign = weekGain >= 0 ? '+' : '';
-      subHtml = `<span class="badge up">${sign}${fmt(weekGain)} this week</span>`;
+      subHtml = `<span class="badge up" title="${sign}${fmtFull(weekGain)}">${sign}${fmt(weekGain)} this week</span>`;
       if (lastWeekGain !== null && lastWeekGain !== 0) {
         const ch = ((weekGain - lastWeekGain) / Math.abs(lastWeekGain)) * 100;
         const cls = ch >= 0 ? 'up' : 'down';
         const arrow = ch >= 0 ? '&#9650;' : '&#9660;';
-        subHtml += ` <span class="badge ${cls}">${arrow} ${Math.abs(ch).toFixed(0)}% WoW</span>`;
+        subHtml += ` <span class="badge ${cls}" title="${fmtPct(Math.abs(ch))}">${arrow} ${fmtPct(Math.abs(ch))} WoW</span>`;
       }
     } else {
       subHtml = '<span class="badge neutral">No weekly data yet</span>';
@@ -1232,12 +1274,11 @@ function renderDashboard() {
             ${spriteHTML(f.pixels)}
             <div>
               <div class="fighter-label">${f.name}</div>
-              <div class="fighter-platform">${p.label}</div>
             </div>
           </div>
           <span class="rank-badge" style="background:${rank.bg}">${rank.label}</span>
         </div>
-        <div class="card-value">${fmt(count)}</div>
+        <div class="card-value" title="${fmtFull(count)}">${fmt(count)}</div>
         <div class="card-sub">${subHtml}</div>
       </div>`;
   }).join('');
@@ -1250,12 +1291,12 @@ function renderDashboard() {
 
   let allSubHtml;
   if (allWeekGain !== null) {
-    allSubHtml = `<span class="badge up">+${fmt(allWeekGain)} this week</span>`;
+    allSubHtml = `<span class="badge up" title="+${fmtFull(allWeekGain)}">+${fmt(allWeekGain)} this week</span>`;
     if (allLastWeekGain !== null && allLastWeekGain !== 0) {
       const ch = ((allWeekGain - allLastWeekGain) / Math.abs(allLastWeekGain)) * 100;
       const cls = ch >= 0 ? 'up' : 'down';
       const arrow = ch >= 0 ? '&#9650;' : '&#9660;';
-      allSubHtml += ` <span class="badge ${cls}">${arrow} ${Math.abs(ch).toFixed(0)}% WoW</span>`;
+      allSubHtml += ` <span class="badge ${cls}" title="${fmtPct(Math.abs(ch))}">${arrow} ${fmtPct(Math.abs(ch))} WoW</span>`;
     }
   } else {
     allSubHtml = '<span class="badge neutral">No weekly data yet</span>';
@@ -1267,11 +1308,11 @@ function renderDashboard() {
       <div class="fighter-header">
         <div class="fighter-name">
           ${spriteHTML(af.pixels)}
-          <div><div class="fighter-label">${af.name}</div><div class="fighter-platform">All Socials</div></div>
+          <div><div class="fighter-label">${af.name}</div></div>
         </div>
         <span class="rank-badge" style="background:${allRank.bg}">${allRank.label}</span>
       </div>
-      <div class="card-value">${fmt(allCount)}</div>
+      <div class="card-value" title="${fmtFull(allCount)}">${fmt(allCount)}</div>
       <div class="card-sub">${allSubHtml}</div>
     </div>`;
 
@@ -1283,24 +1324,24 @@ function renderDashboard() {
 
   document.getElementById('streak-bar').innerHTML = `
     <div class="streak-bar">
-      <div class="streak-item">
+      <div class="streak-item" title="Velocity Streak: Consecutive days where your daily follower growth exceeds your own average daily growth over the previous 7 days. The higher the streak, the longer you've been accelerating!">
         <span class="streak-num">${streaks.currentOverall > 0 ? '🔥 ' + streaks.currentOverall : '0'}</span>
         <div class="streak-desc">Velocity Streak<br><span style="font-size:10px;color:var(--muted)">${streakDesc}</span></div>
       </div>
       <div class="streak-divider"></div>
-      <div class="streak-item">
+      <div class="streak-item" title="Best Ever: Your all-time highest velocity streak across all platforms. This is the longest consecutive run of days where you grew faster than your own 7-day average.">
         <span class="streak-num">🏅 ${streaks.bestOverall}</span>
         <span class="streak-desc">Best Ever</span>
       </div>
       <div class="streak-divider"></div>
-      <div class="streak-item">
+      <div class="streak-item" title="Combo Today: Fires when ALL 3 platforms (LinkedIn, Substack, X) each grew faster today than their own individual 7-day average. A combo means every front is accelerating at the same time!">
         ${streaks.comboToday
           ? '<span class="combo-flash">C-C-COMBO!</span>'
           : '<span class="streak-num">—</span>'}
         <span class="streak-desc">Combo Today</span>
       </div>
       <div class="streak-divider"></div>
-      <div class="streak-item">
+      <div class="streak-item" title="Combos (30d): The number of days in the last 30 where ALL platforms beat their own 7-day average pace on the same day. More combos = more days of synchronized acceleration.">
         <span class="streak-num">🎯 ${streaks.combosLast30}</span>
         <span class="streak-desc">Combos (30d)</span>
       </div>
@@ -1310,12 +1351,12 @@ function renderDashboard() {
   function speedRow(label, current, previous) {
     if (current === null) return `<div class="speed-row"><span class="speed-label">${label}</span><span class="speed-value badge neutral">--</span></div>`;
     const sign = current >= 0 ? '+' : '';
-    let html = `<div class="speed-row"><span class="speed-label">${label}</span><span class="speed-value"><span style="color:var(--text);font-size:12px">${sign}${fmt(current)}</span>`;
+    let html = `<div class="speed-row"><span class="speed-label">${label}</span><span class="speed-value"><span style="color:var(--text);font-size:12px" title="${sign}${fmtFull(current)}">${sign}${fmt(current)}</span>`;
     if (previous !== null && previous !== 0) {
       const ch = ((current - previous) / Math.abs(previous)) * 100;
       const cls = ch >= 0 ? 'up' : 'down';
       const arrow = ch >= 0 ? '&#9650;' : '&#9660;';
-      html += ` <span class="badge ${cls}" style="margin-left:4px">${arrow} ${Math.abs(ch).toFixed(1)}%</span>`;
+      html += ` <span class="badge ${cls}" style="margin-left:4px" title="${fmtPct(Math.abs(ch))}">${arrow} ${fmtPct(Math.abs(ch))}</span>`;
     }
     return html + `</span></div>`;
   }
@@ -1377,17 +1418,17 @@ function renderDashboard() {
           ${spriteHTML(f.pixels)}
           <div class="vs-fighter-name">${f.name}</div>
           <div class="vs-fighter-rank" style="color:${rank.bg}">${rank.label}</div>
-          <div class="vs-count">${fmt(count)}</div>
+          <div class="vs-count" title="${fmtFull(count)}">${fmt(count)}</div>
         </div>
         <div class="vs-middle">VS</div>
         <div class="vs-boss">
           ${spriteHTML(boss.pixels)}
           <div class="vs-boss-name">${boss.name}</div>
-          <div class="vs-count" style="color:var(--red)">${fmt(boss.threshold)}</div>
+          <div class="vs-count" style="color:var(--red)" title="${fmtFull(boss.threshold)}">${fmt(boss.threshold)}</div>
         </div>
       </div>
       <div class="health-bar-wrap"><div class="health-bar-fill ${hpClass}" style="width:${progress}%"></div></div>
-      <div class="health-bar-text"><span>${progress.toFixed(1)}% damage</span><span>${remaining > 0 ? fmt(remaining) + ' to go' : 'DEFEATED!'}</span></div>
+      <div class="health-bar-text"><span title="${fmtPct(progress)}">${progress.toFixed(1)}% damage</span><span title="${remaining > 0 ? fmtFull(remaining) : ''}">${remaining > 0 ? fmt(remaining) + ' to go' : 'DEFEATED!'}</span></div>
       <div class="vs-est">${eRow('Weekly pace', we, weeklyGain)}${eRow('Monthly pace', me, monthlyGain)}</div>
     </div>`;
   }).join('');
@@ -1404,12 +1445,12 @@ function renderDashboard() {
   document.getElementById('vs-cards').innerHTML = vsHtml + `
     <div class="vs-card">
       <div class="vs-fight">
-        <div class="vs-fighter">${spriteHTML(FIGHTERS.all.pixels)}<div class="vs-fighter-name">AKUMA</div><div class="vs-fighter-rank" style="color:${allRank.bg}">${allRank.label}</div><div class="vs-count">${fmt(allCount)}</div></div>
+        <div class="vs-fighter">${spriteHTML(FIGHTERS.all.pixels)}<div class="vs-fighter-name">${FIGHTERS.all.name}</div><div class="vs-fighter-rank" style="color:${allRank.bg}">${allRank.label}</div><div class="vs-count" title="${fmtFull(allCount)}">${fmt(allCount)}</div></div>
         <div class="vs-middle">VS</div>
-        <div class="vs-boss">${spriteHTML(allBoss.pixels)}<div class="vs-boss-name">${allBoss.name}</div><div class="vs-count" style="color:var(--red)">${fmt(allBoss.threshold)}</div></div>
+        <div class="vs-boss">${spriteHTML(allBoss.pixels)}<div class="vs-boss-name">${allBoss.name}</div><div class="vs-count" style="color:var(--red)" title="${fmtFull(allBoss.threshold)}">${fmt(allBoss.threshold)}</div></div>
       </div>
       <div class="health-bar-wrap"><div class="health-bar-fill ${allHp}" style="width:${allProg}%"></div></div>
-      <div class="health-bar-text"><span>${allProg.toFixed(1)}% damage</span><span>${allRem > 0 ? fmt(allRem) + ' to go' : 'DEFEATED!'}</span></div>
+      <div class="health-bar-text"><span title="${fmtPct(allProg)}">${allProg.toFixed(1)}% damage</span><span title="${allRem > 0 ? fmtFull(allRem) : ''}">${allRem > 0 ? fmt(allRem) + ' to go' : 'DEFEATED!'}</span></div>
       <div class="vs-est">${allERow('Weekly pace', allEst(awg, 7))}${allERow('Monthly pace', allEst(amg, 30))}</div>
     </div>`;
 
@@ -1447,7 +1488,7 @@ function renderAchievements(data, ach) {
 // ===================== CHART =====================
 let growthChartInstance = null;
 let currentChartPlatform = 'linkedin';
-let currentTimeRange = '90d';
+let currentTimeRange = '3m';
 let currentMonth = '';
 
 function filterByTimeRange(data) {
@@ -1458,7 +1499,7 @@ function filterByTimeRange(data) {
     return data.filter(d => d.date >= start && d.date <= end);
   }
   if (currentTimeRange === 'all') return data;
-  const ranges = { '1m': 30, '3m': 90, '90d': 90 };
+  const ranges = { '1m': 30, '3m': 90 };
   const days = ranges[currentTimeRange];
   if (!days) return data;
   return data.filter(d => d.date >= daysAgo(days));
@@ -1505,6 +1546,16 @@ function renderChart(data, platformKey) {
     datasets = [{ label: p.label, data: entries.map(e => e.count), borderColor: p.color, backgroundColor: p.color + '22', tension: 0.35, pointRadius: allDates.length > 60 ? 0 : 3, pointHoverRadius: 5, borderWidth: 2.5, fill: true }];
   }
 
+  // Neon glow colors for chart lines
+  const neonColors = {
+    linkedin: { border: '#00d4ff', bg: 'rgba(0,212,255,0.15)' },
+    substack: { border: '#ff6719', bg: 'rgba(255,103,25,0.15)' },
+    x:        { border: '#a78bfa', bg: 'rgba(167,139,250,0.15)' },
+    all:      { border: '#facc15', bg: 'rgba(250,204,21,0.15)' },
+  };
+  const nc = neonColors[platformKey] || neonColors.linkedin;
+  datasets.forEach(ds => { ds.borderColor = nc.border; ds.backgroundColor = nc.bg; ds.borderWidth = 2.5; });
+
   growthChartInstance = new Chart(ctx, {
     type: 'line',
     data: { labels: allDates, datasets },
@@ -1513,11 +1564,11 @@ function renderChart(data, platformKey) {
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { display: false },
-        tooltip: { backgroundColor: '#1a1a2e', borderColor: '#2a2d3a', borderWidth: 1, titleColor: '#e4e4e7', bodyColor: '#e4e4e7', padding: 10, titleFont: { family: "'Press Start 2P', monospace", size: 8 }, bodyFont: { size: 12 }, callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y != null ? ctx.parsed.y.toLocaleString() : '--'}` } }
+        tooltip: { backgroundColor: 'rgba(26,26,46,0.95)', borderColor: '#eab308', borderWidth: 1, titleColor: '#eab308', bodyColor: '#e4e4e7', padding: 12, titleFont: { family: "'Press Start 2P', monospace", size: 8 }, bodyFont: { size: 12 }, callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y != null ? fmtFull(ctx.parsed.y) : '--'}` } }
       },
       scales: {
-        x: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: '#6b7280', font: { size: 10 }, maxRotation: 45, maxTicksLimit: 12 } },
-        y: { grid: { color: 'rgba(0,0,0,0.08)' }, ticks: { color: '#6b7280', font: { size: 11 }, callback: v => fmt(v) }, beginAtZero: false }
+        x: { grid: { color: 'rgba(234,179,8,0.08)' }, ticks: { color: 'rgba(255,255,255,0.6)', font: { size: 10 }, maxRotation: 45, maxTicksLimit: 12 } },
+        y: { grid: { color: 'rgba(234,179,8,0.08)' }, ticks: { color: 'rgba(255,255,255,0.6)', font: { size: 11 }, callback: v => fmt(v) }, beginAtZero: false }
       }
     }
   });
@@ -1540,8 +1591,8 @@ function renderHistory() {
     const idx = all.findIndex(d => d.date === entry.date);
     const prev = idx > 0 ? all[idx - 1] : null;
     let ch = '<span class="badge neutral">--</span>';
-    if (prev) { const diff = entry.count - prev.count; ch = `<span class="badge ${diff >= 0 ? 'up' : 'down'}">${diff >= 0 ? '+' : ''}${fmt(diff)}</span>`; }
-    return `<tr><td>${entry.date}</td><td><span class="platform-tag ${entry.platform}">${p.label}</span></td><td>${entry.count.toLocaleString()}</td><td>${ch}</td><td><button class="delete-btn" data-date="${entry.date}" data-platform="${entry.platform}">&times;</button></td></tr>`;
+    if (prev) { const diff = entry.count - prev.count; ch = `<span class="badge ${diff >= 0 ? 'up' : 'down'}" title="${diff >= 0 ? '+' : ''}${fmtFull(diff)}">${diff >= 0 ? '+' : ''}${fmt(diff)}</span>`; }
+    return `<tr><td>${entry.date}</td><td><span class="platform-tag ${entry.platform}">${p.label}</span></td><td title="${fmtFull(entry.count)}">${fmt(entry.count)}</td><td>${ch}</td><td><button class="delete-btn" data-date="${entry.date}" data-platform="${entry.platform}">&times;</button></td></tr>`;
   }).join('');
   if (sorted.length > 200) body.innerHTML += `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:12px">Showing 200 of ${sorted.length}</td></tr>`;
 }
@@ -1584,9 +1635,9 @@ document.getElementById('month-picker').addEventListener('change', e => {
     currentMonth = val; currentTimeRange = '';
     document.querySelectorAll('#time-range-tabs .filter-btn').forEach(b => b.classList.remove('active'));
   } else {
-    currentMonth = ''; currentTimeRange = '90d';
+    currentMonth = ''; currentTimeRange = '3m';
     document.querySelectorAll('#time-range-tabs .filter-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector('#time-range-tabs .filter-btn[data-range="90d"]').classList.add('active');
+    document.querySelector('#time-range-tabs .filter-btn[data-range="3m"]').classList.add('active');
   }
   renderChart(loadData(), currentChartPlatform);
 });
