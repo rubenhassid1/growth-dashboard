@@ -3,24 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Growth Dashboard</title>
+<title>GROWTH FIGHTER</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
   :root {
-    --bg: #0f1117;
-    --card: #1a1d27;
-    --border: #2a2d3a;
-    --text: #e4e4e7;
-    --muted: #8b8d97;
+    --bg: #f0ebe3;
+    --card: #ffffff;
+    --border: #e0dbd2;
+    --text: #1a1a2e;
+    --muted: #6b7280;
     --accent: #6366f1;
-    --green: #22c55e;
-    --red: #ef4444;
+    --green: #16a34a;
+    --red: #dc2626;
     --yellow: #eab308;
     --linkedin: #0a66c2;
     --substack: #ff6719;
-    --x: #e4e4e7;
-    --all: #6366f1;
+    --x: #374151;
+    --all: #7c3aed;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -32,53 +33,93 @@
     min-height: 100vh;
   }
 
+  .pixel { font-family: 'Press Start 2P', monospace; }
+
+  /* --- ANNOUNCEMENT TICKER --- */
+  .ticker-wrap {
+    background: linear-gradient(90deg, #1a1a2e, #2d1b69, #1a1a2e);
+    overflow: hidden;
+    padding: 10px 0;
+    border-bottom: 3px solid var(--yellow);
+  }
+  .ticker {
+    display: flex;
+    animation: ticker-scroll 20s linear infinite;
+    white-space: nowrap;
+    gap: 60px;
+  }
+  .ticker-item {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    color: var(--yellow);
+    text-shadow: 0 0 10px rgba(234,179,8,0.5);
+    flex-shrink: 0;
+  }
+  @keyframes ticker-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
   /* --- HEADER --- */
   .header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px 32px;
-    border-bottom: 1px solid var(--border);
+    padding: 24px 32px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #2d1b69 50%, #1a1a2e 100%);
+    border-bottom: 4px solid var(--yellow);
   }
-  .header h1 {
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
+  .header-title {
+    text-align: left;
   }
-  .header h1 span { color: var(--accent); }
+  .header-title h1 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 24px;
+    color: #fff;
+    text-shadow: 3px 3px 0 #ff0033, -1px -1px 0 #0066ff;
+    letter-spacing: 2px;
+  }
+  .header-title .subtitle {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: var(--yellow);
+    margin-top: 8px;
+    text-shadow: 0 0 8px rgba(234,179,8,0.4);
+  }
 
   /* --- TABS --- */
   .tabs {
     display: flex;
     gap: 4px;
-    background: var(--card);
+    background: rgba(255,255,255,0.1);
     border-radius: 10px;
     padding: 4px;
   }
   .tab-btn {
-    padding: 8px 20px;
+    padding: 10px 24px;
     border: none;
     background: transparent;
-    color: var(--muted);
-    font-size: 14px;
-    font-weight: 500;
+    color: rgba(255,255,255,0.5);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s;
   }
   .tab-btn.active {
-    background: var(--accent);
-    color: #fff;
+    background: var(--yellow);
+    color: #1a1a2e;
+    box-shadow: 0 0 12px rgba(234,179,8,0.4);
   }
-  .tab-btn:hover:not(.active) { color: var(--text); }
+  .tab-btn:hover:not(.active) { color: #fff; }
 
   .tab-content { display: none; padding: 24px 32px 48px; }
   .tab-content.active { display: block; }
 
-  /* --- STAT CARDS --- */
+  /* --- FIGHTER CARDS --- */
   .cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 16px;
     margin-bottom: 24px;
   }
@@ -87,23 +128,51 @@
     border: 1px solid var(--border);
     border-radius: 14px;
     padding: 22px 24px;
+    border-left: 5px solid var(--border);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
   }
-  .card-label {
-    font-size: 13px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 8px;
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  }
+  .card.linkedin-card { border-left-color: var(--linkedin); }
+  .card.substack-card { border-left-color: var(--substack); }
+  .card.x-card { border-left-color: var(--x); }
+  .card.all-card { border-left-color: var(--all); }
+
+  .fighter-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .fighter-name {
     display: flex;
     align-items: center;
     gap: 8px;
   }
-  .card-label .dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    display: inline-block;
+  .fighter-emoji { font-size: 24px; }
+  .fighter-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: var(--text);
   }
+  .fighter-platform {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .rank-badge {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    color: #fff;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
   .card-value {
     font-size: 36px;
     font-weight: 700;
@@ -126,16 +195,71 @@
     font-size: 12px;
     font-weight: 600;
   }
-  .badge.up { background: rgba(34,197,94,0.12); color: var(--green); }
-  .badge.down { background: rgba(239,68,68,0.12); color: var(--red); }
-  .badge.neutral { background: rgba(139,141,151,0.12); color: var(--muted); }
+  .badge.up { background: rgba(22,163,74,0.12); color: var(--green); }
+  .badge.down { background: rgba(220,38,38,0.12); color: var(--red); }
+  .badge.neutral { background: rgba(107,114,128,0.12); color: var(--muted); }
+
+  /* --- STREAKS & COMBOS SECTION --- */
+  .streaks-section {
+    margin-bottom: 24px;
+  }
+  .streaks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  .streak-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 24px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .streak-card.active-streak {
+    border-color: var(--yellow);
+    box-shadow: 0 0 20px rgba(234,179,8,0.15);
+  }
+  .streak-card.combo-active {
+    border-color: #ff0033;
+    box-shadow: 0 0 20px rgba(255,0,51,0.15);
+    background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);
+  }
+  .streak-value {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 28px;
+    color: var(--text);
+    margin: 8px 0;
+  }
+  .streak-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+  .streak-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+  .combo-text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    color: #ff0033;
+    text-shadow: 1px 1px 0 rgba(255,0,51,0.2);
+  }
 
   /* --- SPEED TABLE --- */
   .speed-section { margin-bottom: 24px; }
   .section-title {
-    font-size: 16px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 13px;
     font-weight: 600;
     margin-bottom: 14px;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 1px;
   }
   .speed-grid {
     display: grid;
@@ -147,6 +271,7 @@
     border: 1px solid var(--border);
     border-radius: 14px;
     padding: 20px 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   }
   .speed-card h3 {
     font-size: 14px;
@@ -167,49 +292,193 @@
   .speed-label { font-size: 13px; color: var(--muted); }
   .speed-value { font-size: 14px; font-weight: 600; }
 
-  /* --- TARGET CARDS --- */
-  .target-grid {
+  /* --- VS TARGET FIGHT SCREEN --- */
+  .vs-section { margin-bottom: 24px; }
+  .vs-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
     gap: 16px;
-    margin-bottom: 24px;
   }
-  .target-card {
+  .vs-card {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 22px 24px;
-  }
-  .target-card h3 {
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .progress-bar-wrap {
-    background: var(--border);
-    border-radius: 6px;
-    height: 10px;
-    margin: 12px 0;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     overflow: hidden;
   }
-  .progress-bar-fill {
-    height: 100%;
-    border-radius: 6px;
-    transition: width 0.5s;
-  }
-  .target-stats {
+  .vs-fight {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    font-size: 13px;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .vs-fighter, .vs-boss {
+    text-align: center;
+    flex: 1;
+  }
+  .vs-fighter-emoji { font-size: 36px; }
+  .vs-fighter-name {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    margin-top: 4px;
+    color: var(--text);
+  }
+  .vs-fighter-rank {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .vs-fighter-count {
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+  .vs-middle {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 24px;
+    color: #ff0033;
+    text-shadow: 2px 2px 0 rgba(255,0,51,0.2);
+    flex-shrink: 0;
+  }
+  .vs-boss-emoji { font-size: 36px; filter: brightness(0.3); }
+  .vs-boss-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .vs-boss-count {
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 4px;
     color: var(--muted);
   }
-  .target-days {
-    font-size: 28px;
+
+  /* Health bar */
+  .health-bar-wrap {
+    background: #2a2d3a;
+    border-radius: 4px;
+    height: 22px;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid #1a1a2e;
+  }
+  .health-bar-fill {
+    height: 100%;
+    transition: width 0.5s;
+    position: relative;
+  }
+  .health-bar-fill.hp-high {
+    background: linear-gradient(180deg, #4ade80, #16a34a);
+  }
+  .health-bar-fill.hp-mid {
+    background: linear-gradient(180deg, #facc15, #eab308);
+  }
+  .health-bar-fill.hp-low {
+    background: linear-gradient(180deg, #f87171, #dc2626);
+  }
+  /* Segmented overlay */
+  .health-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 9%,
+      rgba(0,0,0,0.2) 9%,
+      rgba(0,0,0,0.2) 10%
+    );
+  }
+  .health-bar-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+  .vs-est {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .vs-est-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .vs-est-row:last-child { border-bottom: none; }
+  .vs-est-date {
     font-weight: 700;
-    margin: 4px 0;
+    color: var(--text);
+  }
+
+  /* --- ACHIEVEMENTS --- */
+  .achievements-section { margin-bottom: 24px; }
+  .achievements-toggle {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 13px;
+    background: none;
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .achievements-toggle .arrow {
+    transition: transform 0.2s;
+    font-size: 10px;
+  }
+  .achievements-toggle.open .arrow { transform: rotate(90deg); }
+  .achievements-body {
+    display: none;
+  }
+  .achievements-body.open { display: block; }
+  .achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  .achievement-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: all 0.2s;
+  }
+  .achievement-card.locked {
+    opacity: 0.4;
+    filter: grayscale(1);
+  }
+  .achievement-card.unlocked {
+    border-color: var(--yellow);
+    box-shadow: 0 0 12px rgba(234,179,8,0.2);
+  }
+  .achievement-emoji { font-size: 28px; margin-bottom: 6px; }
+  .achievement-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .achievement-desc {
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .achievement-date {
+    font-size: 10px;
+    color: var(--green);
+    margin-top: 4px;
+    font-weight: 600;
   }
 
   /* --- CHARTS --- */
@@ -219,11 +488,58 @@
     border: 1px solid var(--border);
     border-radius: 14px;
     padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   }
   .chart-container {
     position: relative;
     height: 340px;
   }
+
+  /* --- FILTER BUTTONS --- */
+  .filter-btns {
+    display: flex;
+    gap: 4px;
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 3px;
+  }
+  .filter-btn {
+    padding: 6px 14px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn.active {
+    background: var(--text);
+    color: #fff;
+  }
+  .filter-btn:hover:not(.active) { color: var(--text); }
+
+  .time-range-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .month-picker {
+    padding: 5px 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 500;
+    outline: none;
+    cursor: pointer;
+    transition: border 0.2s;
+  }
+  .month-picker:focus { border-color: var(--accent); }
 
   /* --- UPLOAD TAB --- */
   .upload-columns {
@@ -242,6 +558,7 @@
     border: 1px solid var(--border);
     border-radius: 14px;
     padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   }
   .form-card h2 {
     font-size: 16px;
@@ -279,14 +596,22 @@
     cursor: pointer;
     transition: all 0.2s;
   }
-  .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:hover { opacity: 0.9; }
+  .btn-primary {
+    background: linear-gradient(135deg, #ff0033, #cc0029);
+    color: #fff;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 12px rgba(255,0,51,0.3);
+  }
+  .btn-primary:hover { opacity: 0.9; box-shadow: 0 6px 20px rgba(255,0,51,0.4); }
   .btn-danger {
-    background: rgba(239,68,68,0.12);
+    background: rgba(220,38,38,0.12);
     color: var(--red);
     margin-top: 8px;
   }
-  .btn-danger:hover { background: rgba(239,68,68,0.2); }
+  .btn-danger:hover { background: rgba(220,38,38,0.2); }
 
   /* --- PLATFORM IMPORT CARDS --- */
   .import-card {
@@ -294,6 +619,7 @@
     border: 1px solid var(--border);
     border-radius: 14px;
     padding: 20px 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   }
   .import-card h3 {
     font-size: 14px;
@@ -347,6 +673,7 @@
     border-radius: 14px;
     padding: 24px;
     overflow-x: auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   }
   .history-card h2 {
     font-size: 16px;
@@ -358,24 +685,6 @@
     flex-wrap: wrap;
     gap: 10px;
   }
-  .filter-btns {
-    display: flex;
-    gap: 4px;
-    background: var(--bg);
-    border-radius: 8px;
-    padding: 3px;
-  }
-  .filter-btn {
-    padding: 5px 12px;
-    border: none;
-    background: transparent;
-    color: var(--muted);
-    font-size: 12px;
-    font-weight: 500;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-  .filter-btn.active { background: var(--border); color: var(--text); }
 
   table { width: 100%; border-collapse: collapse; }
   th {
@@ -403,8 +712,8 @@
   }
   .platform-tag.linkedin { background: rgba(10,102,194,0.15); color: var(--linkedin); }
   .platform-tag.substack { background: rgba(255,103,25,0.15); color: var(--substack); }
-  .platform-tag.x { background: rgba(228,228,231,0.12); color: var(--x); }
-  .platform-tag.all { background: rgba(99,102,241,0.15); color: var(--all); }
+  .platform-tag.x { background: rgba(55,65,81,0.12); color: var(--x); }
+  .platform-tag.all { background: rgba(124,58,237,0.15); color: var(--all); }
   .delete-btn {
     background: none;
     border: none;
@@ -414,7 +723,7 @@
     border-radius: 4px;
     font-size: 16px;
   }
-  .delete-btn:hover { color: var(--red); background: rgba(239,68,68,0.1); }
+  .delete-btn:hover { color: var(--red); background: rgba(220,38,38,0.1); }
   .empty-state {
     text-align: center;
     padding: 40px 20px;
@@ -429,7 +738,7 @@
     right: 24px;
     padding: 14px 20px;
     background: var(--green);
-    color: #000;
+    color: #fff;
     border-radius: 10px;
     font-size: 14px;
     font-weight: 600;
@@ -459,53 +768,71 @@
     transition: all 0.2s;
   }
   .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
-
   .hidden-input { display: none; }
 
-  /* Month picker select */
-  .month-picker {
-    padding: 5px 10px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    font-size: 12px;
-    font-weight: 500;
-    outline: none;
-    cursor: pointer;
-    transition: border 0.2s;
-  }
-  .month-picker:focus { border-color: var(--accent); }
-  .time-range-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
-    flex-wrap: wrap;
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
   }
 </style>
 </head>
 <body>
 
+<!-- ANNOUNCEMENT TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker" id="ticker">
+    <span class="ticker-item">LOADING FIGHT DATA...</span>
+  </div>
+</div>
+
+<!-- HEADER -->
 <div class="header">
-  <h1><span>Growth</span> Dashboard</h1>
+  <div class="header-title">
+    <h1>GROWTH FIGHTER</h1>
+    <div class="subtitle">ROAD TO 1,000,000</div>
+  </div>
   <div class="tabs">
-    <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
-    <button class="tab-btn" data-tab="upload">Upload Data</button>
+    <button class="tab-btn active" data-tab="dashboard">FIGHT</button>
+    <button class="tab-btn" data-tab="upload">TRAINING</button>
   </div>
 </div>
 
 <!-- ================ DASHBOARD TAB ================ -->
 <div id="tab-dashboard" class="tab-content active">
+  <!-- Fighter Cards -->
   <div class="cards" id="follower-cards"></div>
+
+  <!-- Streaks & Combos -->
+  <div class="streaks-section">
+    <div class="section-title">Streaks & Combos</div>
+    <div class="streaks-grid" id="streaks-area"></div>
+  </div>
+
+  <!-- Speed -->
   <div class="speed-section">
     <div class="section-title">Growth Speed</div>
     <div class="speed-grid" id="speed-cards"></div>
   </div>
-  <div class="speed-section">
-    <div class="section-title">Target: 1,000,000</div>
-    <div class="target-grid" id="target-cards"></div>
+
+  <!-- VS Target Fights -->
+  <div class="vs-section">
+    <div class="section-title">VS BOSS: 1,000,000</div>
+    <div class="vs-grid" id="vs-cards"></div>
   </div>
+
+  <!-- Achievements -->
+  <div class="achievements-section">
+    <button class="achievements-toggle" id="achievements-toggle">
+      <span class="arrow">&#9654;</span> Achievements
+    </button>
+    <div class="achievements-body" id="achievements-body">
+      <div class="achievements-grid" id="achievements-grid"></div>
+    </div>
+  </div>
+
+  <!-- Chart -->
   <div class="chart-section">
     <div class="section-title" style="display:flex;align-items:center;justify-content:space-between">
       Growth Over Time
@@ -542,10 +869,8 @@
 <div id="tab-upload" class="tab-content">
   <div class="upload-columns">
     <div class="left-panels">
-
-      <!-- PLATFORM FILE IMPORTS -->
       <div class="import-card">
-        <h3><span class="dot" style="background:var(--linkedin);width:10px;height:10px;border-radius:50%;display:inline-block"></span>LinkedIn</h3>
+        <h3><span class="dot" style="background:var(--linkedin)"></span>LinkedIn</h3>
         <div class="hint">Upload your LinkedIn Analytics .xlsx file<br>(the one with "Content" in the name)</div>
         <div class="drop-zone" id="drop-linkedin">
           Click or drag .xlsx file here
@@ -555,7 +880,7 @@
       </div>
 
       <div class="import-card">
-        <h3><span class="dot" style="background:var(--substack);width:10px;height:10px;border-radius:50%;display:inline-block"></span>Substack</h3>
+        <h3><span class="dot" style="background:var(--substack)"></span>Substack</h3>
         <div class="hint">Upload your Substack subscribers .csv file<br>(the one with "ruben_emails" in the name)</div>
         <div class="drop-zone" id="drop-substack">
           Click or drag .csv file here
@@ -565,7 +890,7 @@
       </div>
 
       <div class="import-card">
-        <h3><span class="dot" style="background:var(--x);width:10px;height:10px;border-radius:50%;display:inline-block"></span>X (Twitter)</h3>
+        <h3><span class="dot" style="background:var(--x)"></span>X (Twitter)</h3>
         <div class="hint">Upload your X Analytics .csv file<br>(the one with "account_overview" in the name)</div>
         <div class="x-follower-field">
           <div class="field">
@@ -582,7 +907,6 @@
         <div class="import-result" id="result-x"></div>
       </div>
 
-      <!-- MANUAL + UTILS -->
       <div class="form-card">
         <h2>Manual Entry</h2>
         <div class="field">
@@ -601,7 +925,7 @@
           <label>Followers / Subscribers</label>
           <input type="number" id="entry-count" placeholder="e.g. 125000" min="0">
         </div>
-        <button class="btn btn-primary" id="add-btn">Add Entry</button>
+        <button class="btn btn-primary" id="add-btn">ADD ENTRY</button>
         <button class="btn btn-danger" id="clear-btn">Clear All Data</button>
         <div class="io-btns">
           <button class="btn-outline" id="export-btn">Export CSV</button>
@@ -609,7 +933,6 @@
       </div>
     </div>
 
-    <!-- HISTORY TABLE -->
     <div class="history-card">
       <h2>
         History
@@ -638,13 +961,41 @@
 <script>
 // ======================== DATA LAYER ========================
 const STORAGE_KEY = 'growth_dashboard_data';
+const ACHIEVEMENTS_KEY = 'growth_fighter_achievements';
+const STREAKS_KEY = 'growth_fighter_streaks';
 const TARGET = 1000000;
+const ALL_TARGET = 2000000;
 
 const PLATFORMS = {
   linkedin:  { label: 'LinkedIn',     color: '#0a66c2', dotClass: 'linkedin' },
   substack:  { label: 'Substack',     color: '#ff6719', dotClass: 'substack' },
-  x:         { label: 'X (Twitter)',   color: '#e4e4e7', dotClass: 'x' },
+  x:         { label: 'X (Twitter)',   color: '#374151', dotClass: 'x' },
 };
+
+const FIGHTERS = {
+  linkedin: { name: 'RYU', emoji: '🥋', color: '#0a66c2', cardClass: 'linkedin-card' },
+  substack: { name: 'KEN', emoji: '🔥', color: '#ff6719', cardClass: 'substack-card' },
+  x:        { name: 'CHUN-LI', emoji: '⚡', color: '#374151', cardClass: 'x-card' },
+  all:      { name: 'AKUMA', emoji: '👹', color: '#7c3aed', cardClass: 'all-card' },
+};
+
+const RANKS = [
+  { min: 0,       max: 50000,   label: 'ROOKIE',         bg: '#6b7280' },
+  { min: 50000,   max: 100000,  label: 'FIGHTER',        bg: '#3b82f6' },
+  { min: 100000,  max: 250000,  label: 'WARRIOR',        bg: '#8b5cf6' },
+  { min: 250000,  max: 400000,  label: 'CHAMPION',       bg: '#f59e0b' },
+  { min: 400000,  max: 600000,  label: 'MASTER',         bg: '#ef4444' },
+  { min: 600000,  max: 800000,  label: 'GRAND MASTER',   bg: '#dc2626' },
+  { min: 800000,  max: 1000000, label: 'LEGEND',         bg: '#b91c1c' },
+  { min: 1000000, max: Infinity,label: 'WORLD CHAMPION', bg: '#ffd700' },
+];
+
+function getRank(count) {
+  for (const r of RANKS) {
+    if (count >= r.min && count < r.max) return r;
+  }
+  return RANKS[RANKS.length - 1];
+}
 
 function loadData() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
@@ -652,6 +1003,22 @@ function loadData() {
 }
 function saveData(data) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function loadAchievements() {
+  try { return JSON.parse(localStorage.getItem(ACHIEVEMENTS_KEY)) || {}; }
+  catch { return {}; }
+}
+function saveAchievements(a) {
+  localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(a));
+}
+
+function loadStreaks() {
+  try { return JSON.parse(localStorage.getItem(STREAKS_KEY)) || {}; }
+  catch { return {}; }
+}
+function saveStreaks(s) {
+  localStorage.setItem(STREAKS_KEY, JSON.stringify(s));
 }
 
 function upsertEntries(newEntries) {
@@ -704,22 +1071,14 @@ function daysBetween(d1, d2) {
 }
 
 function toISO(dateStr) {
-  // Convert various date formats to YYYY-MM-DD
-  // Handles: M/D/YYYY, YYYY/MM/DD, "Wed, Mar 11, 2026"
   const s = dateStr.replace(/"/g, '').trim();
-
-  // YYYY/MM/DD or YYYY-MM-DD
   if (/^\d{4}[\/\-]\d{2}[\/\-]\d{2}$/.test(s)) {
     return s.replace(/\//g, '-');
   }
-
-  // M/D/YYYY or MM/DD/YYYY
   if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
     const [m, d, y] = s.split('/');
     return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
   }
-
-  // "Wed, Mar 11, 2026" or "Mar 11, 2026" format
   const months = { jan:1, feb:2, mar:3, apr:4, may:5, jun:6, jul:7, aug:8, sep:9, oct:10, nov:11, dec:12 };
   const longMatch = s.match(/(\w{3})\s+(\d{1,2}),?\s+(\d{4})/);
   if (longMatch) {
@@ -728,7 +1087,6 @@ function toISO(dateStr) {
       return `${longMatch[3]}-${String(mon).padStart(2,'0')}-${longMatch[2].padStart(2,'0')}`;
     }
   }
-
   return null;
 }
 
@@ -740,29 +1098,18 @@ function showToast(msg) {
 }
 
 // ======================== PLATFORM FILE PARSERS ========================
-
 function parseLinkedInXLSX(arrayBuffer) {
   const wb = XLSX.read(arrayBuffer, { type: 'array' });
-
-  // Find FOLLOWERS sheet
   const followersSheet = wb.Sheets['FOLLOWERS'];
   if (!followersSheet) {
     throw new Error('No FOLLOWERS sheet found. Make sure this is a LinkedIn Analytics export.');
   }
-
   const rows = XLSX.utils.sheet_to_json(followersSheet, { header: 1 });
-
-  // Row 0: ['Total followers on DATE:', totalCount]
   const totalFollowers = rows[0] && rows[0][1] ? Number(rows[0][1]) : null;
   if (!totalFollowers) throw new Error('Could not find total follower count in FOLLOWERS sheet.');
-
-  // Extract the date from row 0 text like "Total followers on 3/11/2026:"
   const headerText = String(rows[0][0] || '');
   const dateMatch = headerText.match(/(\d{1,2}\/\d{1,2}\/\d{4})/);
   const totalDate = dateMatch ? toISO(dateMatch[1]) : null;
-
-  // Row 2: headers ['Date', 'New followers']
-  // Rows 3+: data
   const dailyData = [];
   for (let i = 3; i < rows.length; i++) {
     const row = rows[i];
@@ -773,32 +1120,22 @@ function parseLinkedInXLSX(arrayBuffer) {
       dailyData.push({ date, newFollowers });
     }
   }
-
-  // Sort ascending by date
   dailyData.sort((a, b) => a.date.localeCompare(b.date));
-
-  // Reconstruct daily totals working backwards from totalFollowers
-  // totalFollowers is the count on totalDate (the last date)
   const entries = [];
   let running = totalFollowers;
-
-  // Build from the end: last entry = totalFollowers, then subtract going backwards
   for (let i = dailyData.length - 1; i >= 0; i--) {
     entries.unshift({ date: dailyData[i].date, platform: 'linkedin', count: running });
     if (i > 0) {
       running -= dailyData[i].newFollowers;
     }
   }
-
   return entries;
 }
 
 function parseSubstackCSV(text) {
   const lines = text.split('\n').map(l => l.trim()).filter(l => l);
   const entries = [];
-
   for (const line of lines) {
-    // Format: YYYY/MM/DD,count (no header)
     const parts = line.split(',');
     if (parts.length < 2) continue;
     const date = toISO(parts[0]);
@@ -807,29 +1144,21 @@ function parseSubstackCSV(text) {
       entries.push({ date, platform: 'substack', count });
     }
   }
-
   return entries;
 }
 
 function parseXCSV(text, currentTotal) {
   const lines = text.split('\n').map(l => l.trim()).filter(l => l);
   if (lines.length < 2) throw new Error('CSV file appears empty');
-
-  // Parse header to find column indices
-  // Header may have quoted values
   const header = lines[0].split(',').map(h => h.replace(/"/g, '').trim().toLowerCase());
   const dateIdx = header.indexOf('date');
   const newFollowsIdx = header.findIndex(h => h === 'new follows');
   const unfollowsIdx = header.indexOf('unfollows');
-
   if (dateIdx < 0 || newFollowsIdx < 0) {
     throw new Error('Could not find Date or New follows columns in X CSV');
   }
-
-  // Parse daily data
   const dailyData = [];
   for (let i = 1; i < lines.length; i++) {
-    // Handle quoted CSV fields
     const parts = [];
     let current = '';
     let inQuotes = false;
@@ -839,7 +1168,6 @@ function parseXCSV(text, currentTotal) {
       current += ch;
     }
     parts.push(current.trim());
-
     if (parts.length <= Math.max(dateIdx, newFollowsIdx)) continue;
     const date = toISO(parts[dateIdx]);
     const newFollows = parseInt(parts[newFollowsIdx]) || 0;
@@ -848,22 +1176,15 @@ function parseXCSV(text, currentTotal) {
       dailyData.push({ date, net: newFollows - unfollows });
     }
   }
-
-  // Sort ascending by date (file is descending)
   dailyData.sort((a, b) => a.date.localeCompare(b.date));
-
-  // currentTotal is the follower count on the MOST RECENT date
-  // Work backwards to compute daily totals
   const entries = [];
   let running = currentTotal;
-
   for (let i = dailyData.length - 1; i >= 0; i--) {
     entries.unshift({ date: dailyData[i].date, platform: 'x', count: running });
     if (i > 0) {
       running -= dailyData[i].net;
     }
   }
-
   return entries;
 }
 
@@ -872,9 +1193,7 @@ function setupDropZone(zoneId, resultId, handler) {
   const zone = document.getElementById(zoneId);
   const input = zone.querySelector('input');
   const resultEl = document.getElementById(resultId);
-
   zone.addEventListener('click', () => input.click());
-
   zone.addEventListener('dragover', e => {
     e.preventDefault();
     zone.classList.add('drag-over');
@@ -887,27 +1206,321 @@ function setupDropZone(zoneId, resultId, handler) {
       handleFile(e.dataTransfer.files[0]);
     }
   });
-
   input.addEventListener('change', () => {
     if (input.files.length) handleFile(input.files[0]);
     input.value = '';
   });
-
   function handleFile(file) {
     handler(file, resultEl);
   }
 }
 
+// ======================== STREAKS & COMBOS ENGINE ========================
+function computeStreaksAndCombos(data) {
+  const result = {
+    perPlatform: {},
+    bestOverall: 0,
+    currentOverall: 0,
+    bestOverallPlatform: '',
+    currentOverallPlatform: '',
+    comboToday: false,
+    superComboToday: false,
+    combosLast30: 0,
+  };
+
+  const today = daysAgo(0);
+  const platformKeys = Object.keys(PLATFORMS);
+
+  // Per-platform velocity streaks
+  platformKeys.forEach(key => {
+    const sorted = data.filter(d => d.platform === key).sort((a, b) => a.date.localeCompare(b.date));
+    if (sorted.length < 2) {
+      result.perPlatform[key] = { current: 0, best: 0 };
+      return;
+    }
+
+    // Compute daily gains
+    const dailyGains = [];
+    for (let i = 1; i < sorted.length; i++) {
+      const days = daysBetween(sorted[i-1].date, sorted[i].date);
+      if (days <= 0) continue;
+      const gain = sorted[i].count - sorted[i-1].count;
+      const dailyGain = gain / days;
+      dailyGains.push({ date: sorted[i].date, dailyGain });
+    }
+
+    // Compute velocity streaks: day where dailyGain >= 7-day rolling avg
+    let currentStreak = 0;
+    let bestStreak = 0;
+
+    for (let i = 0; i < dailyGains.length; i++) {
+      // Compute 7-day rolling average (using previous entries, not including current)
+      let sum = 0, count = 0;
+      for (let j = Math.max(0, i - 7); j < i; j++) {
+        sum += dailyGains[j].dailyGain;
+        count++;
+      }
+
+      if (count === 0) {
+        // Not enough history, just count as streak if positive
+        if (dailyGains[i].dailyGain > 0) {
+          currentStreak++;
+        } else {
+          currentStreak = 0;
+        }
+      } else {
+        const avg = sum / count;
+        if (dailyGains[i].dailyGain >= avg) {
+          currentStreak++;
+        } else {
+          currentStreak = 0;
+        }
+      }
+      bestStreak = Math.max(bestStreak, currentStreak);
+    }
+
+    result.perPlatform[key] = { current: currentStreak, best: bestStreak };
+
+    if (currentStreak > result.currentOverall) {
+      result.currentOverall = currentStreak;
+      result.currentOverallPlatform = key;
+    }
+    if (bestStreak > result.bestOverall) {
+      result.bestOverall = bestStreak;
+      result.bestOverallPlatform = key;
+    }
+  });
+
+  // Combo detection: all platforms beat their 7-day avg on the same day
+  // Check last 30 days
+  const allDates = new Set();
+  data.forEach(d => allDates.add(d.date));
+  const sortedDates = [...allDates].sort();
+  const last30Dates = sortedDates.filter(d => d >= daysAgo(30));
+
+  let comboDays = 0;
+  last30Dates.forEach(date => {
+    let allBeatAvg = true;
+    let allBeat2x = true;
+    let platformsWithData = 0;
+
+    platformKeys.forEach(key => {
+      const sorted = data.filter(d => d.platform === key).sort((a, b) => a.date.localeCompare(b.date));
+      const idx = sorted.findIndex(d => d.date === date);
+      if (idx < 1) { allBeatAvg = false; allBeat2x = false; return; }
+      platformsWithData++;
+
+      const days = daysBetween(sorted[idx-1].date, sorted[idx].date);
+      if (days <= 0) { allBeatAvg = false; allBeat2x = false; return; }
+      const todayGain = (sorted[idx].count - sorted[idx-1].count) / days;
+
+      // Compute 7-day avg for this platform
+      let sum = 0, cnt = 0;
+      for (let j = Math.max(0, idx - 7); j < idx; j++) {
+        const d = daysBetween(sorted[j > 0 ? j-1 : j].date, sorted[j].date);
+        if (d > 0 && j > 0) {
+          sum += (sorted[j].count - sorted[j-1].count) / d;
+          cnt++;
+        }
+      }
+
+      if (cnt === 0) return;
+      const avg = sum / cnt;
+      if (todayGain < avg) allBeatAvg = false;
+      if (todayGain < avg * 2) allBeat2x = false;
+    });
+
+    if (allBeatAvg && platformsWithData >= 2) {
+      comboDays++;
+      if (date === today) result.comboToday = true;
+      if (allBeat2x && date === today) result.superComboToday = true;
+    }
+  });
+
+  result.combosLast30 = comboDays;
+
+  // Persist best streaks
+  const saved = loadStreaks();
+  platformKeys.forEach(key => {
+    const savedBest = (saved[key] && saved[key].best) || 0;
+    if (result.perPlatform[key].best > savedBest) {
+      if (!saved[key]) saved[key] = {};
+      saved[key].best = result.perPlatform[key].best;
+    } else {
+      result.perPlatform[key].best = Math.max(result.perPlatform[key].best, savedBest);
+    }
+  });
+  const savedOverall = saved.overallBest || 0;
+  if (result.bestOverall > savedOverall) {
+    saved.overallBest = result.bestOverall;
+  } else {
+    result.bestOverall = Math.max(result.bestOverall, savedOverall);
+  }
+  saveStreaks(saved);
+
+  return result;
+}
+
+// ======================== ACHIEVEMENTS ENGINE ========================
+const MILESTONE_ACHIEVEMENTS = [
+  { id: 'first_blood',     emoji: '🥊', title: 'FIRST BLOOD',       threshold: 1000,    desc: 'Reach 1,000 followers' },
+  { id: 'power_up',        emoji: '💪', title: 'POWER UP',          threshold: 10000,   desc: 'Reach 10,000 followers' },
+  { id: 'on_fire',         emoji: '🔥', title: 'ON FIRE',           threshold: 50000,   desc: 'Reach 50,000 followers' },
+  { id: 'super_move',      emoji: '⚡', title: 'SUPER MOVE',        threshold: 100000,  desc: 'Reach 100,000 followers' },
+  { id: 'ultra_combo',     emoji: '🌟', title: 'ULTRA COMBO',       threshold: 250000,  desc: 'Reach 250,000 followers' },
+  { id: 'diamond_fist',    emoji: '💎', title: 'DIAMOND FIST',      threshold: 500000,  desc: 'Reach 500,000 followers' },
+  { id: 'king_of_fighters',emoji: '👑', title: 'KING OF FIGHTERS',  threshold: 750000,  desc: 'Reach 750,000 followers' },
+  { id: 'world_champion',  emoji: '🏆', title: 'WORLD CHAMPION',    threshold: 1000000, desc: 'Reach 1,000,000 followers' },
+];
+
+const SPEED_ACHIEVEMENTS = [
+  { id: 'hadouken',   emoji: '🚀', title: 'HADOUKEN!',    desc: 'Gain 10K+ in a single week' },
+  { id: 'shoryuken',  emoji: '🌪️', title: 'SHORYUKEN!',   desc: 'Gain 5K+ in a single day' },
+  { id: 'streak_master', emoji: '🔥', title: 'STREAK MASTER', desc: '7-day velocity streak' },
+  { id: 'unstoppable',   emoji: '⚡', title: 'UNSTOPPABLE',   desc: '30-day velocity streak' },
+];
+
+const COMBO_ACHIEVEMENTS = [
+  { id: 'perfect_round',  emoji: '🎯', title: 'PERFECT ROUND!',  desc: 'All platforms beat their pace on the same day' },
+  { id: 'flawless_victory', emoji: '💥', title: 'FLAWLESS VICTORY', desc: 'Combo every day for a full week' },
+  { id: 'super_combo_ach',  emoji: '🔥', title: 'SUPER COMBO',      desc: 'All platforms hit 2x their pace' },
+];
+
+function checkAndUpdateAchievements(data, streaks) {
+  const achievements = loadAchievements();
+  const today = daysAgo(0);
+
+  // Milestone achievements per platform
+  Object.keys(PLATFORMS).forEach(key => {
+    const latest = getLatest(data, key);
+    if (!latest) return;
+    MILESTONE_ACHIEVEMENTS.forEach(ach => {
+      const achKey = `${ach.id}_${key}`;
+      if (!achievements[achKey] && latest.count >= ach.threshold) {
+        achievements[achKey] = { date: today, platform: key };
+      }
+    });
+  });
+
+  // Speed achievements
+  Object.keys(PLATFORMS).forEach(key => {
+    // Weekly gain 10K+
+    const weekGain = getGainForPlatform(data, key, daysAgo(0), 7);
+    if (weekGain !== null && weekGain >= 10000 && !achievements[`hadouken_${key}`]) {
+      achievements[`hadouken_${key}`] = { date: today, platform: key };
+    }
+    // Daily gain 5K+
+    const dayGain = getGainForPlatform(data, key, daysAgo(0), 1);
+    if (dayGain !== null && dayGain >= 5000 && !achievements[`shoryuken_${key}`]) {
+      achievements[`shoryuken_${key}`] = { date: today, platform: key };
+    }
+  });
+
+  // Streak achievements
+  Object.keys(PLATFORMS).forEach(key => {
+    const ps = streaks.perPlatform[key];
+    if (ps && ps.best >= 7 && !achievements[`streak_master_${key}`]) {
+      achievements[`streak_master_${key}`] = { date: today, platform: key };
+    }
+    if (ps && ps.best >= 30 && !achievements[`unstoppable_${key}`]) {
+      achievements[`unstoppable_${key}`] = { date: today, platform: key };
+    }
+  });
+
+  // Combo achievements
+  if (streaks.combosLast30 > 0 && !achievements['perfect_round']) {
+    achievements['perfect_round'] = { date: today };
+  }
+  if (streaks.superComboToday && !achievements['super_combo_ach']) {
+    achievements['super_combo_ach'] = { date: today };
+  }
+  // Flawless victory: we'd need 7 consecutive combo days - approximate check
+  if (streaks.combosLast30 >= 7 && !achievements['flawless_victory']) {
+    achievements['flawless_victory'] = { date: today };
+  }
+
+  saveAchievements(achievements);
+  return achievements;
+}
+
+function getGainForPlatform(data, key, endDate, days) {
+  const end = getEntryOnOrBefore(data, key, endDate);
+  if (!end) return null;
+  const startDate = (() => { const d = new Date(endDate); d.setDate(d.getDate() - days); return d.toISOString().split('T')[0]; })();
+  const start = getEntryOnOrBefore(data, key, startDate);
+  if (!start || start.date === end.date) return null;
+  return end.count - start.count;
+}
+
+// ======================== ANNOUNCEMENT TICKER ========================
+function buildTickerMessages(data, streaks, achievements) {
+  const messages = [];
+
+  // Rank announcements
+  Object.keys(PLATFORMS).forEach(key => {
+    const latest = getLatest(data, key);
+    if (!latest) return;
+    const rank = getRank(latest.count);
+    const f = FIGHTERS[key];
+    messages.push(`${f.emoji} ${PLATFORMS[key].label} is ${rank.label}! ${fmt(latest.count)} power level!`);
+  });
+
+  // Streak announcements
+  if (streaks.currentOverall > 0) {
+    const pKey = streaks.currentOverallPlatform;
+    const f = FIGHTERS[pKey];
+    messages.push(`${f.emoji} ${streaks.currentOverall}-DAY VELOCITY STREAK! ${PLATFORMS[pKey].label} is on fire!`);
+  }
+
+  // Combo
+  if (streaks.comboToday) {
+    messages.push('💥 C-C-COMBO! All platforms beat their pace today!');
+  }
+  if (streaks.superComboToday) {
+    messages.push('🔥🔥 SUPER COMBO! All platforms at 2x pace!');
+  }
+
+  // Combo count
+  if (streaks.combosLast30 > 0) {
+    messages.push(`🎯 ${streaks.combosLast30} COMBO DAYS in the last 30 days!`);
+  }
+
+  // Recent achievements
+  const achKeys = Object.keys(achievements);
+  const recent = achKeys.filter(k => achievements[k].date === daysAgo(0));
+  recent.forEach(k => {
+    messages.push(`🏆 NEW ACHIEVEMENT UNLOCKED TODAY!`);
+  });
+
+  if (messages.length === 0) {
+    messages.push('👊 READY TO FIGHT! Upload data to begin your journey!');
+    messages.push('🎮 INSERT COIN... Upload your analytics files to start!');
+  }
+
+  return messages;
+}
+
+function renderTicker(messages) {
+  const ticker = document.getElementById('ticker');
+  // Duplicate for seamless loop
+  const all = [...messages, ...messages];
+  ticker.innerHTML = all.map(m => `<span class="ticker-item">${m}</span>`).join('');
+}
+
 // ======================== RENDER DASHBOARD ========================
 function renderDashboard() {
   const data = loadData();
+  const streaks = computeStreaksAndCombos(data);
+  const achievements = checkAndUpdateAchievements(data, streaks);
 
-  // --- Follower Cards ---
+  // --- Fighter Cards ---
   const cardsHtml = Object.entries(PLATFORMS).map(([key, p]) => {
     const latest = getLatest(data, key);
     const prev = latest ? getEntryOnOrBefore(data, key, daysAgo(1)) : null;
     const count = latest ? latest.count : 0;
     const change = (prev && latest && prev.date !== latest.date) ? pct(prev.count, latest.count) : null;
+    const f = FIGHTERS[key];
+    const rank = getRank(count);
 
     let badgeHtml = '<span class="badge neutral">No data</span>';
     if (change !== null) {
@@ -917,8 +1530,17 @@ function renderDashboard() {
     }
 
     return `
-      <div class="card">
-        <div class="card-label"><span class="dot" style="background:${p.color}"></span>${p.label}</div>
+      <div class="card ${f.cardClass}">
+        <div class="fighter-header">
+          <div class="fighter-name">
+            <span class="fighter-emoji">${f.emoji}</span>
+            <div>
+              <div class="fighter-label">${f.name}</div>
+              <div class="fighter-platform">${p.label}</div>
+            </div>
+          </div>
+          <span class="rank-badge" style="background:${rank.bg}">${rank.label}</span>
+        </div>
         <div class="card-value">${fmt(count)}</div>
         <div class="card-sub">${badgeHtml} <span>vs previous entry</span></div>
       </div>`;
@@ -934,6 +1556,7 @@ function renderDashboard() {
     return sum + (p ? p.count : 0);
   }, 0);
   const allChange = (allPrevCount > 0 && allPrevCount !== allCount) ? pct(allPrevCount, allCount) : null;
+  const allRank = getRank(Math.round(allCount / 3)); // Avg per platform for rank
   let allBadge = '<span class="badge neutral">No data</span>';
   if (allChange !== null) {
     const cls = allChange >= 0 ? 'up' : 'down';
@@ -941,58 +1564,61 @@ function renderDashboard() {
     allBadge = `<span class="badge ${cls}">${arrow} ${Math.abs(allChange).toFixed(2)}%</span>`;
   }
   const allCard = `
-    <div class="card">
-      <div class="card-label"><span class="dot" style="background:var(--all)"></span>All Socials</div>
+    <div class="card all-card">
+      <div class="fighter-header">
+        <div class="fighter-name">
+          <span class="fighter-emoji">${FIGHTERS.all.emoji}</span>
+          <div>
+            <div class="fighter-label">${FIGHTERS.all.name}</div>
+            <div class="fighter-platform">All Socials</div>
+          </div>
+        </div>
+        <span class="rank-badge" style="background:${allRank.bg}">${allRank.label}</span>
+      </div>
       <div class="card-value">${fmt(allCount)}</div>
       <div class="card-sub">${allBadge} <span>vs previous entry</span></div>
     </div>`;
   document.getElementById('follower-cards').innerHTML = cardsHtml + allCard;
 
-  // --- Speed Cards (compare growth rates, not totals) ---
+  // --- Streaks & Combos ---
+  const bestPlatformLabel = streaks.currentOverallPlatform ? PLATFORMS[streaks.currentOverallPlatform]?.label : '--';
+  const streakActive = streaks.currentOverall > 2;
+  const comboActive = streaks.comboToday;
+
+  document.getElementById('streaks-area').innerHTML = `
+    <div class="streak-card ${streakActive ? 'active-streak' : ''}">
+      <div class="streak-label">Velocity Streak</div>
+      <div class="streak-value">${streaks.currentOverall > 0 ? '🔥 ' + streaks.currentOverall : '0'}</div>
+      <div class="streak-sub">${streaks.currentOverall > 0 ? bestPlatformLabel + ' is on pace' : 'Beat your 7-day avg to start'}</div>
+    </div>
+    <div class="streak-card">
+      <div class="streak-label">Best Streak</div>
+      <div class="streak-value">🏅 ${streaks.bestOverall}</div>
+      <div class="streak-sub">All-time record</div>
+    </div>
+    <div class="streak-card ${comboActive ? 'combo-active' : ''}">
+      <div class="streak-label">Combo Today</div>
+      <div class="streak-value">${streaks.comboToday ? '<span class="combo-text">C-C-COMBO!</span>' : '—'}</div>
+      <div class="streak-sub">${streaks.comboToday ? 'All platforms above pace!' : 'All platforms must beat avg'}</div>
+    </div>
+    <div class="streak-card">
+      <div class="streak-label">Combos (30 days)</div>
+      <div class="streak-value">🎯 ${streaks.combosLast30}</div>
+      <div class="streak-sub">${streaks.combosLast30 > 0 ? streaks.combosLast30 + ' combo days' : 'No combo days yet'}</div>
+    </div>`;
+
+  // --- Speed Cards (compare growth rates) ---
   const speedHtml = Object.entries(PLATFORMS).map(([key, p]) => {
-    const sorted = data.filter(d => d.platform === key).sort((a, b) => a.date.localeCompare(b.date));
-
-    // Helper: get gain for a period ending on or before `endDate`, spanning `days` days
     function getGain(endDate, days) {
-      const end = getEntryOnOrBefore(data, key, endDate);
-      if (!end) return null;
-      const startDate = (() => { const d = new Date(endDate); d.setDate(d.getDate() - days); return d.toISOString().split('T')[0]; })();
-      const start = getEntryOnOrBefore(data, key, startDate);
-      if (!start || start.date === end.date) return null;
-      return end.count - start.count;
+      return getGainForPlatform(data, key, endDate, days);
     }
 
-    // DoD: today's gain vs yesterday's gain
-    function dodRow() {
-      const todayGain = getGain(daysAgo(0), 1);
-      const yesterdayGain = getGain(daysAgo(1), 1);
-      return speedCompareRow('Day over Day', todayGain, yesterdayGain, 'today', 'yesterday');
-    }
-
-    // WoW: this week's gain vs last week's gain
-    function wowRow() {
-      const thisWeek = getGain(daysAgo(0), 7);
-      const lastWeek = getGain(daysAgo(7), 7);
-      return speedCompareRow('Week over Week', thisWeek, lastWeek, 'this week', 'last week');
-    }
-
-    // MoM: this month's gain vs last month's gain
-    function momRow() {
-      const thisMonth = getGain(daysAgo(0), 30);
-      const lastMonth = getGain(daysAgo(30), 30);
-      return speedCompareRow('Month over Month', thisMonth, lastMonth, 'this month', 'last month');
-    }
-
-    function speedCompareRow(label, current, previous, curLabel, prevLabel) {
+    function speedCompareRow(label, current, previous) {
       const noData = `<div class="speed-row"><span class="speed-label">${label}</span><span class="speed-value badge neutral">--</span></div>`;
       if (current === null) return noData;
-
-      // Show current period gain
       const sign = current >= 0 ? '+' : '';
       let html = `<div class="speed-row"><span class="speed-label">${label}</span><span class="speed-value">`;
       html += `<span style="color:var(--text);font-size:13px">${sign}${fmt(current)}</span>`;
-
-      // Show % change vs previous period if available
       if (previous !== null && previous !== 0) {
         const ch = ((current - previous) / Math.abs(previous)) * 100;
         const cls = ch >= 0 ? 'up' : 'down';
@@ -1003,26 +1629,22 @@ function renderDashboard() {
       return html;
     }
 
+    const f = FIGHTERS[key];
     return `
       <div class="speed-card">
-        <h3><span class="dot" style="background:${p.color}"></span>${p.label}</h3>
-        ${dodRow()}
-        ${wowRow()}
-        ${momRow()}
+        <h3><span style="font-size:18px">${f.emoji}</span> ${p.label}</h3>
+        ${speedCompareRow('Day over Day', getGain(daysAgo(0), 1), getGain(daysAgo(1), 1))}
+        ${speedCompareRow('Week over Week', getGain(daysAgo(0), 7), getGain(daysAgo(7), 7))}
+        ${speedCompareRow('Month over Month', getGain(daysAgo(0), 30), getGain(daysAgo(30), 30))}
       </div>`;
   }).join('');
 
-  // --- All Socials Speed Card ---
+  // All Socials Speed Card
   function getAllGain(endDate, days) {
     let total = 0, hasAny = false;
     Object.keys(PLATFORMS).forEach(key => {
-      const end = getEntryOnOrBefore(data, key, endDate);
-      if (!end) return;
-      const startDate = (() => { const d = new Date(endDate); d.setDate(d.getDate() - days); return d.toISOString().split('T')[0]; })();
-      const start = getEntryOnOrBefore(data, key, startDate);
-      if (!start || start.date === end.date) return;
-      total += end.count - start.count;
-      hasAny = true;
+      const g = getGainForPlatform(data, key, endDate, days);
+      if (g !== null) { total += g; hasAny = true; }
     });
     return hasAny ? total : null;
   }
@@ -1043,30 +1665,27 @@ function renderDashboard() {
   }
   const allSpeedCard = `
     <div class="speed-card">
-      <h3><span class="dot" style="background:var(--all)"></span>All Socials</h3>
+      <h3><span style="font-size:18px">${FIGHTERS.all.emoji}</span> All Socials</h3>
       ${allSpeedRow('Day over Day', getAllGain(daysAgo(0), 1), getAllGain(daysAgo(1), 1))}
       ${allSpeedRow('Week over Week', getAllGain(daysAgo(0), 7), getAllGain(daysAgo(7), 7))}
       ${allSpeedRow('Month over Month', getAllGain(daysAgo(0), 30), getAllGain(daysAgo(30), 30))}
     </div>`;
   document.getElementById('speed-cards').innerHTML = speedHtml + allSpeedCard;
 
-  // --- Target Cards (exact dates at weekly + monthly speed) ---
-  const targetHtml = Object.entries(PLATFORMS).map(([key, p]) => {
+  // --- VS Target Fight Screens ---
+  const vsHtml = Object.entries(PLATFORMS).map(([key, p]) => {
     const sorted = data.filter(d => d.platform === key).sort((a, b) => a.date.localeCompare(b.date));
     const latest = sorted[sorted.length - 1];
     const count = latest ? latest.count : 0;
     const progress = Math.min((count / TARGET) * 100, 100);
     const remaining = TARGET - count;
+    const f = FIGHTERS[key];
+    const rank = getRank(count);
 
-    // Weekly speed: gain over last 7 days
-    const weekAgoEntry = getEntryOnOrBefore(data, key, daysAgo(7));
-    const weeklyGain = (latest && weekAgoEntry && latest.date !== weekAgoEntry.date)
-      ? latest.count - weekAgoEntry.count : null;
+    const hpClass = progress >= 60 ? 'hp-high' : progress >= 30 ? 'hp-mid' : 'hp-low';
 
-    // Monthly speed: gain over last 30 days
-    const monthAgoEntry = getEntryOnOrBefore(data, key, daysAgo(30));
-    const monthlyGain = (latest && monthAgoEntry && latest.date !== monthAgoEntry.date)
-      ? latest.count - monthAgoEntry.count : null;
+    const weeklyGain = getGainForPlatform(data, key, daysAgo(0), 7);
+    const monthlyGain = getGainForPlatform(data, key, daysAgo(0), 30);
 
     function estimateDate(gain, periodDays) {
       if (!gain || gain <= 0 || remaining <= 0) return null;
@@ -1081,38 +1700,52 @@ function renderDashboard() {
     const monthEst = estimateDate(monthlyGain, 30);
 
     function estRow(label, est, gain) {
-      if (remaining <= 0) return `<div class="speed-row"><span class="speed-label">${label}</span><span class="speed-value" style="color:var(--green)">Reached!</span></div>`;
-      if (!est) return `<div class="speed-row"><span class="speed-label">${label}</span><span class="speed-value badge neutral">--</span></div>`;
-      return `<div class="speed-row"><span class="speed-label">${label}<br><span style="font-size:11px;color:var(--muted)">${fmt(gain)}/period</span></span><span class="speed-value" style="text-align:right"><span style="color:var(--text);font-size:15px;font-weight:700">${est.date}</span><br><span style="font-size:11px;color:var(--muted)">${est.days.toLocaleString()} days</span></span></div>`;
+      if (remaining <= 0) return `<div class="vs-est-row"><span>${label}</span><span class="vs-est-date" style="color:var(--green)">DEFEATED! 🏆</span></div>`;
+      if (!est) return `<div class="vs-est-row"><span>${label}</span><span class="badge neutral">--</span></div>`;
+      return `<div class="vs-est-row"><span>${label} <span style="font-size:10px;color:var(--muted)">(${fmt(gain)}/period)</span></span><span class="vs-est-date">${est.date}<br><span style="font-size:10px;color:var(--muted);font-weight:400">${est.days.toLocaleString()} days</span></span></div>`;
     }
 
     return `
-      <div class="target-card">
-        <h3><span class="dot" style="background:${p.color}"></span>${p.label}</h3>
-        <div class="progress-bar-wrap">
-          <div class="progress-bar-fill" style="width:${progress}%;background:${p.color}"></div>
+      <div class="vs-card">
+        <div class="vs-fight">
+          <div class="vs-fighter">
+            <div class="vs-fighter-emoji">${f.emoji}</div>
+            <div class="vs-fighter-name">${f.name}</div>
+            <div class="vs-fighter-rank" style="color:${rank.bg}">${rank.label}</div>
+            <div class="vs-fighter-count">${fmt(count)}</div>
+          </div>
+          <div class="vs-middle">VS</div>
+          <div class="vs-boss">
+            <div class="vs-boss-emoji">👤</div>
+            <div class="vs-boss-label">BOSS</div>
+            <div class="vs-boss-count">${fmt(TARGET)}</div>
+          </div>
         </div>
-        <div class="target-stats" style="margin-bottom:12px">
-          <span>${fmt(count)} current</span>
-          <span>${progress.toFixed(2)}%</span>
-          <span>${fmt(TARGET)} target</span>
+        <div class="health-bar-wrap">
+          <div class="health-bar-fill ${hpClass}" style="width:${progress}%"></div>
         </div>
-        ${estRow('At weekly speed', weekEst, weeklyGain)}
-        ${estRow('At monthly speed', monthEst, monthlyGain)}
+        <div class="health-bar-text">
+          <span>${progress.toFixed(1)}% damage dealt</span>
+          <span>${remaining > 0 ? fmt(remaining) + ' remaining' : 'DEFEATED!'}</span>
+        </div>
+        <div class="vs-est">
+          ${estRow('At weekly speed', weekEst, weeklyGain)}
+          ${estRow('At monthly speed', monthEst, monthlyGain)}
+        </div>
       </div>`;
   }).join('');
 
-  // --- All Socials Target Card (2M combined) ---
-  const ALL_TARGET = 2000000;
+  // All Socials VS card
   const allLatestCount = Object.keys(PLATFORMS).reduce((sum, key) => {
     const sorted = data.filter(d => d.platform === key).sort((a, b) => a.date.localeCompare(b.date));
     return sum + (sorted.length ? sorted[sorted.length - 1].count : 0);
   }, 0);
   const allProgress = Math.min((allLatestCount / ALL_TARGET) * 100, 100);
   const allRemaining = ALL_TARGET - allLatestCount;
-
+  const allHpClass = allProgress >= 60 ? 'hp-high' : allProgress >= 30 ? 'hp-mid' : 'hp-low';
   const allWeeklyGain = getAllGain(daysAgo(0), 7);
   const allMonthlyGain = getAllGain(daysAgo(0), 30);
+  const allRankForVs = getRank(Math.round(allLatestCount / 3));
 
   function allEstDate(gain, periodDays) {
     if (!gain || gain <= 0 || allRemaining <= 0) return null;
@@ -1123,35 +1756,109 @@ function renderDashboard() {
     return { days: daysNeeded, date: target.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) };
   }
 
-  const allWeekEst = allEstDate(allWeeklyGain, 7);
-  const allMonthEst = allEstDate(allMonthlyGain, 30);
-
   function allEstRow(label, est, gain) {
-    if (allRemaining <= 0) return `<div class="speed-row"><span class="speed-label">${label}</span><span class="speed-value" style="color:var(--green)">Reached!</span></div>`;
-    if (!est) return `<div class="speed-row"><span class="speed-label">${label}</span><span class="speed-value badge neutral">--</span></div>`;
-    return `<div class="speed-row"><span class="speed-label">${label}<br><span style="font-size:11px;color:var(--muted)">${fmt(gain)}/period</span></span><span class="speed-value" style="text-align:right"><span style="color:var(--text);font-size:15px;font-weight:700">${est.date}</span><br><span style="font-size:11px;color:var(--muted)">${est.days.toLocaleString()} days</span></span></div>`;
+    if (allRemaining <= 0) return `<div class="vs-est-row"><span>${label}</span><span class="vs-est-date" style="color:var(--green)">DEFEATED! 🏆</span></div>`;
+    if (!est) return `<div class="vs-est-row"><span>${label}</span><span class="badge neutral">--</span></div>`;
+    return `<div class="vs-est-row"><span>${label} <span style="font-size:10px;color:var(--muted)">(${fmt(gain)}/period)</span></span><span class="vs-est-date">${est.date}<br><span style="font-size:10px;color:var(--muted);font-weight:400">${est.days.toLocaleString()} days</span></span></div>`;
   }
 
-  const allTargetCard = `
-    <div class="target-card">
-      <h3><span class="dot" style="background:var(--all)"></span>All Socials</h3>
-      <div class="progress-bar-wrap">
-        <div class="progress-bar-fill" style="width:${allProgress}%;background:var(--all)"></div>
+  const allVsCard = `
+    <div class="vs-card">
+      <div class="vs-fight">
+        <div class="vs-fighter">
+          <div class="vs-fighter-emoji">${FIGHTERS.all.emoji}</div>
+          <div class="vs-fighter-name">${FIGHTERS.all.name}</div>
+          <div class="vs-fighter-rank" style="color:${allRankForVs.bg}">${allRankForVs.label}</div>
+          <div class="vs-fighter-count">${fmt(allLatestCount)}</div>
+        </div>
+        <div class="vs-middle">VS</div>
+        <div class="vs-boss">
+          <div class="vs-boss-emoji">👤</div>
+          <div class="vs-boss-label">MEGA BOSS</div>
+          <div class="vs-boss-count">${fmt(ALL_TARGET)}</div>
+        </div>
       </div>
-      <div class="target-stats" style="margin-bottom:12px">
-        <span>${fmt(allLatestCount)} current</span>
-        <span>${allProgress.toFixed(2)}%</span>
-        <span>${fmt(ALL_TARGET)} target</span>
+      <div class="health-bar-wrap">
+        <div class="health-bar-fill ${allHpClass}" style="width:${allProgress}%"></div>
       </div>
-      ${allEstRow('At weekly speed', allWeekEst, allWeeklyGain)}
-      ${allEstRow('At monthly speed', allMonthEst, allMonthlyGain)}
+      <div class="health-bar-text">
+        <span>${allProgress.toFixed(1)}% damage dealt</span>
+        <span>${allRemaining > 0 ? fmt(allRemaining) + ' remaining' : 'DEFEATED!'}</span>
+      </div>
+      <div class="vs-est">
+        ${allEstRow('At weekly speed', allEstDate(allWeeklyGain, 7), allWeeklyGain)}
+        ${allEstRow('At monthly speed', allEstDate(allMonthlyGain, 30), allMonthlyGain)}
+      </div>
     </div>`;
-  document.getElementById('target-cards').innerHTML = targetHtml + allTargetCard;
+  document.getElementById('vs-cards').innerHTML = vsHtml + allVsCard;
 
+  // --- Achievements ---
+  renderAchievements(data, achievements);
+
+  // --- Ticker ---
+  const tickerMessages = buildTickerMessages(data, streaks, achievements);
+  renderTicker(tickerMessages);
+
+  // --- Chart ---
   renderChart(data, currentChartPlatform);
 }
 
-// ======================== CHART (per-platform tabs + time range) ========================
+function renderAchievements(data, achievements) {
+  const grid = document.getElementById('achievements-grid');
+  let html = '';
+
+  // Milestone achievements per platform
+  html += '<div style="grid-column:1/-1;margin-bottom:4px"><div class="section-title" style="font-size:10px;margin-bottom:8px">Milestone Badges</div></div>';
+  Object.keys(PLATFORMS).forEach(key => {
+    const f = FIGHTERS[key];
+    MILESTONE_ACHIEVEMENTS.forEach(ach => {
+      const achKey = `${ach.id}_${key}`;
+      const unlocked = achievements[achKey];
+      html += `
+        <div class="achievement-card ${unlocked ? 'unlocked' : 'locked'}">
+          <div class="achievement-emoji">${ach.emoji}</div>
+          <div class="achievement-title">${ach.title}</div>
+          <div class="achievement-desc">${f.emoji} ${PLATFORMS[key].label}: ${ach.desc}</div>
+          ${unlocked ? `<div class="achievement-date">Unlocked ${unlocked.date}</div>` : ''}
+        </div>`;
+    });
+  });
+
+  // Speed achievements
+  html += '<div style="grid-column:1/-1;margin-top:16px;margin-bottom:4px"><div class="section-title" style="font-size:10px;margin-bottom:8px">Speed & Power</div></div>';
+  SPEED_ACHIEVEMENTS.forEach(ach => {
+    // Check if any platform has it
+    let unlocked = null;
+    Object.keys(PLATFORMS).forEach(key => {
+      const achKey = `${ach.id}_${key}`;
+      if (achievements[achKey] && !unlocked) unlocked = achievements[achKey];
+    });
+    html += `
+      <div class="achievement-card ${unlocked ? 'unlocked' : 'locked'}">
+        <div class="achievement-emoji">${ach.emoji}</div>
+        <div class="achievement-title">${ach.title}</div>
+        <div class="achievement-desc">${ach.desc}</div>
+        ${unlocked ? `<div class="achievement-date">Unlocked ${unlocked.date}</div>` : ''}
+      </div>`;
+  });
+
+  // Combo achievements
+  html += '<div style="grid-column:1/-1;margin-top:16px;margin-bottom:4px"><div class="section-title" style="font-size:10px;margin-bottom:8px">Combo Moves</div></div>';
+  COMBO_ACHIEVEMENTS.forEach(ach => {
+    const unlocked = achievements[ach.id];
+    html += `
+      <div class="achievement-card ${unlocked ? 'unlocked' : 'locked'}">
+        <div class="achievement-emoji">${ach.emoji}</div>
+        <div class="achievement-title">${ach.title}</div>
+        <div class="achievement-desc">${ach.desc}</div>
+        ${unlocked ? `<div class="achievement-date">Unlocked ${unlocked.date}</div>` : ''}
+      </div>`;
+  });
+
+  grid.innerHTML = html;
+}
+
+// ======================== CHART ========================
 let growthChartInstance = null;
 let currentChartPlatform = 'linkedin';
 let currentTimeRange = 'all';
@@ -1176,7 +1883,6 @@ function populateMonthPicker(data, platformKey) {
   const picker = document.getElementById('month-picker');
   const entries = platformKey === 'all' ? data : data.filter(d => d.platform === platformKey);
   const months = [...new Set(entries.map(d => d.date.substring(0, 7)))].sort();
-  const prev = picker.value;
   picker.innerHTML = '<option value="">Pick a month\u2026</option>';
   months.forEach(m => {
     const [y, mo] = m.split('-');
@@ -1187,10 +1893,7 @@ function populateMonthPicker(data, platformKey) {
 }
 
 function renderChart(data, platformKey) {
-  // Populate month picker with available months for this platform
   populateMonthPicker(data, platformKey);
-
-  // Apply time range filter
   data = filterByTimeRange(data);
 
   const ctx = document.getElementById('growthChart').getContext('2d');
@@ -1199,7 +1902,6 @@ function renderChart(data, platformKey) {
   let datasets, allDates;
 
   if (platformKey === 'all') {
-    // All Socials: single combined line (sum of all platforms per date)
     const dateSet = new Set();
     const platMaps = {};
     Object.keys(PLATFORMS).forEach(key => {
@@ -1211,7 +1913,6 @@ function renderChart(data, platformKey) {
     });
     allDates = [...dateSet].sort();
 
-    // For each date, sum latest known value per platform
     const lastKnown = {};
     const combined = allDates.map(date => {
       let sum = 0;
@@ -1225,8 +1926,8 @@ function renderChart(data, platformKey) {
     datasets = [{
       label: 'All Socials',
       data: combined,
-      borderColor: '#6366f1',
-      backgroundColor: '#6366f122',
+      borderColor: '#7c3aed',
+      backgroundColor: '#7c3aed22',
       tension: 0.35,
       pointRadius: 0,
       pointHoverRadius: 5,
@@ -1234,7 +1935,6 @@ function renderChart(data, platformKey) {
       fill: true,
     }];
   } else {
-    // Single platform
     const p = PLATFORMS[platformKey];
     const entries = data.filter(d => d.platform === platformKey).sort((a, b) => a.date.localeCompare(b.date));
     allDates = entries.map(e => e.date);
@@ -1261,12 +1961,14 @@ function renderChart(data, platformKey) {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: '#1a1d27',
+          backgroundColor: '#1a1a2e',
           borderColor: '#2a2d3a',
           borderWidth: 1,
           titleColor: '#e4e4e7',
           bodyColor: '#e4e4e7',
           padding: 12,
+          titleFont: { family: "'Press Start 2P', monospace", size: 9 },
+          bodyFont: { size: 13 },
           callbacks: {
             label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y != null ? ctx.parsed.y.toLocaleString() : '--'}`
           }
@@ -1274,17 +1976,17 @@ function renderChart(data, platformKey) {
       },
       scales: {
         x: {
-          grid: { color: '#2a2d3a22' },
+          grid: { color: 'rgba(0,0,0,0.05)' },
           ticks: {
-            color: '#8b8d97',
+            color: '#6b7280',
             font: { size: 11 },
             maxRotation: 45,
             maxTicksLimit: 15,
           }
         },
         y: {
-          grid: { color: '#2a2d3a44' },
-          ticks: { color: '#8b8d97', font: { size: 12 }, callback: v => fmt(v) },
+          grid: { color: 'rgba(0,0,0,0.08)' },
+          ticks: { color: '#6b7280', font: { size: 12 }, callback: v => fmt(v) },
           beginAtZero: false
         }
       }
@@ -1310,7 +2012,6 @@ function renderHistory() {
   }
   empty.style.display = 'none';
 
-  // Only show last 200 rows for performance
   const shown = sorted.slice(0, 200);
 
   body.innerHTML = shown.map((entry) => {
@@ -1392,6 +2093,14 @@ document.getElementById('month-picker').addEventListener('change', (e) => {
   renderChart(loadData(), currentChartPlatform);
 });
 
+// Achievements toggle
+document.getElementById('achievements-toggle').addEventListener('click', () => {
+  const toggle = document.getElementById('achievements-toggle');
+  const body = document.getElementById('achievements-body');
+  toggle.classList.toggle('open');
+  body.classList.toggle('open');
+});
+
 // History filter buttons
 document.querySelectorAll('.history-card .filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -1444,7 +2153,6 @@ setupDropZone('drop-x', 'result-x', (file, resultEl) => {
     showToast('Please enter your current X follower count first');
     return;
   }
-
   const reader = new FileReader();
   reader.onload = e => {
     try {
