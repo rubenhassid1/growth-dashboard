@@ -646,6 +646,26 @@
     padding: 3px 6px; border-radius: 4px; font-size: 15px;
   }
   .delete-btn:hover { color: var(--red); background: rgba(220,38,38,0.1); }
+  .edit-btn {
+    background: none; border: none; color: var(--muted); cursor: pointer;
+    padding: 3px 6px; border-radius: 4px; font-size: 13px;
+  }
+  .edit-btn:hover { color: var(--accent); background: rgba(99,102,241,0.1); }
+  .inline-edit { display: inline-flex; align-items: center; gap: 4px; }
+  .inline-edit input {
+    width: 100px; padding: 4px 8px; border: 1px solid var(--accent);
+    border-radius: 6px; font-size: 13px; background: var(--bg); color: var(--text); outline: none;
+  }
+  .inline-edit .save-edit {
+    background: none; border: none; cursor: pointer; font-size: 15px;
+    color: var(--green); padding: 2px 4px; border-radius: 4px;
+  }
+  .inline-edit .save-edit:hover { background: rgba(22,163,74,0.1); }
+  .inline-edit .cancel-edit {
+    background: none; border: none; cursor: pointer; font-size: 15px;
+    color: var(--red); padding: 2px 4px; border-radius: 4px;
+  }
+  .inline-edit .cancel-edit:hover { background: rgba(220,38,38,0.1); }
   .empty-state { text-align: center; padding: 32px 16px; color: var(--muted); }
   .empty-state p { margin-top: 6px; font-size: 13px; }
 
@@ -807,11 +827,11 @@ const CHAR_IMAGES = {
   ryu:    'https://www.muraldecal.com/en/img/arc244-png/folder/products-detalle-png/stickers-street-fighter-ryu-pixel-16-bits.png',
   ken:    'https://www.muraldecal.com/en/img/arc243-png/folder/products-detalle-png/stickers-street-fighter-ken-pixel-16-bits.png',
   akuma:  'https://i.imgur.com/MNVOm.gif',
+  chunli: 'https://www.clipartmax.com/png/full/204-2048460_chun-li-chung-lee-street-fighter-kick.png',
 };
 
 // ShroomArts blog pixel art (dark bg, needs zoom)
 const CHAR_BG_IMAGES = {
-  chunli: { url: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg_y95GR-vRv8Mj4U5HP10Sl6yzt0ItvCxdS6CjfmynrCm5lGOCbm9hkB2-TKVNtn5pg0Ih2iFf-xRf2xuONDaCLpG_a1fL3A_4jQFtU-zwl_gkfja18FCR_SsSs7f5g3ty86Z6egUbZfy-/s1600/chunli.png', pos: 'center 30%', zoom: '320%' },
   vega:   { url: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhbmo1AcE0gt41KTvErW_E4t3Yuij0pPccN-ubEsvX_LXDUboZeeSU4nn1t4D1CISH_4u9Gqhta4dAOP-e7ja_M1bR64yz1FEsBqpqmmfhNcfBTAm32Oqa8_Rgl93FEmbAqc8rz_3DR5An6/s1600/vega.png', pos: 'center 28%', zoom: '350%' },
   balrog: { url: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgJOno8NKDsub6hu88VG9gnCZOgQ1zZnS9NlModtxIxBYK4fSqkpJJhLEyMBu59wWtn1Ea7THjS22n1mZ2d_JN6WXh5eqzSZvnWcVVaViSvE_U5L166O44nz-0bfVjKMPScEU1qyNCsYqvW/s1600/balrog.png', pos: 'center 35%', zoom: '320%' },
   mbison: { url: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiZuLw1_BwvoT40YVW2swor3nbVCo80erbZ_SV_a_n_5A4kgXwV_O_BdWwk8aNqsxSGG9UhNvipxD3fBqwKeXzmcoZUl89ASvRZTfnP8JSHyqn5bsLcGp-Ijtwfexyokce0AdY6c5s1-CLj/s1600/mbison.png', pos: 'center 28%', zoom: '350%' },
@@ -1634,7 +1654,7 @@ function renderHistory() {
     const prev = idx > 0 ? all[idx - 1] : null;
     let ch = '<span class="badge neutral">--</span>';
     if (prev) { const diff = entry.count - prev.count; ch = `<span class="badge ${diff >= 0 ? 'up' : 'down'}" title="${diff >= 0 ? '+' : ''}${fmtFull(diff)}">${diff >= 0 ? '+' : ''}${fmt(diff)}</span>`; }
-    return `<tr><td>${entry.date}</td><td><span class="platform-tag ${entry.platform}">${p.label}</span></td><td title="${fmtFull(entry.count)}">${fmt(entry.count)}</td><td>${ch}</td><td><button class="delete-btn" data-date="${entry.date}" data-platform="${entry.platform}">&times;</button></td></tr>`;
+    return `<tr><td>${entry.date}</td><td><span class="platform-tag ${entry.platform}">${p.label}</span></td><td class="count-cell" data-raw="${entry.count}" title="${fmtFull(entry.count)}">${fmt(entry.count)}</td><td>${ch}</td><td><button class="edit-btn" data-date="${entry.date}" data-platform="${entry.platform}">&#9998;</button><button class="delete-btn" data-date="${entry.date}" data-platform="${entry.platform}">&times;</button></td></tr>`;
   }).join('');
   if (sorted.length > 200) body.innerHTML += `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:12px">Showing 200 of ${sorted.length}</td></tr>`;
 }
@@ -1720,6 +1740,49 @@ document.getElementById('history-body').addEventListener('click', e => {
   const data = loadData();
   const idx = data.findIndex(d => d.date === btn.dataset.date && d.platform === btn.dataset.platform);
   if (idx >= 0) { data.splice(idx, 1); saveData(data); renderHistory(); showToast('Deleted'); }
+});
+
+// Edit button — transform count cell into inline input
+document.getElementById('history-body').addEventListener('click', e => {
+  const btn = e.target.closest('.edit-btn'); if (!btn) return;
+  const row = btn.closest('tr');
+  const countCell = row.querySelector('.count-cell');
+  if (countCell.querySelector('.inline-edit')) return;
+  const rawValue = countCell.dataset.raw;
+  countCell.innerHTML = `<span class="inline-edit"><input type="number" class="edit-input" value="${rawValue}" min="0"><button class="save-edit" title="Save">&#10003;</button><button class="cancel-edit" title="Cancel">&#10007;</button></span>`;
+  const input = countCell.querySelector('.edit-input');
+  input.focus();
+  input.select();
+});
+
+// Save edit
+document.getElementById('history-body').addEventListener('click', e => {
+  const btn = e.target.closest('.save-edit'); if (!btn) return;
+  const row = btn.closest('tr');
+  const input = row.querySelector('.edit-input');
+  const newCount = parseInt(input.value);
+  if (isNaN(newCount) || newCount < 0) { showToast('Enter a valid count'); return; }
+  const ref = row.querySelector('.edit-btn') || row.querySelector('.delete-btn');
+  upsertEntries([{ date: ref.dataset.date, platform: ref.dataset.platform, count: newCount }]);
+  renderHistory();
+  renderDashboard();
+  showToast('Updated!');
+});
+
+// Cancel edit
+document.getElementById('history-body').addEventListener('click', e => {
+  const btn = e.target.closest('.cancel-edit'); if (!btn) return;
+  renderHistory();
+});
+
+// Enter to save, Escape to cancel
+document.getElementById('history-body').addEventListener('keydown', e => {
+  if (!e.target.classList.contains('edit-input')) return;
+  if (e.key === 'Enter') {
+    e.target.closest('.inline-edit').querySelector('.save-edit').click();
+  } else if (e.key === 'Escape') {
+    renderHistory();
+  }
 });
 
 document.getElementById('clear-btn').addEventListener('click', () => {
