@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Growth Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --border: #2a2d3a;
+    --text: #e4e4e7;
+    --muted: #8b8d97;
+    --accent: #6366f1;
+    --green: #22c55e;
+    --red: #ef4444;
+    --yellow: #eab308;
+    --linkedin: #0a66c2;
+    --substack: #ff6719;
+    --x: #e4e4e7;
+    --all: #6366f1;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* --- HEADER --- */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .header h1 span { color: var(--accent); }
+
+  /* --- TABS --- */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--card);
+    border-radius: 10px;
+    padding: 4px;
+  }
+  .tab-btn {
+    padding: 8px 20px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: var(--accent);
+    color: #fff;
+  }
+  .tab-btn:hover:not(.active) { color: var(--text); }
+
+  .tab-content { display: none; padding: 24px 32px 48px; }
+  .tab-content.active { display: block; }
+
+  /* --- STAT CARDS --- */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 24px;
+  }
+  .card-label {
+    font-size: 13px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-label .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .card-value {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+  }
+  .card-sub {
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .badge.up { background: rgba(34,197,94,0.12); color: var(--green); }
+  .badge.down { background: rgba(239,68,68,0.12); color: var(--red); }
+  .badge.neutral { background: rgba(139,141,151,0.12); color: var(--muted); }
+
+  /* --- SPEED TABLE --- */
+  .speed-section { margin-bottom: 24px; }
+  .section-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+  .speed-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .speed-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 24px;
+  }
+  .speed-card h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .speed-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .speed-row:last-child { border-bottom: none; }
+  .speed-label { font-size: 13px; color: var(--muted); }
+  .speed-value { font-size: 14px; font-weight: 600; }
+
+  /* --- TARGET CARDS --- */
+  .target-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .target-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 24px;
+  }
+  .target-card h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .progress-bar-wrap {
+    background: var(--border);
+    border-radius: 6px;
+    height: 10px;
+    margin: 12px 0;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.5s;
+  }
+  .target-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .target-days {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 4px 0;
+  }
+
+  /* --- CHARTS --- */
+  .chart-section { margin-bottom: 24px; }
+  .chart-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+  }
+  .chart-container {
+    position: relative;
+    height: 340px;
+  }
+
+  /* --- UPLOAD TAB --- */
+  .upload-columns {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .upload-columns { grid-template-columns: 1fr; }
+  }
+  .left-panels { display: flex; flex-direction: column; gap: 16px; }
+
+  .form-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+  }
+  .form-card h2 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .field input, .field select {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    transition: border 0.2s;
+  }
+  .field input:focus, .field select:focus { border-color: var(--accent); }
+
+  .btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-danger {
+    background: rgba(239,68,68,0.12);
+    color: var(--red);
+    margin-top: 8px;
+  }
+  .btn-danger:hover { background: rgba(239,68,68,0.2); }
+
+  /* --- PLATFORM IMPORT CARDS --- */
+  .import-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 24px;
+  }
+  .import-card h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .import-card .hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+  .drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .drop-zone:hover, .drop-zone.drag-over {
+    border-color: var(--accent);
+    background: rgba(99,102,241,0.06);
+    color: var(--text);
+  }
+  .drop-zone input { display: none; }
+  .import-result {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--green);
+    display: none;
+  }
+  .x-follower-field {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    align-items: end;
+  }
+  .x-follower-field .field { flex: 1; margin-bottom: 0; }
+  .x-follower-field .btn { width: auto; padding: 10px 18px; }
+
+  /* --- History table --- */
+  .history-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    overflow-x: auto;
+  }
+  .history-card h2 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .filter-btns {
+    display: flex;
+    gap: 4px;
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 3px;
+  }
+  .filter-btn {
+    padding: 5px 12px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .filter-btn.active { background: var(--border); color: var(--text); }
+
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left;
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 500;
+  }
+  td {
+    padding: 12px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  tr:last-child td { border-bottom: none; }
+  .platform-tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .platform-tag.linkedin { background: rgba(10,102,194,0.15); color: var(--linkedin); }
+  .platform-tag.substack { background: rgba(255,103,25,0.15); color: var(--substack); }
+  .platform-tag.x { background: rgba(228,228,231,0.12); color: var(--x); }
+  .platform-tag.all { background: rgba(99,102,241,0.15); color: var(--all); }
+  .delete-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+  .delete-btn:hover { color: var(--red); background: rgba(239,68,68,0.1); }
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+  }
+  .empty-state p { margin-top: 8px; font-size: 14px; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 14px 20px;
+    background: var(--green);
+    color: #000;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 100;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* Export / manual entry buttons */
+  .io-btns {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .btn-outline {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+  .hidden-input { display: none; }
+
+  /* Month picker select */
+  .month-picker {
+    padding: 5px 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 500;
+    outline: none;
+    cursor: pointer;
+    transition: border 0.2s;
+  }
+  .month-picker:focus { border-color: var(--accent); }
+  .time-range-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1><span>Growth</span> Dashboard</h1>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+    <button class="tab-btn" data-tab="upload">Upload Data</button>
+  </div>
+</div>
+
+<!-- ================ DASHBOARD TAB ================ -->
+<div id="tab-dashboard" class="tab-content active">
+  <div class="cards" id="follower-cards"></div>
+  <div class="speed-section">
+    <div class="section-title">Growth Speed</div>
+    <div class="speed-grid" id="speed-cards"></div>
+  </div>
+  <div class="speed-section">
+    <div class="section-title">Target: 1,000,000</div>
+    <div class="target-grid" id="target-cards"></div>
+  </div>
+  <div class="chart-section">
+    <div class="section-title" style="display:flex;align-items:center;justify-content:space-between">
+      Growth Over Time
+      <div class="filter-btns" id="chart-tabs">
+        <button class="filter-btn active" data-chart="linkedin">LinkedIn</button>
+        <button class="filter-btn" data-chart="substack">Substack</button>
+        <button class="filter-btn" data-chart="x">X</button>
+        <button class="filter-btn" data-chart="all">All Socials</button>
+      </div>
+    </div>
+    <div class="time-range-row">
+      <div class="filter-btns" id="time-range-tabs">
+        <button class="filter-btn" data-range="1d">Day</button>
+        <button class="filter-btn" data-range="1w">Week</button>
+        <button class="filter-btn" data-range="1m">Month</button>
+        <button class="filter-btn" data-range="3m">3 Mo</button>
+        <button class="filter-btn" data-range="6m">6 Mo</button>
+        <button class="filter-btn" data-range="12m">12 Mo</button>
+        <button class="filter-btn active" data-range="all">All Time</button>
+      </div>
+      <select id="month-picker" class="month-picker">
+        <option value="">Pick a month…</option>
+      </select>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-container">
+        <canvas id="growthChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================ UPLOAD TAB ================ -->
+<div id="tab-upload" class="tab-content">
+  <div class="upload-columns">
+    <div class="left-panels">
+
+      <!-- PLATFORM FILE IMPORTS -->
+      <div class="import-card">
+        <h3><span class="dot" style="background:var(--linkedin);width:10px;height:10px;border-radius:50%;display:inline-block"></span>LinkedIn</h3>
+        <div class="hint">Upload your LinkedIn Analytics .xlsx file<br>(the one with "Content" in the name)</div>
+        <div class="drop-zone" id="drop-linkedin">
+          Click or drag .xlsx file here
+          <input type="file" accept=".xlsx,.xls">
+        </div>
+        <div class="import-result" id="result-linkedin"></div>
+      </div>
+
+      <div class="import-card">
+        <h3><span class="dot" style="background:var(--substack);width:10px;height:10px;border-radius:50%;display:inline-block"></span>Substack</h3>
+        <div class="hint">Upload your Substack subscribers .csv file<br>(the one with "ruben_emails" in the name)</div>
+        <div class="drop-zone" id="drop-substack">
+          Click or drag .csv file here
+          <input type="file" accept=".csv">
+        </div>
+        <div class="import-result" id="result-substack"></div>
+      </div>
+
+      <div class="import-card">
+        <h3><span class="dot" style="background:var(--x);width:10px;height:10px;border-radius:50%;display:inline-block"></span>X (Twitter)</h3>
+        <div class="hint">Upload your X Analytics .csv file<br>(the one with "account_overview" in the name)</div>
+        <div class="x-follower-field">
+          <div class="field">
+            <label>Your current X follower count</label>
+            <input type="number" id="x-current-count" placeholder="e.g. 356000" min="0">
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="drop-zone" id="drop-x">
+            Click or drag .csv file here
+            <input type="file" accept=".csv">
+          </div>
+        </div>
+        <div class="import-result" id="result-x"></div>
+      </div>
+
+      <!-- MANUAL + UTILS -->
+      <div class="form-card">
+        <h2>Manual Entry</h2>
+        <div class="field">
+          <label>Date</label>
+          <input type="date" id="entry-date">
+        </div>
+        <div class="field">
+          <label>Platform</label>
+          <select id="entry-platform">
+            <option value="linkedin">LinkedIn</option>
+            <option value="substack">Substack</option>
+            <option value="x">X (Twitter)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Followers / Subscribers</label>
+          <input type="number" id="entry-count" placeholder="e.g. 125000" min="0">
+        </div>
+        <button class="btn btn-primary" id="add-btn">Add Entry</button>
+        <button class="btn btn-danger" id="clear-btn">Clear All Data</button>
+        <div class="io-btns">
+          <button class="btn-outline" id="export-btn">Export CSV</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORY TABLE -->
+    <div class="history-card">
+      <h2>
+        History
+        <div class="filter-btns">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="linkedin">LinkedIn</button>
+          <button class="filter-btn" data-filter="substack">Substack</button>
+          <button class="filter-btn" data-filter="x">X</button>
+        </div>
+      </h2>
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Platform</th><th>Count</th><th>Change</th><th></th></tr>
+        </thead>
+        <tbody id="history-body"></tbody>
+      </table>
+      <div class="empty-state" id="empty-msg" style="display:none">
+        <p>No data yet. Upload a file or add an entry!</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ======================== DATA LAYER ========================
+const STORAGE_KEY = 'growth_dashboard_data';
+const TARGET = 1000000;
+
+const PLATFORMS = {
+  linkedin:  { label: 'LinkedIn',     color: '#0a66c2', dotClass: 'linkedin' },
+  substack:  { label: 'Substack',     color: '#ff6719', dotClass: 'substack' },
+  x:         { label: 'X (Twitter)',   color: '#e4e4e7', dotClass: 'x' },
+};
+
+function loadData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch { return []; }
+}
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function upsertEntries(newEntries) {
+  const data = loadData();
+  let added = 0, updated = 0;
+  newEntries.forEach(entry => {
+    const idx = data.findIndex(d => d.date === entry.date && d.platform === entry.platform);
+    if (idx >= 0) {
+      data[idx].count = entry.count;
+      updated++;
+    } else {
+      data.push(entry);
+      added++;
+    }
+  });
+  saveData(data);
+  return { added, updated, total: added + updated };
+}
+
+// ======================== HELPERS ========================
+function fmt(n) {
+  if (n >= 1000000) return (n / 1000000).toFixed(2) + 'M';
+  if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+  return n.toLocaleString();
+}
+
+function pct(prev, curr) {
+  if (!prev || prev === 0) return null;
+  return ((curr - prev) / prev) * 100;
+}
+
+function getLatest(data, platform) {
+  return data.filter(d => d.platform === platform).sort((a, b) => b.date.localeCompare(a.date))[0] || null;
+}
+
+function getEntryOnOrBefore(data, platform, dateStr) {
+  return data
+    .filter(d => d.platform === platform && d.date <= dateStr)
+    .sort((a, b) => b.date.localeCompare(a.date))[0] || null;
+}
+
+function daysAgo(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d.toISOString().split('T')[0];
+}
+
+function daysBetween(d1, d2) {
+  return Math.round((new Date(d2) - new Date(d1)) / 86400000);
+}
+
+function toISO(dateStr) {
+  // Convert various date formats to YYYY-MM-DD
+  // Handles: M/D/YYYY, YYYY/MM/DD, "Wed, Mar 11, 2026"
+  const s = dateStr.replace(/"/g, '').trim();
+
+  // YYYY/MM/DD or YYYY-MM-DD
+  if (/^\d{4}[\/\-]\d{2}[\/\-]\d{2}$/.test(s)) {
+    return s.replace(/\//g, '-');
+  }
+
+  // M/D/YYYY or MM/DD/YYYY
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
+    const [m, d, y] = s.split('/');
+    return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+  }
+
+  // "Wed, Mar 11, 2026" or "Mar 11, 2026" format
+  const months = { jan:1, feb:2, mar:3, apr:4, may:5, jun:6, jul:7, aug:8, sep:9, oct:10, nov:11, dec:12 };
+  const longMatch = s.match(/(\w{3})\s+(\d{1,2}),?\s+(\d{4})/);
+  if (longMatch) {
+    const mon = months[longMatch[1].toLowerCase()];
+    if (mon) {
+      return `${longMatch[3]}-${String(mon).padStart(2,'0')}-${longMatch[2].padStart(2,'0')}`;
+    }
+  }
+
+  return null;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ======================== PLATFORM FILE PARSERS ========================
+
+function parseLinkedInXLSX(arrayBuffer) {
+  const wb = XLSX.read(arrayBuffer, { type: 'array' });
+
+  // Find FOLLOWERS sheet
+  const followersSheet = wb.Sheets['FOLLOWERS'];
+  if (!followersSheet) {
+    throw new Error('No FOLLOWERS sheet found. Make sure this is a LinkedIn Analytics export.');
+  }
+
+  const rows = XLSX.utils.sheet_to_json(followersSheet, { header: 1 });
+
+  // Row 0: ['Total followers on DATE:', totalCount]
+  const totalFollowers = rows[0] && rows[0][1] ? Number(rows[0][1]) : null;
+  if (!totalFollowers) throw new Error('Could not find total follower count in FOLLOWERS sheet.');
+
+  // Extract the date from row 0 text like "Total followers on 3/11/2026:"
+  const headerText = String(rows[0][0] || '');
+  const dateMatch = headerText.match(/(\d{1,2}\/\d{1,2}\/\d{4})/);
+  const totalDate = dateMatch ? toISO(dateMatch[1]) : null;
+
+  // Row 2: headers ['Date', 'New followers']
+  // Rows 3+: data
+  const dailyData = [];
+  for (let i = 3; i < rows.length; i++) {
+    const row = rows[i];
+    if (!row || !row[0]) continue;
+    const date = toISO(String(row[0]));
+    const newFollowers = Number(row[1]) || 0;
+    if (date) {
+      dailyData.push({ date, newFollowers });
+    }
+  }
+
+  // Sort ascending by date
+  dailyData.sort((a, b) => a.date.localeCompare(b.date));
+
+  // Reconstruct daily totals working backwards from totalFollowers
+  // totalFollowers is the count on totalDate (the last date)
+  const entries = [];
+  let running = totalFollowers;
+
+  // Build from the end: last entry = totalFollowers, then subtract going backwards
+  for (let i = dailyData.length - 1; i >= 0; i--) {
+    entries.unshift({ date: dailyData[i].date, platform: 'linkedin', count: running });
+    if (i > 0) {
+      running -= dailyData[i].newFollowers;
+    }
+  }
+
+  return entries;
+}
+
+function parseSubstackCSV(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+  const entries = [];
+
+  for (const line of lines) {
+    // Format: YYYY/MM/DD,count (no header)
+    const parts = line.split(',');
+    if (parts.length < 2) continue;
+    const date = toISO(parts[0]);
+    const count = parseInt(parts[1]);
+    if (date && !isNaN(count) && count > 0) {
+      entries.push({ date, platform: 'substack', count });
+    }
+  }
+
+  return entries;
+}
+
+function parseXCSV(text, currentTotal) {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+  if (lines.length < 2) throw new Error('CSV file appears empty');
+
+  // Parse header to find column indices
+  // Header may have quoted values
+  const header = lines[0].split(',').map(h => h.replace(/"/g, '').trim().toLowerCase());
+  const dateIdx = header.indexOf('date');
+  const newFollowsIdx = header.findIndex(h => h === 'new follows');
+  const unfollowsIdx = header.indexOf('unfollows');
+
+  if (dateIdx < 0 || newFollowsIdx < 0) {
+    throw new Error('Could not find Date or New follows columns in X CSV');
+  }
+
+  // Parse daily data
+  const dailyData = [];
+  for (let i = 1; i < lines.length; i++) {
+    // Handle quoted CSV fields
+    const parts = [];
+    let current = '';
+    let inQuotes = false;
+    for (const ch of lines[i]) {
+      if (ch === '"') { inQuotes = !inQuotes; continue; }
+      if (ch === ',' && !inQuotes) { parts.push(current.trim()); current = ''; continue; }
+      current += ch;
+    }
+    parts.push(current.trim());
+
+    if (parts.length <= Math.max(dateIdx, newFollowsIdx)) continue;
+    const date = toISO(parts[dateIdx]);
+    const newFollows = parseInt(parts[newFollowsIdx]) || 0;
+    const unfollows = unfollowsIdx >= 0 ? (parseInt(parts[unfollowsIdx]) || 0) : 0;
+    if (date) {
+      dailyData.push({ date, net: newFollows - unfollows });
+    }
+  }
+
+  // Sort ascending by date (file is descending)
+  dailyData.sort((a, b) => a.date.localeCompare(b.date));
+
+  // currentTotal is the follower count on the MOST RECENT date
+  // Work backwards to compute daily totals
+  const entries = [];
+  let running = currentTotal;
+
+  for (let i = dailyData.length - 1; i >= 0; i--) {
+    entries.unshift({ date: dailyData[i].date, platform: 'x', count: running });
+    if (i > 0) {
+      running -= dailyData[i].net;
+    }
+  }
+
+  return entries;
+}
+
+// ======================== DROP ZONE SETUP ========================
+function setupDropZone(zoneId, resultId, handler) {
+  const zone = document.getElementById(zoneId);
+  const input = zone.querySelector('input');
+  const resultEl = document.getElementById(resultId);
+
+  zone.addEventListener('click', () => input.click());
+
+  zone.addEventListener('dragover', e => {
+    e.preventDefault();
+    zone.classList.add('drag-over');
+  });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    if (e.dataTransfer.files.length) {
+      handleFile(e.dataTransfer.files[0]);
+    }
+  });
+
+  input.addEventListener('change', () => {
+    if (input.files.length) handleFile(input.files[0]);
+    input.value = '';
+  });
+
+  function handleFile(file) {
+    handler(file, resultEl);
+  }
+}
+
+// ======================== RENDER DASHBOARD ========================
+function renderDashboard() {
+  const data = loadData();
+
+  // --- Follower Cards ---
+  const cardsHtml = Object.entries(PLATFORMS).map(([key, p]) => {
+    const latest = getLatest(data, key);
+    const prev = latest ? getEntryOnOrBefore(data, key, daysAgo(1)) : null;
+    const count = latest ? latest.count : 0;
+    const change = (prev && latest && prev.date !== latest.date) ? pct(prev.count, latest.count) : null;
+
+    let badgeHtml = '<span class="badge neutral">No data</span>';
+    if (change !== null) {
+      const cls = change >= 0 ? 'up' : 'down';
+      const arrow = change >= 0 ? '&#9650;' : '&#9660;';
+      badgeHtml = `<span class="badge ${cls}">${arrow} ${Math.abs(change).toFixed(2)}%</span>`;
+    }
+
+    return `
+      <div class="card">
+        <div class="card-label"><span class="dot" style="background:${p.color}"></span>${p.label}</div>
+        <div class="card-value">${fmt(count)}</div>
+        <div class="card-sub">${badgeHtml} <span>vs previous entry</span></div>
+      </div>`;
+  }).join('');
+
+  // --- All Socials Card ---
+  const allCount = Object.keys(PLATFORMS).reduce((sum, key) => {
+    const l = getLatest(data, key);
+    return sum + (l ? l.count : 0);
+  }, 0);
+  const allPrevCount = Object.keys(PLATFORMS).reduce((sum, key) => {
+    const p = getEntryOnOrBefore(data, key, daysAgo(1));
+    return sum + (p ? p.count : 0);
+  }, 0);
+  const allChange = (allPrevCount > 0 && allPrevCount !== allCount) ? pct(allPrevCount, allCount) : null;
+  let allBadge = '<span class="badge neutral">No data</span>';
+  if (allChange !== null) {
+    const cls = allChange >= 0 ? 'up' : 'down';
+    const arrow = allChange >= 0 ? '&#9650;' : '&#9660;';
+    allBadge = `<span class="badge ${cls}">${arrow} ${Math.abs(allChange).toFixed(2)}%</span>`;
+  }
+  const allCard = `
+    <div class="card">
+      <div class="card-label"><span class="dot" style="background:var(--all)"></span>All Socials</div>
+      <div class="card-value">${fmt(allCount)}</div>
+      <div class="card-sub">${allBadge} <span>vs previous entry</span></div>
+    </div>`;
+  document.getElementById('follower-cards').innerHTML = cardsHtml + allCard;
+
+  // --- Speed Cards (compare growth rates, not totals) ---
+  const speedHtml = Object.entries(PLATFORMS).map(([key, p]) => {
+    const sorted = data.filter(d => d.platform === key).sort((a, b) => a.date.localeCompare(b.date));
+
+    // Helper: get gain for a period ending on or before `endDate`, spanning `days` days
+    function getGain(endDate, days) {
+      const end = getEntryOnOrBefore(data, key, endDate);
+      if (!end) return null;
+      const startDate = (() => { const d = new Date(endDate); d.setDate(d.getDate() - days); return d.toISOString().split('T')[0]; })();
+      const start = getEntryOnOrBefore(data, key, startDate);
+      if (!start || start.date === end.date) return null;
+      return end.count - start.count;
+    }
+
+    // DoD: today's gain vs yesterday's gain
+    function dodRow() {
+      const todayGain = getGain(daysAgo(0), 1);
+      const yesterdayGain = getGain(daysAgo(1), 1);
+      return speedCompareRow('Day over Day', todayGain, yesterdayGain, 'today', 'yesterday');
+    }
+
+    // WoW: this week's gain vs last week's gain
+    function wowRow() {
+      const thisWeek = getGain(daysAgo(0), 7);
+      const lastWeek = getGain(daysAgo(7), 7);
+      return speedCompareRow('Week over Week', thisWeek, lastWeek, 'this week', 'last week');
+    }
+
+    // MoM: this month's gain vs last month's gain
+    function momRow() {
+      const thisMonth = getGain(daysAgo(0), 30);
+      const lastMonth = getGain(daysAgo(30), 30);
+      return speedCompareRow('Month over Month', thisMonth, lastMonth, 'this month', 'last month');
+    }
+
+    function speedCompareRow(label, current, previous, curLabel, prevLabel) {
+      const noData = `<div class="speed-row"><span class="speed-label">${label}</span><span class="speed-value badge neutral">--</span></div>`;
+      if (current === null) return noData;
+
+      // Show current period gain
+      const sign = current >= 0 ? '+' : '';
+      let html = `<div class="speed-row"><span class="speed-label">${label}</span><span class="speed-value">`;
+      html += `<span style="color:var(--text);font-size:13px">${sign}${fmt(current)}</span>`;
+
+      // Show % change vs previous period if available
+      if (previous !== null && previous !== 0) {
+        const ch = ((current - previous) / Math.abs(previous)) * 100;
+        const cls = ch >= 0 ? 'up' : 'down';
+        const arrow = ch >= 0 ? '&#9650;' : '&#9660;';
+        html += ` <span class="badge ${cls}" style="margin-left:6px">${arrow} ${Math.abs(ch).toFixed(1)}%</span>`;
+      }
+      html += `</span></div>`;
+      return html;
+    }
+
+    return `
+      <div class="speed-card">
+        <h3><span class="dot" style="background:${p.color}"></span>${p.label}</h3>
+        ${dodRow()}
+        ${wowRow()}
+        ${momRow()}
+      </div>`;
+  }).join('');
+
+  // --- All Socials Speed Card ---
+  function getAllGain(endDate, days) {
+    let total = 0, hasAny = false;
+    Object.keys(PLATFORMS).forEach(key => {
+      const end = getEntryOnOrBefore(data, key, endDate);
+      if (!end) return;
+      const startDate = (() => { const d = new Date(endDate); d.setDate(d.getDate() - days); return d.toISOString().split('T')[0]; })();
+      const start = getEntryOnOrBefore(data, key, startDate);
+      if (!start || start.date === end.date) return;
+      total += end.count - start.count;
+      hasAny = true;
+    });
+    return hasAny ? total : null;
+  }
+  function allSpeedRow(label, current, previous) {
+    const noData = `<div class="speed-row"><span class="speed-label">${label}</span><span class="speed-value badge neutral">--</span></div>`;
+    if (current === null) return noData;
+    const sign = current >= 0 ? '+' : '';
+    let html = `<div class="speed-row"><span class="speed-label">${label}</span><span class="speed-value">`;
+    html += `<span style="color:var(--text);font-size:13px">${sign}${fmt(current)}</span>`;
+    if (previous !== null && previous !== 0) {
+      const ch = ((current - previous) / Math.abs(previous)) * 100;
+      const cls = ch >= 0 ? 'up' : 'down';
+      const arrow = ch >= 0 ? '&#9650;' : '&#9660;';
+      html += ` <span class="badge ${cls}" style="margin-left:6px">${arrow} ${Math.abs(ch).toFixed(1)}%</span>`;
+    }
+    html += `</span></div>`;
+    return html;
+  }
+  const allSpeedCard = `
+    <div class="speed-card">
+      <h3><span class="dot" style="background:var(--all)"></span>All Socials</h3>
+      ${allSpeedRow('Day over Day', getAllGain(daysAgo(0), 1), getAllGain(daysAgo(1), 1))}
+      ${allSpeedRow('Week over Week', getAllGain(daysAgo(0), 7), getAllGain(daysAgo(7), 7))}
+      ${allSpeedRow('Month over Month', getAllGain(daysAgo(0), 30), getAllGain(daysAgo(30), 30))}
+    </div>`;
+  document.getElementById('speed-cards').innerHTML = speedHtml + allSpeedCard;
+
+  // --- Target Cards (exact dates at weekly + monthly speed) ---
+  const targetHtml = Object.entries(PLATFORMS).map(([key, p]) => {
+    const sorted = data.filter(d => d.platform === key).sort((a, b) => a.date.localeCompare(b.date));
+    const latest = sorted[sorted.length - 1];
+    const count = latest ? latest.count : 0;
+    const progress = Math.min((count / TARGET) * 100, 100);
+    const remaining = TARGET - count;
+
+    // Weekly speed: gain over last 7 days
+    const weekAgoEntry = getEntryOnOrBefore(data, key, daysAgo(7));
+    const weeklyGain = (latest && weekAgoEntry && latest.date !== weekAgoEntry.date)
+      ? latest.count - weekAgoEntry.count : null;
+
+    // Monthly speed: gain over last 30 days
+    const monthAgoEntry = getEntryOnOrBefore(data, key, daysAgo(30));
+    const monthlyGain = (latest && monthAgoEntry && latest.date !== monthAgoEntry.date)
+      ? latest.count - monthAgoEntry.count : null;
+
+    function estimateDate(gain, periodDays) {
+      if (!gain || gain <= 0 || remaining <= 0) return null;
+      const dailyRate = gain / periodDays;
+      const daysNeeded = Math.ceil(remaining / dailyRate);
+      const target = new Date();
+      target.setDate(target.getDate() + daysNeeded);
+      return { days: daysNeeded, date: target.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) };
+    }
+
+    const weekEst = estimateDate(weeklyGain, 7);
+    const monthEst = estimateDate(monthlyGain, 30);
+
+    function estRow(label, est, gain) {
+      if (remaining <= 0) return `<div class="speed-row"><span class="speed-label">${label}</span><span class="speed-value" style="color:var(--green)">Reached!</span></div>`;
+      if (!est) return `<div class="speed-row"><span class="speed-label">${label}</span><span class="speed-value badge neutral">--</span></div>`;
+      return `<div class="speed-row"><span class="speed-label">${label}<br><span style="font-size:11px;color:var(--muted)">${fmt(gain)}/period</span></span><span class="speed-value" style="text-align:right"><span style="color:var(--text);font-size:15px;font-weight:700">${est.date}</span><br><span style="font-size:11px;color:var(--muted)">${est.days.toLocaleString()} days</span></span></div>`;
+    }
+
+    return `
+      <div class="target-card">
+        <h3><span class="dot" style="background:${p.color}"></span>${p.label}</h3>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" style="width:${progress}%;background:${p.color}"></div>
+        </div>
+        <div class="target-stats" style="margin-bottom:12px">
+          <span>${fmt(count)} current</span>
+          <span>${progress.toFixed(2)}%</span>
+          <span>${fmt(TARGET)} target</span>
+        </div>
+        ${estRow('At weekly speed', weekEst, weeklyGain)}
+        ${estRow('At monthly speed', monthEst, monthlyGain)}
+      </div>`;
+  }).join('');
+
+  // --- All Socials Target Card (2M combined) ---
+  const ALL_TARGET = 2000000;
+  const allLatestCount = Object.keys(PLATFORMS).reduce((sum, key) => {
+    const sorted = data.filter(d => d.platform === key).sort((a, b) => a.date.localeCompare(b.date));
+    return sum + (sorted.length ? sorted[sorted.length - 1].count : 0);
+  }, 0);
+  const allProgress = Math.min((allLatestCount / ALL_TARGET) * 100, 100);
+  const allRemaining = ALL_TARGET - allLatestCount;
+
+  const allWeeklyGain = getAllGain(daysAgo(0), 7);
+  const allMonthlyGain = getAllGain(daysAgo(0), 30);
+
+  function allEstDate(gain, periodDays) {
+    if (!gain || gain <= 0 || allRemaining <= 0) return null;
+    const dailyRate = gain / periodDays;
+    const daysNeeded = Math.ceil(allRemaining / dailyRate);
+    const target = new Date();
+    target.setDate(target.getDate() + daysNeeded);
+    return { days: daysNeeded, date: target.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) };
+  }
+
+  const allWeekEst = allEstDate(allWeeklyGain, 7);
+  const allMonthEst = allEstDate(allMonthlyGain, 30);
+
+  function allEstRow(label, est, gain) {
+    if (allRemaining <= 0) return `<div class="speed-row"><span class="speed-label">${label}</span><span class="speed-value" style="color:var(--green)">Reached!</span></div>`;
+    if (!est) return `<div class="speed-row"><span class="speed-label">${label}</span><span class="speed-value badge neutral">--</span></div>`;
+    return `<div class="speed-row"><span class="speed-label">${label}<br><span style="font-size:11px;color:var(--muted)">${fmt(gain)}/period</span></span><span class="speed-value" style="text-align:right"><span style="color:var(--text);font-size:15px;font-weight:700">${est.date}</span><br><span style="font-size:11px;color:var(--muted)">${est.days.toLocaleString()} days</span></span></div>`;
+  }
+
+  const allTargetCard = `
+    <div class="target-card">
+      <h3><span class="dot" style="background:var(--all)"></span>All Socials</h3>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" style="width:${allProgress}%;background:var(--all)"></div>
+      </div>
+      <div class="target-stats" style="margin-bottom:12px">
+        <span>${fmt(allLatestCount)} current</span>
+        <span>${allProgress.toFixed(2)}%</span>
+        <span>${fmt(ALL_TARGET)} target</span>
+      </div>
+      ${allEstRow('At weekly speed', allWeekEst, allWeeklyGain)}
+      ${allEstRow('At monthly speed', allMonthEst, allMonthlyGain)}
+    </div>`;
+  document.getElementById('target-cards').innerHTML = targetHtml + allTargetCard;
+
+  renderChart(data, currentChartPlatform);
+}
+
+// ======================== CHART (per-platform tabs + time range) ========================
+let growthChartInstance = null;
+let currentChartPlatform = 'linkedin';
+let currentTimeRange = 'all';
+let currentMonth = '';
+
+function filterByTimeRange(data) {
+  if (currentMonth) {
+    const [y, m] = currentMonth.split('-').map(Number);
+    const start = currentMonth + '-01';
+    const lastDay = new Date(y, m, 0).getDate();
+    const end = currentMonth + '-' + String(lastDay).padStart(2, '0');
+    return data.filter(d => d.date >= start && d.date <= end);
+  }
+  if (currentTimeRange === 'all') return data;
+  const ranges = { '1d': 1, '1w': 7, '1m': 30, '3m': 90, '6m': 180, '12m': 365 };
+  const days = ranges[currentTimeRange];
+  if (!days) return data;
+  return data.filter(d => d.date >= daysAgo(days));
+}
+
+function populateMonthPicker(data, platformKey) {
+  const picker = document.getElementById('month-picker');
+  const entries = platformKey === 'all' ? data : data.filter(d => d.platform === platformKey);
+  const months = [...new Set(entries.map(d => d.date.substring(0, 7)))].sort();
+  const prev = picker.value;
+  picker.innerHTML = '<option value="">Pick a month\u2026</option>';
+  months.forEach(m => {
+    const [y, mo] = m.split('-');
+    const label = new Date(y, mo - 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    picker.innerHTML += `<option value="${m}">${label}</option>`;
+  });
+  picker.value = currentMonth;
+}
+
+function renderChart(data, platformKey) {
+  // Populate month picker with available months for this platform
+  populateMonthPicker(data, platformKey);
+
+  // Apply time range filter
+  data = filterByTimeRange(data);
+
+  const ctx = document.getElementById('growthChart').getContext('2d');
+  if (growthChartInstance) growthChartInstance.destroy();
+
+  let datasets, allDates;
+
+  if (platformKey === 'all') {
+    // All Socials: single combined line (sum of all platforms per date)
+    const dateSet = new Set();
+    const platMaps = {};
+    Object.keys(PLATFORMS).forEach(key => {
+      platMaps[key] = {};
+      data.filter(d => d.platform === key).sort((a, b) => a.date.localeCompare(b.date)).forEach(d => {
+        platMaps[key][d.date] = d.count;
+        dateSet.add(d.date);
+      });
+    });
+    allDates = [...dateSet].sort();
+
+    // For each date, sum latest known value per platform
+    const lastKnown = {};
+    const combined = allDates.map(date => {
+      let sum = 0;
+      Object.keys(PLATFORMS).forEach(key => {
+        if (platMaps[key][date] !== undefined) lastKnown[key] = platMaps[key][date];
+        sum += (lastKnown[key] || 0);
+      });
+      return sum;
+    });
+
+    datasets = [{
+      label: 'All Socials',
+      data: combined,
+      borderColor: '#6366f1',
+      backgroundColor: '#6366f122',
+      tension: 0.35,
+      pointRadius: 0,
+      pointHoverRadius: 5,
+      borderWidth: 2.5,
+      fill: true,
+    }];
+  } else {
+    // Single platform
+    const p = PLATFORMS[platformKey];
+    const entries = data.filter(d => d.platform === platformKey).sort((a, b) => a.date.localeCompare(b.date));
+    allDates = entries.map(e => e.date);
+    datasets = [{
+      label: p.label,
+      data: entries.map(e => e.count),
+      borderColor: p.color,
+      backgroundColor: p.color + '22',
+      tension: 0.35,
+      pointRadius: allDates.length > 60 ? 0 : 3,
+      pointHoverRadius: 5,
+      borderWidth: 2.5,
+      fill: true,
+    }];
+  }
+
+  growthChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: { labels: allDates, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1a1d27',
+          borderColor: '#2a2d3a',
+          borderWidth: 1,
+          titleColor: '#e4e4e7',
+          bodyColor: '#e4e4e7',
+          padding: 12,
+          callbacks: {
+            label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y != null ? ctx.parsed.y.toLocaleString() : '--'}`
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: '#2a2d3a22' },
+          ticks: {
+            color: '#8b8d97',
+            font: { size: 11 },
+            maxRotation: 45,
+            maxTicksLimit: 15,
+          }
+        },
+        y: {
+          grid: { color: '#2a2d3a44' },
+          ticks: { color: '#8b8d97', font: { size: 12 }, callback: v => fmt(v) },
+          beginAtZero: false
+        }
+      }
+    }
+  });
+}
+
+// ======================== HISTORY TABLE ========================
+let currentFilter = 'all';
+
+function renderHistory() {
+  const data = loadData();
+  const filtered = currentFilter === 'all' ? data : data.filter(d => d.platform === currentFilter);
+  const sorted = filtered.sort((a, b) => b.date.localeCompare(a.date) || a.platform.localeCompare(b.platform));
+
+  const body = document.getElementById('history-body');
+  const empty = document.getElementById('empty-msg');
+
+  if (sorted.length === 0) {
+    body.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  // Only show last 200 rows for performance
+  const shown = sorted.slice(0, 200);
+
+  body.innerHTML = shown.map((entry) => {
+    const p = PLATFORMS[entry.platform];
+    const allForPlatform = data.filter(d => d.platform === entry.platform).sort((a, b) => a.date.localeCompare(b.date));
+    const idx = allForPlatform.findIndex(d => d.date === entry.date);
+    const prev = idx > 0 ? allForPlatform[idx - 1] : null;
+    let changeHtml = '<span class="badge neutral">--</span>';
+    if (prev) {
+      const diff = entry.count - prev.count;
+      const sign = diff >= 0 ? '+' : '';
+      const cls = diff >= 0 ? 'up' : 'down';
+      changeHtml = `<span class="badge ${cls}">${sign}${fmt(diff)}</span>`;
+    }
+
+    return `<tr>
+      <td>${entry.date}</td>
+      <td><span class="platform-tag ${entry.platform}">${p.label}</span></td>
+      <td>${entry.count.toLocaleString()}</td>
+      <td>${changeHtml}</td>
+      <td><button class="delete-btn" data-date="${entry.date}" data-platform="${entry.platform}" title="Delete">&times;</button></td>
+    </tr>`;
+  }).join('');
+
+  if (sorted.length > 200) {
+    body.innerHTML += `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px">Showing 200 of ${sorted.length} entries</td></tr>`;
+  }
+}
+
+// ======================== EVENT HANDLERS ========================
+
+// Tabs
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'dashboard') renderDashboard();
+    if (btn.dataset.tab === 'upload') renderHistory();
+  });
+});
+
+// Chart platform tabs
+document.querySelectorAll('#chart-tabs .filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#chart-tabs .filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentChartPlatform = btn.dataset.chart;
+    renderChart(loadData(), currentChartPlatform);
+  });
+});
+
+// Time range tabs
+document.querySelectorAll('#time-range-tabs .filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#time-range-tabs .filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentTimeRange = btn.dataset.range;
+    currentMonth = '';
+    document.getElementById('month-picker').value = '';
+    renderChart(loadData(), currentChartPlatform);
+  });
+});
+
+// Month picker
+document.getElementById('month-picker').addEventListener('change', (e) => {
+  const val = e.target.value;
+  if (val) {
+    currentMonth = val;
+    currentTimeRange = '';
+    document.querySelectorAll('#time-range-tabs .filter-btn').forEach(b => b.classList.remove('active'));
+  } else {
+    currentMonth = '';
+    currentTimeRange = 'all';
+    document.querySelectorAll('#time-range-tabs .filter-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('#time-range-tabs .filter-btn[data-range="all"]').classList.add('active');
+  }
+  renderChart(loadData(), currentChartPlatform);
+});
+
+// History filter buttons
+document.querySelectorAll('.history-card .filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.history-card .filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    renderHistory();
+  });
+});
+
+// --- PLATFORM FILE IMPORTS ---
+setupDropZone('drop-linkedin', 'result-linkedin', (file, resultEl) => {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const entries = parseLinkedInXLSX(e.target.result);
+      const result = upsertEntries(entries);
+      resultEl.textContent = `Imported ${result.total} days of LinkedIn data`;
+      resultEl.style.display = 'block';
+      renderHistory();
+      showToast(`LinkedIn: ${result.total} entries imported!`);
+    } catch (err) {
+      showToast('Error: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+setupDropZone('drop-substack', 'result-substack', (file, resultEl) => {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const entries = parseSubstackCSV(e.target.result);
+      if (entries.length === 0) throw new Error('No valid data found in CSV');
+      const result = upsertEntries(entries);
+      resultEl.textContent = `Imported ${result.total} days of Substack data`;
+      resultEl.style.display = 'block';
+      renderHistory();
+      showToast(`Substack: ${result.total} entries imported!`);
+    } catch (err) {
+      showToast('Error: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+});
+
+setupDropZone('drop-x', 'result-x', (file, resultEl) => {
+  const currentTotal = parseInt(document.getElementById('x-current-count').value);
+  if (!currentTotal || currentTotal <= 0) {
+    showToast('Please enter your current X follower count first');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const entries = parseXCSV(e.target.result, currentTotal);
+      if (entries.length === 0) throw new Error('No valid data found in CSV');
+      const result = upsertEntries(entries);
+      resultEl.textContent = `Imported ${result.total} days of X data`;
+      resultEl.style.display = 'block';
+      renderHistory();
+      showToast(`X: ${result.total} entries imported!`);
+    } catch (err) {
+      showToast('Error: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+});
+
+// --- MANUAL ENTRY ---
+document.getElementById('add-btn').addEventListener('click', () => {
+  const date = document.getElementById('entry-date').value;
+  const platform = document.getElementById('entry-platform').value;
+  const count = parseInt(document.getElementById('entry-count').value);
+
+  if (!date) { showToast('Please select a date'); return; }
+  if (!count && count !== 0) { showToast('Please enter a follower count'); return; }
+  if (count < 0) { showToast('Count must be positive'); return; }
+
+  const result = upsertEntries([{ date, platform, count }]);
+  document.getElementById('entry-count').value = '';
+  renderHistory();
+  showToast(result.added ? 'Entry added!' : 'Entry updated!');
+});
+
+// Delete entry
+document.getElementById('history-body').addEventListener('click', e => {
+  const btn = e.target.closest('.delete-btn');
+  if (!btn) return;
+  const date = btn.dataset.date;
+  const platform = btn.dataset.platform;
+  const data = loadData();
+  const idx = data.findIndex(d => d.date === date && d.platform === platform);
+  if (idx >= 0) {
+    data.splice(idx, 1);
+    saveData(data);
+    renderHistory();
+    showToast('Entry deleted');
+  }
+});
+
+// Clear all
+document.getElementById('clear-btn').addEventListener('click', () => {
+  if (confirm('Delete all data? This cannot be undone.')) {
+    saveData([]);
+    renderHistory();
+    renderDashboard();
+    showToast('All data cleared');
+  }
+});
+
+// Export CSV
+document.getElementById('export-btn').addEventListener('click', () => {
+  const data = loadData();
+  if (data.length === 0) { showToast('No data to export'); return; }
+  const rows = [['date', 'platform', 'count']];
+  data.sort((a, b) => a.date.localeCompare(b.date) || a.platform.localeCompare(b.platform))
+      .forEach(d => rows.push([d.date, d.platform, d.count]));
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'growth_data.csv'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('CSV exported!');
+});
+
+// Set default date to today
+document.getElementById('entry-date').value = new Date().toISOString().split('T')[0];
+
+// Initial render
+renderDashboard();
+renderHistory();
+</script>
+</body>
+</html>
