@@ -1179,20 +1179,43 @@ function computeStreaksAndCombos(data) {
     if (bestStreak > result.bestOverall) { result.bestOverall = bestStreak; result.bestOverallPlatform = key; }
   });
 
-  // Velocity streak: count platforms where last 7d growth > all-time average 7d growth
+  // Velocity streak (Duolingo-style): consecutive days where at least 1 platform
+  // grew faster in its last 7 days than its all-time average weekly growth.
+  // +1 per day that qualifies, resets to 0 when none qualify.
+  const avgWeeklyGains = {};
   platformKeys.forEach(key => {
     const sorted = data.filter(d => d.platform === key).sort((a, b) => a.date.localeCompare(b.date));
     if (sorted.length < 2) return;
     const totalGain = sorted[sorted.length - 1].count - sorted[0].count;
     const totalDays = daysBetween(sorted[0].date, sorted[sorted.length - 1].date);
     if (totalDays <= 7) return;
-    const avg7dayGain = (totalGain / totalDays) * 7;
+    avgWeeklyGains[key] = (totalGain / totalDays) * 7;
+  });
+
+  // Today's velocity: which platforms are currently beating their avg
+  platformKeys.forEach(key => {
+    if (avgWeeklyGains[key] === undefined) return;
     const last7gain = getGainForPlatform(data, key, daysAgo(0), 7);
-    if (last7gain !== null && last7gain > avg7dayGain) {
+    if (last7gain !== null && last7gain > avgWeeklyGains[key]) {
       result.velocityCount++;
       result.velocityPlatforms.push(key);
     }
   });
+
+  // Count consecutive days backwards from today
+  let streak = 0;
+  for (let d = 0; d < 365; d++) {
+    const dateStr = daysAgo(d);
+    let dayCount = 0, hasData = false;
+    platformKeys.forEach(key => {
+      if (avgWeeklyGains[key] === undefined) return;
+      const gain = getGainForPlatform(data, key, dateStr, 7);
+      if (gain !== null) { hasData = true; if (gain > avgWeeklyGains[key]) dayCount++; }
+    });
+    if (!hasData || dayCount === 0) break;
+    streak++;
+  }
+  result.velocityStreak = streak;
 
   // Combo detection
   const allDates = [...new Set(data.map(d => d.date))].sort().filter(d => d >= daysAgo(30));
@@ -1470,10 +1493,10 @@ function renderDashboard() {
           <span class="streak-card-icon">🔥</span>
           <span class="streak-card-title">VELOCITY STREAK</span>
         </div>
-        <div class="streak-card-value">${streaks.velocityCount}/3</div>
-        <div class="streak-card-explain">${streaks.velocityCount > 0
-          ? `<strong>${streaks.velocityPlatforms.map(k => PLATFORMS[k].label).join(', ')}</strong> grew faster in the last 7 days than ${streaks.velocityCount > 1 ? 'their' : 'its'} all-time average weekly growth. ${streaks.velocityCount === 3 ? 'ALL platforms accelerating — PERFECT!' : streaks.velocityCount === 2 ? 'Two out of three — almost there!' : 'Keep pushing the other platforms!'}`
-          : `Counts how many platforms grew faster in the last 7 days than their all-time average weekly growth. Right now none are beating their average — time to accelerate!`}</div>
+        <div class="streak-card-value">${streaks.velocityStreak} day${streaks.velocityStreak !== 1 ? 's' : ''}</div>
+        <div class="streak-card-explain">${streaks.velocityStreak > 0
+          ? `${streaks.velocityCount}/3 platforms beating their average today: <strong>${streaks.velocityPlatforms.map(k => PLATFORMS[k].label).join(', ')}</strong>. Your streak has been alive for <strong>${streaks.velocityStreak}</strong> consecutive day${streaks.velocityStreak !== 1 ? 's' : ''}! ${streaks.velocityStreak >= 14 ? "You're on fire — don't break it!" : streaks.velocityStreak >= 7 ? 'Solid streak — keep it going!' : 'Keep uploading to grow the streak!'}`
+          : `Each day, at least 1 platform must grow faster in its last 7 days than its all-time average weekly growth to keep the streak alive. Right now none qualify — time to accelerate!`}</div>
       </div>
       <div class="streak-card">
         <div class="streak-card-header">
