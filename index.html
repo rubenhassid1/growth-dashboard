@@ -800,6 +800,9 @@ const STORAGE_KEY = 'growth_dashboard_data';
 const ACHIEVEMENTS_KEY = 'growth_fighter_achievements';
 const STREAKS_KEY = 'growth_fighter_streaks';
 
+// Substack: migration from ConvertKit on this date — exclude from gain calculations
+const SUBSTACK_MIGRATION_DATE = '2025-05-19';
+
 const PLATFORMS = {
   linkedin:  { label: 'LinkedIn',   color: '#0a66c2', dotClass: 'linkedin' },
   substack:  { label: 'Substack',   color: '#ff6719', dotClass: 'substack' },
@@ -1150,7 +1153,7 @@ function setupDropZone(zoneId, resultId, handler) {
 
 // ===================== STREAKS ENGINE =====================
 function computeStreaksAndCombos(data) {
-  const result = { perPlatform: {}, bestOverall: 0, currentOverall: 0, bestOverallPlatform: '', currentOverallPlatform: '', comboToday: false, superComboToday: false, combosLast30: 0 };
+  const result = { perPlatform: {}, velocityCount: 0, velocityPlatforms: [], bestOverall: 0, currentOverall: 0, bestOverallPlatform: '', currentOverallPlatform: '', comboToday: false, superComboToday: false, combosLast30: 0 };
   const today = daysAgo(0);
   const platformKeys = Object.keys(PLATFORMS);
 
@@ -1174,6 +1177,21 @@ function computeStreaksAndCombos(data) {
     result.perPlatform[key] = { current: currentStreak, best: bestStreak };
     if (currentStreak > result.currentOverall) { result.currentOverall = currentStreak; result.currentOverallPlatform = key; }
     if (bestStreak > result.bestOverall) { result.bestOverall = bestStreak; result.bestOverallPlatform = key; }
+  });
+
+  // Velocity streak: count platforms where last 7d growth > all-time average 7d growth
+  platformKeys.forEach(key => {
+    const sorted = data.filter(d => d.platform === key).sort((a, b) => a.date.localeCompare(b.date));
+    if (sorted.length < 2) return;
+    const totalGain = sorted[sorted.length - 1].count - sorted[0].count;
+    const totalDays = daysBetween(sorted[0].date, sorted[sorted.length - 1].date);
+    if (totalDays <= 7) return;
+    const avg7dayGain = (totalGain / totalDays) * 7;
+    const last7gain = getGainForPlatform(data, key, daysAgo(0), 7);
+    if (last7gain !== null && last7gain > avg7dayGain) {
+      result.velocityCount++;
+      result.velocityPlatforms.push(key);
+    }
   });
 
   // Combo detection
@@ -1452,10 +1470,10 @@ function renderDashboard() {
           <span class="streak-card-icon">🔥</span>
           <span class="streak-card-title">VELOCITY STREAK</span>
         </div>
-        <div class="streak-card-value">${streaks.currentOverall} days</div>
-        <div class="streak-card-explain">${streaks.currentOverall > 0
-          ? `<strong>${bestPlatformLabel}</strong> has been growing faster than its own 7-day average for <strong>${streaks.currentOverall}</strong> consecutive days. You're accelerating!`
-          : `How many consecutive days you grow <em>faster</em> than your own previous 7-day average. Right now no platform has an active streak — it starts the moment your daily growth beats your recent pace.`}</div>
+        <div class="streak-card-value">${streaks.velocityCount}/3</div>
+        <div class="streak-card-explain">${streaks.velocityCount > 0
+          ? `<strong>${streaks.velocityPlatforms.map(k => PLATFORMS[k].label).join(', ')}</strong> grew faster in the last 7 days than ${streaks.velocityCount > 1 ? 'their' : 'its'} all-time average weekly growth. ${streaks.velocityCount === 3 ? 'ALL platforms accelerating — PERFECT!' : streaks.velocityCount === 2 ? 'Two out of three — almost there!' : 'Keep pushing the other platforms!'}`
+          : `Counts how many platforms grew faster in the last 7 days than their all-time average weekly growth. Right now none are beating their average — time to accelerate!`}</div>
       </div>
       <div class="streak-card">
         <div class="streak-card-header">
@@ -1645,33 +1663,41 @@ function populateMonthPicker(data, platformKey) {
 }
 
 function computeDailyGains(data, platformKey) {
-  let entries;
   if (platformKey === 'all') {
-    // Sum gains across all platforms per date
-    const dateSet = new Set();
-    const platMaps = {};
+    // Sum per-platform gains to avoid fake spikes when a new platform first appears
+    const platGains = {};
     Object.keys(PLATFORMS).forEach(k => {
-      platMaps[k] = {};
-      data.filter(d => d.platform === k).sort((a, b) => a.date.localeCompare(b.date)).forEach(d => { platMaps[k][d.date] = d.count; dateSet.add(d.date); });
+      let entries = data.filter(d => d.platform === k).sort((a, b) => a.date.localeCompare(b.date));
+      if (k === 'substack') entries = entries.filter(d => d.date >= SUBSTACK_MIGRATION_DATE);
+      platGains[k] = {};
+      for (let i = 1; i < entries.length; i++) {
+        const days = daysBetween(entries[i-1].date, entries[i].date);
+        if (days <= 0) continue;
+        const gain = entries[i].count - entries[i-1].count;
+        if (k === 'substack' && gain < 0) continue; // skip list cleaning
+        platGains[k][entries[i].date] = gain;
+      }
     });
+    const dateSet = new Set();
+    Object.keys(PLATFORMS).forEach(k => Object.keys(platGains[k]).forEach(d => dateSet.add(d)));
     const allDates = [...dateSet].sort();
-    const lastKnown = {};
-    const totals = allDates.map(date => {
-      let sum = 0;
-      Object.keys(PLATFORMS).forEach(k => { if (platMaps[k][date] !== undefined) lastKnown[k] = platMaps[k][date]; sum += (lastKnown[k] || 0); });
-      return { date, count: sum };
+    return allDates.map(date => {
+      let totalGain = 0;
+      Object.keys(PLATFORMS).forEach(k => { if (platGains[k][date] !== undefined) totalGain += platGains[k][date]; });
+      return { date, gain: totalGain, perDay: totalGain };
     });
-    entries = totals;
-  } else {
-    entries = data.filter(d => d.platform === platformKey).sort((a, b) => a.date.localeCompare(b.date));
   }
+
+  let entries = data.filter(d => d.platform === platformKey).sort((a, b) => a.date.localeCompare(b.date));
+  if (platformKey === 'substack') entries = entries.filter(d => d.date >= SUBSTACK_MIGRATION_DATE);
+
   const gains = [];
   for (let i = 1; i < entries.length; i++) {
     const days = daysBetween(entries[i-1].date, entries[i].date);
     if (days <= 0) continue;
     const totalGain = entries[i].count - entries[i-1].count;
-    // Spread evenly if multi-day gap, but show as single bar on the end date
-    gains.push({ date: entries[i].date, gain: totalGain, perDay: Math.round(totalGain / days) });
+    const isSubstackCleaning = platformKey === 'substack' && totalGain < 0;
+    gains.push({ date: entries[i].date, gain: totalGain, perDay: Math.round(totalGain / days), isSubstackCleaning });
   }
   return gains;
 }
@@ -1685,17 +1711,23 @@ function renderChart(data, platformKey) {
   const gains = computeDailyGains(data, platformKey);
   const allDates = gains.map(g => g.date);
   const rawGains = gains.map(g => g.gain);
+  const substackCleaningFlags = gains.map(g => g.isSubstackCleaning || false);
 
   // Detect and clip extreme negative outliers (e.g. Substack list cleanings)
   // so they don't crush the chart scale. Clip negatives to -2x the median positive gain.
-  const positiveGains = rawGains.filter(g => g > 0).sort((a, b) => a - b);
+  const positiveGains = rawGains.filter((g, i) => g > 0 && !substackCleaningFlags[i]).sort((a, b) => a - b);
   const medianPositive = positiveGains.length > 0 ? positiveGains[Math.floor(positiveGains.length / 2)] : 1000;
   const negativeClip = -(medianPositive * 3);
-  const clippedFlags = rawGains.map(g => g < negativeClip);
-  const allGains = rawGains.map(g => g < negativeClip ? negativeClip : g);
+  const smallRedCap = -(medianPositive * 0.15); // small bar for Substack list cleaning
+  const clippedFlags = rawGains.map((g, i) => substackCleaningFlags[i] ? false : g < negativeClip);
+  const allGains = rawGains.map((g, i) => {
+    if (substackCleaningFlags[i]) return smallRedCap;
+    if (g < negativeClip) return negativeClip;
+    return g;
+  });
 
   // Color bars: green for positive, red for negative, bright yellow for "banger" days (top 10%)
-  const sorted = [...allGains].filter(g => g > 0).sort((a, b) => b - a);
+  const sorted = [...allGains].filter((g, i) => g > 0 && !substackCleaningFlags[i]).sort((a, b) => b - a);
   const bangerThreshold = sorted.length >= 3 ? sorted[Math.max(0, Math.floor(sorted.length * 0.1))] : Infinity;
 
   const neonColors = {
@@ -1707,12 +1739,14 @@ function renderChart(data, platformKey) {
   const nc = neonColors[platformKey] || neonColors.linkedin;
 
   const barColors = allGains.map((g, i) => {
-    if (clippedFlags[i]) return 'rgba(220,38,38,0.3)';  // faded for clipped outliers
+    if (substackCleaningFlags[i]) return 'rgba(220,38,38,0.4)';
+    if (clippedFlags[i]) return 'rgba(220,38,38,0.3)';
     if (g >= bangerThreshold && g > 0) return nc.banger;
     if (g >= 0) return nc.normal;
     return 'rgba(220,38,38,0.7)';
   });
   const borderColors = allGains.map((g, i) => {
+    if (substackCleaningFlags[i]) return 'rgba(220,38,38,0.6)';
     if (clippedFlags[i]) return 'rgba(220,38,38,0.5)';
     if (g >= bangerThreshold && g > 0) return '#eab308';
     if (g >= 0) return nc.normal.replace('0.7', '1');
@@ -1746,10 +1780,12 @@ function renderChart(data, platformKey) {
             label: ctx => {
               const idx = ctx.dataIndex;
               const isClipped = clippedFlags[idx];
+              const isCleaning = substackCleaningFlags[idx];
               const actualValue = rawGains[idx];
               const v = ctx.parsed.y;
               if (v == null) return '--';
-              if (isClipped) return `${fmtFull(actualValue)} followers (list cleaning — clipped on chart)`;
+              if (isCleaning) return `${fmtFull(actualValue)} followers (list cleaning)`;
+              if (isClipped) return `${fmtFull(actualValue)} followers (clipped on chart)`;
               const sign = v >= 0 ? '+' : '';
               const isBanger = v >= bangerThreshold && v > 0;
               return `${sign}${fmtFull(v)} followers${isBanger ? ' ⭐ BANGER DAY!' : ''}`;
