@@ -198,11 +198,11 @@
   /* ===== STREAK CARDS ===== */
   .streak-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 14px;
     margin-bottom: 18px;
   }
-  @media (max-width: 1100px) { .streak-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 1100px) { .streak-grid { grid-template-columns: 1fr; } }
   @media (max-width: 600px) { .streak-grid { grid-template-columns: 1fr; } }
   .streak-card {
     background: var(--card);
@@ -1366,8 +1366,83 @@ function renderDashboard() {
       <div class="card-sub">${allSubHtml}</div>
     </div>`;
 
-  // ---- Streak Cards (with clear explanations) ----
+  // ---- Momentum Cards ----
   const bestPlatformLabel = streaks.currentOverallPlatform ? PLATFORMS[streaks.currentOverallPlatform]?.label : '';
+
+  // Compute "This Week vs Best Week" (all platforms combined)
+  const thisWeekGain = (() => {
+    let t = 0, has = false;
+    Object.keys(PLATFORMS).forEach(k => { const g = getGainForPlatform(data, k, daysAgo(0), 7); if (g !== null) { t += g; has = true; } });
+    return has ? t : null;
+  })();
+
+  // Find best-ever 7-day gain across all platforms combined
+  const bestWeekEver = (() => {
+    // Get all unique dates across all platforms
+    const allDates = [...new Set(data.map(d => d.date))].sort();
+    let best = 0;
+    for (const endDate of allDates) {
+      let weekTotal = 0, has = false;
+      Object.keys(PLATFORMS).forEach(k => {
+        const end = getEntryOnOrBefore(data, k, endDate);
+        if (!end) return;
+        const startDate = (() => { const d = new Date(endDate); d.setDate(d.getDate() - 7); return d.toISOString().split('T')[0]; })();
+        const start = getEntryOnOrBefore(data, k, startDate);
+        if (!start || start.date === end.date) return;
+        weekTotal += end.count - start.count;
+        has = true;
+      });
+      if (has && weekTotal > best) best = weekTotal;
+    }
+    return best;
+  })();
+
+  const weekPct = (thisWeekGain !== null && bestWeekEver > 0) ? Math.round((thisWeekGain / bestWeekEver) * 100) : null;
+  let weekVsBestValue, weekVsBestExplain;
+  if (thisWeekGain === null) {
+    weekVsBestValue = '--';
+    weekVsBestExplain = 'Upload at least 2 weeks of data to see how this week stacks up against your best week ever across all platforms.';
+  } else if (thisWeekGain >= bestWeekEver && bestWeekEver > 0) {
+    weekVsBestValue = '<span style="color:var(--green)">NEW RECORD!</span>';
+    weekVsBestExplain = `This week you gained <strong>+${fmtFull(thisWeekGain)}</strong> followers total — that's your <strong>best week ever</strong>! The team is on fire, keep this energy going!`;
+  } else if (weekPct !== null) {
+    weekVsBestValue = `${weekPct}%`;
+    weekVsBestExplain = `This week: <strong>+${fmtFull(thisWeekGain)}</strong> across all platforms. Your best week ever was <strong>+${fmtFull(bestWeekEver)}</strong>. ${weekPct >= 80 ? "You're SO close to beating your record — push harder!" : weekPct >= 50 ? "Solid week! Can you close the gap to your all-time best?" : "Every week is a chance to top the leaderboard. Let's go!"}`;
+  } else {
+    weekVsBestValue = `+${fmt(thisWeekGain)}`;
+    weekVsBestExplain = `You gained <strong>+${fmtFull(thisWeekGain)}</strong> this week. Keep uploading data to track your best week ever!`;
+  }
+
+  // Compute "Month Projection" — extrapolate this month's pace to end of month
+  const monthProjection = (() => {
+    const today = new Date();
+    const dayOfMonth = today.getDate();
+    const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    const monthStart = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`;
+
+    let totalGainSoFar = 0, has = false;
+    Object.keys(PLATFORMS).forEach(k => {
+      const startEntry = getEntryOnOrBefore(data, k, monthStart);
+      const endEntry = getLatest(data, k);
+      if (startEntry && endEntry && endEntry.date > startEntry.date) {
+        totalGainSoFar += endEntry.count - startEntry.count;
+        has = true;
+      }
+    });
+    if (!has || dayOfMonth < 2) return null;
+    const projected = Math.round(totalGainSoFar * (daysInMonth / dayOfMonth));
+    return { soFar: totalGainSoFar, projected, dayOfMonth, daysInMonth };
+  })();
+
+  let projValue, projExplain;
+  if (!monthProjection) {
+    projValue = '--';
+    projExplain = 'Once you have data for this month, this will project your total follower gain by month\'s end based on your current pace.';
+  } else {
+    const mp = monthProjection;
+    projValue = `+${fmt(mp.projected)}`;
+    projExplain = `You've gained <strong>+${fmtFull(mp.soFar)}</strong> so far (day ${mp.dayOfMonth} of ${mp.daysInMonth}). At this pace, you'll finish the month with <strong>+${fmtFull(mp.projected)}</strong> new followers across all platforms. ${mp.projected >= 20000 ? "That's massive — keep the machine running!" : mp.projected >= 10000 ? "Strong month shaping up! Every day counts." : "Still time to make this month count. Let's accelerate!"}`;
+  }
 
   document.getElementById('streak-bar').innerHTML = `
     <div class="section-title">Momentum</div>
@@ -1384,33 +1459,19 @@ function renderDashboard() {
       </div>
       <div class="streak-card">
         <div class="streak-card-header">
-          <span class="streak-card-icon">🏅</span>
-          <span class="streak-card-title">BEST EVER</span>
+          <span class="streak-card-icon">🏆</span>
+          <span class="streak-card-title">THIS WEEK VS BEST WEEK</span>
         </div>
-        <div class="streak-card-value">${streaks.bestOverall} days</div>
-        <div class="streak-card-explain">Your all-time longest velocity streak across any platform. ${streaks.bestOverall > 0
-          ? `Your record is <strong>${streaks.bestOverall}</strong> days of non-stop acceleration. Can you beat it?`
-          : `Once you build your first streak, your record will show here.`}</div>
+        <div class="streak-card-value">${weekVsBestValue}</div>
+        <div class="streak-card-explain">${weekVsBestExplain}</div>
       </div>
       <div class="streak-card">
         <div class="streak-card-header">
-          <span class="streak-card-icon">💥</span>
-          <span class="streak-card-title">COMBO TODAY</span>
+          <span class="streak-card-icon">🚀</span>
+          <span class="streak-card-title">MONTH PROJECTION</span>
         </div>
-        <div class="streak-card-value">${streaks.comboToday ? '<span class="combo-flash">C-C-COMBO!</span>' : 'No combo'}</div>
-        <div class="streak-card-explain">${streaks.comboToday
-          ? `All 3 platforms (LinkedIn, Substack, X) are growing faster today than their own 7-day average <em>at the same time</em>. Everything is firing!`
-          : `A combo fires when <em>all 3 platforms</em> beat their own 7-day average on the same day. It means LinkedIn, Substack, and X are all accelerating simultaneously.`}</div>
-      </div>
-      <div class="streak-card">
-        <div class="streak-card-header">
-          <span class="streak-card-icon">🎯</span>
-          <span class="streak-card-title">COMBOS (30 DAYS)</span>
-        </div>
-        <div class="streak-card-value">${streaks.combosLast30}</div>
-        <div class="streak-card-explain">${streaks.combosLast30 > 0
-          ? `In the last 30 days, <strong>${streaks.combosLast30}</strong> day${streaks.combosLast30 > 1 ? 's' : ''} where all platforms accelerated together. More combos = more synchronized growth.`
-          : `The number of days in the last 30 where all platforms beat their own pace on the same day. You haven't had one yet — keep growing!`}</div>
+        <div class="streak-card-value">${projValue}</div>
+        <div class="streak-card-explain">${projExplain}</div>
       </div>
     </div>`;
 
@@ -1623,7 +1684,15 @@ function renderChart(data, platformKey) {
 
   const gains = computeDailyGains(data, platformKey);
   const allDates = gains.map(g => g.date);
-  const allGains = gains.map(g => g.gain);
+  const rawGains = gains.map(g => g.gain);
+
+  // Detect and clip extreme negative outliers (e.g. Substack list cleanings)
+  // so they don't crush the chart scale. Clip negatives to -2x the median positive gain.
+  const positiveGains = rawGains.filter(g => g > 0).sort((a, b) => a - b);
+  const medianPositive = positiveGains.length > 0 ? positiveGains[Math.floor(positiveGains.length / 2)] : 1000;
+  const negativeClip = -(medianPositive * 3);
+  const clippedFlags = rawGains.map(g => g < negativeClip);
+  const allGains = rawGains.map(g => g < negativeClip ? negativeClip : g);
 
   // Color bars: green for positive, red for negative, bright yellow for "banger" days (top 10%)
   const sorted = [...allGains].filter(g => g > 0).sort((a, b) => b - a);
@@ -1637,12 +1706,14 @@ function renderChart(data, platformKey) {
   };
   const nc = neonColors[platformKey] || neonColors.linkedin;
 
-  const barColors = allGains.map(g => {
+  const barColors = allGains.map((g, i) => {
+    if (clippedFlags[i]) return 'rgba(220,38,38,0.3)';  // faded for clipped outliers
     if (g >= bangerThreshold && g > 0) return nc.banger;
     if (g >= 0) return nc.normal;
     return 'rgba(220,38,38,0.7)';
   });
-  const borderColors = allGains.map(g => {
+  const borderColors = allGains.map((g, i) => {
+    if (clippedFlags[i]) return 'rgba(220,38,38,0.5)';
     if (g >= bangerThreshold && g > 0) return '#eab308';
     if (g >= 0) return nc.normal.replace('0.7', '1');
     return 'rgba(220,38,38,1)';
@@ -1673,8 +1744,12 @@ function renderChart(data, platformKey) {
           titleFont: { family: "'Press Start 2P', monospace", size: 8 }, bodyFont: { size: 12 },
           callbacks: {
             label: ctx => {
+              const idx = ctx.dataIndex;
+              const isClipped = clippedFlags[idx];
+              const actualValue = rawGains[idx];
               const v = ctx.parsed.y;
               if (v == null) return '--';
+              if (isClipped) return `${fmtFull(actualValue)} followers (list cleaning — clipped on chart)`;
               const sign = v >= 0 ? '+' : '';
               const isBanger = v >= bangerThreshold && v > 0;
               return `${sign}${fmtFull(v)} followers${isBanger ? ' ⭐ BANGER DAY!' : ''}`;
