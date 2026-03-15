@@ -52,43 +52,20 @@
   .sprite-sm .sprite { width: 2px; height: 2px; }
   .sprite-sm { width: 28px; height: 28px; }
 
-  /* ===== TICKER ===== */
-  .ticker-wrap {
-    background: linear-gradient(90deg, #1a1a2e, #2d1b69, #1a1a2e);
-    overflow: hidden;
-    padding: 8px 0;
-    border-bottom: 3px solid var(--yellow);
-  }
-  .ticker {
-    display: flex;
-    animation: ticker-scroll 25s linear infinite;
-    white-space: nowrap;
-    gap: 60px;
-  }
-  .ticker-item {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 10px;
-    color: var(--yellow);
-    text-shadow: 0 0 10px rgba(234,179,8,0.5);
-    flex-shrink: 0;
-  }
-  @keyframes ticker-scroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
+  /* ===== TICKER (removed) ===== */
 
   /* ===== HEADER ===== */
   .header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px 32px;
+    padding: 16px 32px;
     background: linear-gradient(135deg, #1a1a2e 0%, #2d1b69 50%, #1a1a2e 100%);
     border-bottom: 4px solid var(--yellow);
   }
   .header-title h1 {
     font-family: 'Press Start 2P', monospace;
-    font-size: 22px;
+    font-size: 20px;
     color: #fff;
     text-shadow: 3px 3px 0 #ff0033, -1px -1px 0 #0066ff;
     letter-spacing: 2px;
@@ -124,6 +101,12 @@
     box-shadow: 0 0 12px rgba(234,179,8,0.4);
   }
   .tab-btn:hover:not(.active) { color: #fff; }
+  .tab-btn .tab-icon { display: block; font-size: 14px; margin-bottom: 2px; }
+  @media (max-width: 600px) {
+    .header { flex-direction: column; gap: 12px; padding: 14px 16px; }
+    .header-title h1 { font-size: 16px; }
+    .tab-btn { padding: 8px 14px; font-size: 9px; }
+  }
 
   .tab-content { display: none; padding: 20px 32px 40px; }
   .tab-content.active { display: block; }
@@ -212,42 +195,50 @@
   .badge.down { background: rgba(220,38,38,0.12); color: var(--red); }
   .badge.neutral { background: rgba(107,114,128,0.12); color: var(--muted); }
 
-  /* ===== STREAK BAR (compact) ===== */
-  .streak-bar {
-    display: flex;
-    align-items: center;
-    gap: 24px;
+  /* ===== STREAK CARDS ===== */
+  .streak-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  @media (max-width: 1100px) { .streak-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .streak-grid { grid-template-columns: 1fr; } }
+  .streak-card {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 14px 24px;
-    margin-bottom: 18px;
+    padding: 16px 18px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    flex-wrap: wrap;
   }
-  .streak-item {
+  .streak-card-header {
     display: flex;
     align-items: center;
     gap: 8px;
+    margin-bottom: 8px;
   }
-  .streak-item .streak-num {
+  .streak-card-icon {
+    font-size: 20px;
+  }
+  .streak-card-title {
     font-family: 'Press Start 2P', monospace;
-    font-size: 16px;
+    font-size: 9px;
     color: var(--text);
   }
-  .streak-item .streak-desc {
+  .streak-card-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .streak-card-explain {
     font-size: 12px;
     color: var(--muted);
-    line-height: 1.3;
-  }
-  .streak-divider {
-    width: 1px;
-    height: 28px;
-    background: var(--border);
+    line-height: 1.5;
   }
   .combo-flash {
     font-family: 'Press Start 2P', monospace;
-    font-size: 11px;
+    font-size: 14px;
     color: #ff0033;
     animation: combo-pulse 0.5s ease-in-out infinite alternate;
   }
@@ -693,11 +684,6 @@
 </head>
 <body>
 
-<!-- TICKER -->
-<div class="ticker-wrap">
-  <div class="ticker" id="ticker"><span class="ticker-item">LOADING FIGHT DATA...</span></div>
-</div>
-
 <!-- HEADER -->
 <div class="header">
   <div class="header-title">
@@ -705,8 +691,8 @@
     <div class="subtitle">ROAD TO 1,000,000</div>
   </div>
   <div class="tabs">
-    <button class="tab-btn active" data-tab="dashboard">FIGHT</button>
-    <button class="tab-btn" data-tab="upload">TRAINING</button>
+    <button class="tab-btn active" data-tab="dashboard"><span class="tab-icon">⚔️</span>DASHBOARD</button>
+    <button class="tab-btn" data-tab="upload"><span class="tab-icon">📊</span>UPLOAD DATA</button>
   </div>
 </div>
 
@@ -732,7 +718,7 @@
   </div>
   <div class="chart-section">
     <div class="section-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-      Growth Over Time
+      Daily Growth (spot the banger days!)
       <div class="filter-btns" id="chart-tabs">
         <button class="filter-btn active" data-chart="linkedin">LinkedIn</button>
         <button class="filter-btn" data-chart="substack">Substack</button>
@@ -1380,34 +1366,51 @@ function renderDashboard() {
       <div class="card-sub">${allSubHtml}</div>
     </div>`;
 
-  // ---- Streak Bar (compact) ----
+  // ---- Streak Cards (with clear explanations) ----
   const bestPlatformLabel = streaks.currentOverallPlatform ? PLATFORMS[streaks.currentOverallPlatform]?.label : '';
-  const streakDesc = streaks.currentOverall > 0
-    ? `${bestPlatformLabel} growing faster than its last 7 days`
-    : 'Grow faster than your last 7 days to start';
 
   document.getElementById('streak-bar').innerHTML = `
-    <div class="streak-bar">
-      <div class="streak-item" title="Velocity Streak: Consecutive days where your daily follower growth exceeds your own average daily growth over the previous 7 days. The higher the streak, the longer you've been accelerating!">
-        <span class="streak-num">${streaks.currentOverall > 0 ? '🔥 ' + streaks.currentOverall : '0'}</span>
-        <div class="streak-desc">Velocity Streak<br><span style="font-size:10px;color:var(--muted)">${streakDesc}</span></div>
+    <div class="section-title">Momentum</div>
+    <div class="streak-grid">
+      <div class="streak-card">
+        <div class="streak-card-header">
+          <span class="streak-card-icon">🔥</span>
+          <span class="streak-card-title">VELOCITY STREAK</span>
+        </div>
+        <div class="streak-card-value">${streaks.currentOverall} days</div>
+        <div class="streak-card-explain">${streaks.currentOverall > 0
+          ? `<strong>${bestPlatformLabel}</strong> has been growing faster than its own 7-day average for <strong>${streaks.currentOverall}</strong> consecutive days. You're accelerating!`
+          : `How many consecutive days you grow <em>faster</em> than your own previous 7-day average. Right now no platform has an active streak — it starts the moment your daily growth beats your recent pace.`}</div>
       </div>
-      <div class="streak-divider"></div>
-      <div class="streak-item" title="Best Ever: Your all-time highest velocity streak across all platforms. This is the longest consecutive run of days where you grew faster than your own 7-day average.">
-        <span class="streak-num">🏅 ${streaks.bestOverall}</span>
-        <span class="streak-desc">Best Ever</span>
+      <div class="streak-card">
+        <div class="streak-card-header">
+          <span class="streak-card-icon">🏅</span>
+          <span class="streak-card-title">BEST EVER</span>
+        </div>
+        <div class="streak-card-value">${streaks.bestOverall} days</div>
+        <div class="streak-card-explain">Your all-time longest velocity streak across any platform. ${streaks.bestOverall > 0
+          ? `Your record is <strong>${streaks.bestOverall}</strong> days of non-stop acceleration. Can you beat it?`
+          : `Once you build your first streak, your record will show here.`}</div>
       </div>
-      <div class="streak-divider"></div>
-      <div class="streak-item" title="Combo Today: Fires when ALL 3 platforms (LinkedIn, Substack, X) each grew faster today than their own individual 7-day average. A combo means every front is accelerating at the same time!">
-        ${streaks.comboToday
-          ? '<span class="combo-flash">C-C-COMBO!</span>'
-          : '<span class="streak-num">—</span>'}
-        <span class="streak-desc">Combo Today</span>
+      <div class="streak-card">
+        <div class="streak-card-header">
+          <span class="streak-card-icon">💥</span>
+          <span class="streak-card-title">COMBO TODAY</span>
+        </div>
+        <div class="streak-card-value">${streaks.comboToday ? '<span class="combo-flash">C-C-COMBO!</span>' : 'No combo'}</div>
+        <div class="streak-card-explain">${streaks.comboToday
+          ? `All 3 platforms (LinkedIn, Substack, X) are growing faster today than their own 7-day average <em>at the same time</em>. Everything is firing!`
+          : `A combo fires when <em>all 3 platforms</em> beat their own 7-day average on the same day. It means LinkedIn, Substack, and X are all accelerating simultaneously.`}</div>
       </div>
-      <div class="streak-divider"></div>
-      <div class="streak-item" title="Combos (30d): The number of days in the last 30 where ALL platforms beat their own 7-day average pace on the same day. More combos = more days of synchronized acceleration.">
-        <span class="streak-num">🎯 ${streaks.combosLast30}</span>
-        <span class="streak-desc">Combos (30d)</span>
+      <div class="streak-card">
+        <div class="streak-card-header">
+          <span class="streak-card-icon">🎯</span>
+          <span class="streak-card-title">COMBOS (30 DAYS)</span>
+        </div>
+        <div class="streak-card-value">${streaks.combosLast30}</div>
+        <div class="streak-card-explain">${streaks.combosLast30 > 0
+          ? `In the last 30 days, <strong>${streaks.combosLast30}</strong> day${streaks.combosLast30 > 1 ? 's' : ''} where all platforms accelerated together. More combos = more synchronized growth.`
+          : `The number of days in the last 30 where all platforms beat their own pace on the same day. You haven't had one yet — keep growing!`}</div>
       </div>
     </div>`;
 
@@ -1520,7 +1523,6 @@ function renderDashboard() {
 
   // ---- Achievements ----
   renderAchievements(data, achievements);
-  renderTicker(buildTickerMessages(data, streaks));
   renderChart(data, currentChartPlatform);
 }
 
@@ -1581,58 +1583,108 @@ function populateMonthPicker(data, platformKey) {
   picker.value = currentMonth;
 }
 
-function renderChart(data, platformKey) {
-  populateMonthPicker(data, platformKey);
-  data = filterByTimeRange(data);
-  const ctx = document.getElementById('growthChart').getContext('2d');
-  if (growthChartInstance) growthChartInstance.destroy();
-  let datasets, allDates;
-
+function computeDailyGains(data, platformKey) {
+  let entries;
   if (platformKey === 'all') {
+    // Sum gains across all platforms per date
     const dateSet = new Set();
     const platMaps = {};
     Object.keys(PLATFORMS).forEach(k => {
       platMaps[k] = {};
       data.filter(d => d.platform === k).sort((a, b) => a.date.localeCompare(b.date)).forEach(d => { platMaps[k][d.date] = d.count; dateSet.add(d.date); });
     });
-    allDates = [...dateSet].sort();
+    const allDates = [...dateSet].sort();
     const lastKnown = {};
-    const combined = allDates.map(date => {
+    const totals = allDates.map(date => {
       let sum = 0;
       Object.keys(PLATFORMS).forEach(k => { if (platMaps[k][date] !== undefined) lastKnown[k] = platMaps[k][date]; sum += (lastKnown[k] || 0); });
-      return sum;
+      return { date, count: sum };
     });
-    datasets = [{ label: 'All Socials', data: combined, borderColor: '#7c3aed', backgroundColor: '#7c3aed22', tension: 0.35, pointRadius: 0, pointHoverRadius: 5, borderWidth: 2.5, fill: true }];
+    entries = totals;
   } else {
-    const p = PLATFORMS[platformKey];
-    const entries = data.filter(d => d.platform === platformKey).sort((a, b) => a.date.localeCompare(b.date));
-    allDates = entries.map(e => e.date);
-    datasets = [{ label: p.label, data: entries.map(e => e.count), borderColor: p.color, backgroundColor: p.color + '22', tension: 0.35, pointRadius: allDates.length > 60 ? 0 : 3, pointHoverRadius: 5, borderWidth: 2.5, fill: true }];
+    entries = data.filter(d => d.platform === platformKey).sort((a, b) => a.date.localeCompare(b.date));
   }
+  const gains = [];
+  for (let i = 1; i < entries.length; i++) {
+    const days = daysBetween(entries[i-1].date, entries[i].date);
+    if (days <= 0) continue;
+    const totalGain = entries[i].count - entries[i-1].count;
+    // Spread evenly if multi-day gap, but show as single bar on the end date
+    gains.push({ date: entries[i].date, gain: totalGain, perDay: Math.round(totalGain / days) });
+  }
+  return gains;
+}
 
-  // Neon glow colors for chart lines
+function renderChart(data, platformKey) {
+  populateMonthPicker(data, platformKey);
+  data = filterByTimeRange(data);
+  const ctx = document.getElementById('growthChart').getContext('2d');
+  if (growthChartInstance) growthChartInstance.destroy();
+
+  const gains = computeDailyGains(data, platformKey);
+  const allDates = gains.map(g => g.date);
+  const allGains = gains.map(g => g.gain);
+
+  // Color bars: green for positive, red for negative, bright yellow for "banger" days (top 10%)
+  const sorted = [...allGains].filter(g => g > 0).sort((a, b) => b - a);
+  const bangerThreshold = sorted.length >= 3 ? sorted[Math.max(0, Math.floor(sorted.length * 0.1))] : Infinity;
+
   const neonColors = {
-    linkedin: { border: '#00d4ff', bg: 'rgba(0,212,255,0.15)' },
-    substack: { border: '#ff6719', bg: 'rgba(255,103,25,0.15)' },
-    x:        { border: '#a78bfa', bg: 'rgba(167,139,250,0.15)' },
-    all:      { border: '#facc15', bg: 'rgba(250,204,21,0.15)' },
+    linkedin: { normal: 'rgba(0,212,255,0.7)', banger: 'rgba(250,204,21,0.95)' },
+    substack: { normal: 'rgba(255,103,25,0.7)', banger: 'rgba(250,204,21,0.95)' },
+    x:        { normal: 'rgba(167,139,250,0.7)', banger: 'rgba(250,204,21,0.95)' },
+    all:      { normal: 'rgba(124,58,237,0.7)', banger: 'rgba(250,204,21,0.95)' },
   };
   const nc = neonColors[platformKey] || neonColors.linkedin;
-  datasets.forEach(ds => { ds.borderColor = nc.border; ds.backgroundColor = nc.bg; ds.borderWidth = 2.5; });
+
+  const barColors = allGains.map(g => {
+    if (g >= bangerThreshold && g > 0) return nc.banger;
+    if (g >= 0) return nc.normal;
+    return 'rgba(220,38,38,0.7)';
+  });
+  const borderColors = allGains.map(g => {
+    if (g >= bangerThreshold && g > 0) return '#eab308';
+    if (g >= 0) return nc.normal.replace('0.7', '1');
+    return 'rgba(220,38,38,1)';
+  });
+
+  const label = platformKey === 'all' ? 'All Socials' : PLATFORMS[platformKey].label;
+
+  const datasets = [{
+    label: label + ' daily growth',
+    data: allGains,
+    backgroundColor: barColors,
+    borderColor: borderColors,
+    borderWidth: 1,
+    borderRadius: 3,
+  }];
 
   growthChartInstance = new Chart(ctx, {
-    type: 'line',
+    type: 'bar',
     data: { labels: allDates, datasets },
     options: {
       responsive: true, maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { display: false },
-        tooltip: { backgroundColor: 'rgba(26,26,46,0.95)', borderColor: '#eab308', borderWidth: 1, titleColor: '#eab308', bodyColor: '#e4e4e7', padding: 12, titleFont: { family: "'Press Start 2P', monospace", size: 8 }, bodyFont: { size: 12 }, callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y != null ? fmtFull(ctx.parsed.y) : '--'}` } }
+        tooltip: {
+          backgroundColor: 'rgba(26,26,46,0.95)', borderColor: '#eab308', borderWidth: 1,
+          titleColor: '#eab308', bodyColor: '#e4e4e7', padding: 12,
+          titleFont: { family: "'Press Start 2P', monospace", size: 8 }, bodyFont: { size: 12 },
+          callbacks: {
+            label: ctx => {
+              const v = ctx.parsed.y;
+              if (v == null) return '--';
+              const sign = v >= 0 ? '+' : '';
+              const isBanger = v >= bangerThreshold && v > 0;
+              return `${sign}${fmtFull(v)} followers${isBanger ? ' ⭐ BANGER DAY!' : ''}`;
+            }
+          }
+        }
       },
       scales: {
         x: { grid: { color: 'rgba(234,179,8,0.08)' }, ticks: { color: 'rgba(255,255,255,0.6)', font: { size: 10 }, maxRotation: 45, maxTicksLimit: 12 } },
-        y: { grid: { color: 'rgba(234,179,8,0.08)' }, ticks: { color: 'rgba(255,255,255,0.6)', font: { size: 11 }, callback: v => fmt(v) }, beginAtZero: false }
+        y: { grid: { color: 'rgba(234,179,8,0.08)' }, ticks: { color: 'rgba(255,255,255,0.6)', font: { size: 11 }, callback: v => (v >= 0 ? '+' : '') + fmt(v) } }
       }
     }
   });
