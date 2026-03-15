@@ -1438,21 +1438,10 @@ function renderDashboard() {
     return best;
   })();
 
-  const weekPct = (thisWeekGain !== null && bestWeekEver > 0) ? Math.round((thisWeekGain / bestWeekEver) * 100) : null;
-  let weekVsBestValue, weekVsBestExplain;
-  if (thisWeekGain === null) {
-    weekVsBestValue = '--';
-    weekVsBestExplain = 'Upload at least 2 weeks of data to see how this week stacks up against your best week ever across all platforms.';
-  } else if (thisWeekGain >= bestWeekEver && bestWeekEver > 0) {
-    weekVsBestValue = '<span style="color:var(--green)">NEW RECORD!</span>';
-    weekVsBestExplain = `This week you gained <strong>+${fmtFull(thisWeekGain)}</strong> followers total — that's your <strong>best week ever</strong>! The team is on fire, keep this energy going!`;
-  } else if (weekPct !== null) {
-    weekVsBestValue = `${weekPct}%`;
-    weekVsBestExplain = `This week: <strong>+${fmtFull(thisWeekGain)}</strong> across all platforms. Your best week ever was <strong>+${fmtFull(bestWeekEver)}</strong>. ${weekPct >= 80 ? "You're SO close to beating your record — push harder!" : weekPct >= 50 ? "Solid week! Can you close the gap to your all-time best?" : "Every week is a chance to top the leaderboard. Let's go!"}`;
-  } else {
-    weekVsBestValue = `+${fmt(thisWeekGain)}`;
-    weekVsBestExplain = `You gained <strong>+${fmtFull(thisWeekGain)}</strong> this week. Keep uploading data to track your best week ever!`;
-  }
+  const weekPct = (thisWeekGain !== null && bestWeekEver > 0) ? Math.min(Math.round((thisWeekGain / bestWeekEver) * 100), 100) : null;
+  const weekRemaining = (thisWeekGain !== null && bestWeekEver > 0) ? Math.max(bestWeekEver - thisWeekGain, 0) : null;
+  const weekDefeated = thisWeekGain !== null && bestWeekEver > 0 && thisWeekGain >= bestWeekEver;
+  const weekHpClass = weekPct === null ? '' : weekPct >= 60 ? 'hp-high' : weekPct >= 30 ? 'hp-mid' : 'hp-low';
 
   // Compute "Month Projection" — extrapolate this month's pace to end of month
   const monthProjection = (() => {
@@ -1503,8 +1492,31 @@ function renderDashboard() {
           <span class="streak-card-icon">🏆</span>
           <span class="streak-card-title">THIS WEEK VS BEST WEEK</span>
         </div>
-        <div class="streak-card-value">${weekVsBestValue}</div>
-        <div class="streak-card-explain">${weekVsBestExplain}</div>
+        ${thisWeekGain !== null && bestWeekEver > 0 ? `
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <div style="text-align:center">
+              ${spriteHTML(FIGHTERS.all.img, 2)}
+              <div style="font-family:'Press Start 2P',monospace;font-size:7px;margin-top:4px">THIS WEEK</div>
+              <div style="font-size:16px;font-weight:700;color:var(--text)" title="+${fmtFull(thisWeekGain)}">+${fmt(thisWeekGain)}</div>
+            </div>
+            <div style="font-family:'Press Start 2P',monospace;font-size:14px;color:#ff0033">VS</div>
+            <div style="text-align:center">
+              ${spriteHTML('mbison', 2)}
+              <div style="font-family:'Press Start 2P',monospace;font-size:7px;color:#dc2626;margin-top:4px">BEST WEEK</div>
+              <div style="font-size:16px;font-weight:700;color:var(--red)" title="+${fmtFull(bestWeekEver)}">+${fmt(bestWeekEver)}</div>
+            </div>
+          </div>
+          <div class="health-bar-wrap"><div class="health-bar-fill ${weekHpClass}" style="width:${weekPct}%"></div></div>
+          <div class="health-bar-text"><span>${weekDefeated ? '<span style="color:var(--green);font-weight:700">NEW RECORD!</span>' : weekPct + '% damage'}</span><span>${weekDefeated ? 'DEFEATED!' : '+' + fmt(weekRemaining) + ' to go'}</span></div>
+          <div class="streak-card-explain" style="margin-top:8px">${weekDefeated
+            ? "You BEAT your best week ever! The boss is down — keep this energy going!"
+            : weekPct >= 80 ? "You're SO close to beating your record — push harder!"
+            : weekPct >= 50 ? "Solid week! Can you close the gap to your all-time best?"
+            : "Every week is a chance to top the leaderboard. Let's go!"}</div>
+        ` : `
+          <div class="streak-card-value">--</div>
+          <div class="streak-card-explain">Upload at least 2 weeks of data to see how this week stacks up against your best week ever.</div>
+        `}
       </div>
       <div class="streak-card">
         <div class="streak-card-header">
