@@ -1735,7 +1735,7 @@ document.getElementById('achievements-toggle').addEventListener('click', () => {
 // ===================== ASYNC INIT =====================
 async function init() {
   try {
-    const res = await fetch('data/counts.json');
+    const res = await fetch('data/counts.json?v=' + Date.now());
     const json = await res.json();
     const entries = [];
     const platformKeys = Object.keys(PLATFORMS);
