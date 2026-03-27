@@ -2,8 +2,8 @@ name: Daily follower count scrape
 
 on:
   schedule:
-    # Every day at 23:59 UTC
-    - cron: '59 23 * * *'
+    # Every day at 23:59 Israel time (20:59 UTC during summer / 21:59 UTC during winter)
+    - cron: '59 20 * * *'
   workflow_dispatch: # Allow manual trigger
 
 permissions:
