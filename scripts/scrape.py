@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
 Daily scraper: fetches public follower counts for LinkedIn, Substack, X.
-- LinkedIn: reads from the existing Google Sheet (already updated daily)
+- LinkedIn: Apify scraper (supreme_coder/linkedin-profile-scraper)
 - Substack: scrapes the public newsletter page
-- X: uses guest token + GraphQL API
+- X: syndication timeline embed endpoint
 Appends results to data/counts.json and commits.
 """
 
@@ -11,6 +11,7 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.parse
 import urllib.request
 import urllib.error
@@ -18,40 +19,46 @@ from datetime import datetime, timezone
 
 DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'counts.json')
 
-# ── LinkedIn: read from existing Google Sheet ──
-SHEET_ID = '1j_Z8JuukkskQlfgsIzZgiX_XoSGu_rzNuCGLu_asZuo'
-SHEET_CSV = f'https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv'
+# ── LinkedIn: Apify scraper ──
+APIFY_TOKEN = os.environ.get('APIFY_TOKEN', '')
+LINKEDIN_URL = 'https://www.linkedin.com/in/ruben-hassid/'
 
 def fetch_linkedin():
-    """Get latest Ruben follower count from the linkedin-fighter Google Sheet."""
+    """Get follower count via Apify LinkedIn profile scraper."""
+    if not APIFY_TOKEN:
+        print('LinkedIn: APIFY_TOKEN not set, skipping', file=sys.stderr)
+        return None
     try:
-        req = urllib.request.Request(SHEET_CSV, headers={'User-Agent': 'Mozilla/5.0'})
-        with urllib.request.urlopen(req, timeout=15) as r:
-            text = r.read().decode('utf-8')
-        lines = text.strip().split('\n')
-        if len(lines) < 2:
+        # Trigger the scraper run and wait for it to finish
+        run_url = f'https://api.apify.com/v2/acts/supreme_coder~linkedin-profile-scraper/runs?token={APIFY_TOKEN}&waitForFinish=120'
+        body = json.dumps({"urls": [{"url": LINKEDIN_URL}]}).encode()
+        req = urllib.request.Request(run_url, data=body, headers={'Content-Type': 'application/json'})
+        with urllib.request.urlopen(req, timeout=130) as r:
+            run = json.loads(r.read())
+
+        run_data = run.get('data', run)
+        status = run_data.get('status')
+        dataset_id = run_data.get('defaultDatasetId')
+
+        if status != 'SUCCEEDED' or not dataset_id:
+            print(f'LinkedIn: Apify run status={status}', file=sys.stderr)
             return None
-        # Last row has the latest data; column 4 (index 4) = Ruben Followers
-        last = lines[-1]
-        # Parse CSV (handle quoted numbers with commas)
-        fields = []
-        in_q = False
-        field = ''
-        for ch in last:
-            if ch == '"':
-                in_q = not in_q
-                continue
-            if ch == ',' and not in_q:
-                fields.append(field.strip())
-                field = ''
-                continue
-            field += ch
-        fields.append(field.strip())
-        # Ruben Followers is column index 4
-        raw = fields[4] if len(fields) > 4 else ''
-        count = int(raw.replace(',', '').replace('"', ''))
-        print(f'LinkedIn: {count:,}')
-        return count
+
+        # Fetch results from dataset
+        items_url = f'https://api.apify.com/v2/datasets/{dataset_id}/items?token={APIFY_TOKEN}'
+        req = urllib.request.Request(items_url)
+        with urllib.request.urlopen(req, timeout=15) as r:
+            items = json.loads(r.read())
+
+        if items and len(items) > 0:
+            count = items[0].get('followerCount')
+            if count and isinstance(count, (int, float)):
+                count = int(count)
+                print(f'LinkedIn: {count:,}')
+                return count
+
+        print('LinkedIn: followerCount not found in Apify response', file=sys.stderr)
+        return None
     except Exception as e:
         print(f'LinkedIn error: {e}', file=sys.stderr)
         return None
