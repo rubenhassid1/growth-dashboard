@@ -7,7 +7,6 @@
 <link rel="icon" type="image/png" href="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/ef02abe3-63cc-4dfa-8eab-5543cf3bcf4f/ddkn1y7-779f66b8-42d5-45d8-8f29-7265d6bae0c5.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiIvZi9lZjAyYWJlMy02M2NjLTRkZmEtOGVhYi01NTQzY2YzYmNmNGYvZGRrbjF5Ny03NzlmNjZiOC00MmQ1LTQ1ZDgtOGYyOS03MjY1ZDZiYWUwYzUucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.256giev3ngaWjZSp-QOXqah5bbPoiaiBIkmbD-jAdc8">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
   :root {
     --bg: #f0ebe3;
@@ -108,8 +107,7 @@
     .tab-btn { padding: 8px 14px; font-size: 9px; }
   }
 
-  .tab-content { display: none; padding: 20px 32px 40px; }
-  .tab-content.active { display: block; }
+  .tab-content { display: block; padding: 20px 32px 40px; }
 
   /* ===== FIGHTER CARDS ===== */
   .cards {
@@ -690,14 +688,10 @@
     <h1>GROWTH FIGHTER</h1>
     <div class="subtitle">ROAD TO 1,000,000</div>
   </div>
-  <div class="tabs">
-    <button class="tab-btn active" data-tab="dashboard"><span class="tab-icon">⚔️</span>DASHBOARD</button>
-    <button class="tab-btn" data-tab="upload"><span class="tab-icon">📊</span>UPLOAD DATA</button>
-  </div>
 </div>
 
 <!-- DASHBOARD -->
-<div id="tab-dashboard" class="tab-content active">
+<div id="tab-dashboard" class="tab-content">
   <div class="cards" id="follower-cards"></div>
   <div id="streak-bar"></div>
   <div class="speed-section">
@@ -740,65 +734,14 @@
   </div>
 </div>
 
-<!-- UPLOAD TAB -->
-<div id="tab-upload" class="tab-content">
-  <div class="upload-columns">
-    <div class="left-panels">
-      <div class="import-card">
-        <h3><span class="dot" style="background:var(--linkedin)"></span>LinkedIn</h3>
-        <div class="hint">Upload your LinkedIn Analytics .xlsx file<br>(the one with "Content" in the name)</div>
-        <div class="drop-zone" id="drop-linkedin">Click or drag .xlsx file here<input type="file" accept=".xlsx,.xls"></div>
-        <div class="import-result" id="result-linkedin"></div>
-      </div>
-      <div class="import-card">
-        <h3><span class="dot" style="background:var(--substack)"></span>Substack</h3>
-        <div class="hint">Upload your Substack subscribers .csv file<br>(the one with "ruben_emails" in the name)</div>
-        <div class="drop-zone" id="drop-substack">Click or drag .csv file here<input type="file" accept=".csv"></div>
-        <div class="import-result" id="result-substack"></div>
-      </div>
-      <div class="import-card">
-        <h3><span class="dot" style="background:var(--x)"></span>X (Twitter)</h3>
-        <div class="hint">Upload your X Analytics .csv file<br>(the one with "account_overview" in the name)</div>
-        <div class="x-follower-field">
-          <div class="field"><label>Your current X follower count</label><input type="number" id="x-current-count" placeholder="e.g. 356000" min="0"></div>
-        </div>
-        <div style="margin-top:10px">
-          <div class="drop-zone" id="drop-x">Click or drag .csv file here<input type="file" accept=".csv"></div>
-        </div>
-        <div class="import-result" id="result-x"></div>
-      </div>
-      <div class="form-card">
-        <h2>Manual Entry</h2>
-        <div class="field"><label>Date</label><input type="date" id="entry-date"></div>
-        <div class="field"><label>Platform</label><select id="entry-platform"><option value="linkedin">LinkedIn</option><option value="substack">Substack</option><option value="x">X (Twitter)</option></select></div>
-        <div class="field"><label>Followers / Subscribers</label><input type="number" id="entry-count" placeholder="e.g. 125000" min="0"></div>
-        <button class="btn btn-primary" id="add-btn">ADD ENTRY</button>
-        <button class="btn btn-danger" id="clear-btn">Clear All Data</button>
-        <div class="io-btns"><button class="btn-outline" id="export-btn">Export CSV</button></div>
-      </div>
-    </div>
-    <div class="history-card">
-      <h2>History
-        <div class="filter-btns">
-          <button class="filter-btn active" data-filter="all">All</button>
-          <button class="filter-btn" data-filter="linkedin">LinkedIn</button>
-          <button class="filter-btn" data-filter="substack">Substack</button>
-          <button class="filter-btn" data-filter="x">X</button>
-        </div>
-      </h2>
-      <table><thead><tr><th>Date</th><th>Platform</th><th>Count</th><th>Change</th><th></th></tr></thead><tbody id="history-body"></tbody></table>
-      <div class="empty-state" id="empty-msg" style="display:none"><p>No data yet. Upload a file or add an entry!</p></div>
-    </div>
-  </div>
-</div>
 
 <div class="toast" id="toast"></div>
 
 <script>
 // ===================== DATA LAYER =====================
-const STORAGE_KEY = 'growth_dashboard_data';
 const ACHIEVEMENTS_KEY = 'growth_fighter_achievements';
 const STREAKS_KEY = 'growth_fighter_streaks';
+let _cachedData = [];
 
 // Substack: migration from ConvertKit on this date — exclude from gain calculations
 const SUBSTACK_MIGRATION_DATE = '2025-05-19';
@@ -1002,24 +945,11 @@ function getRank(count) {
   return RANKS[RANKS.length - 1];
 }
 
-function loadData() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; } }
-function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+function loadData() { return _cachedData; }
 function loadAchievements() { try { return JSON.parse(localStorage.getItem(ACHIEVEMENTS_KEY)) || {}; } catch { return {}; } }
 function saveAchievements(a) { localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(a)); }
 function loadStreaks() { try { return JSON.parse(localStorage.getItem(STREAKS_KEY)) || {}; } catch { return {}; } }
 function saveStreaks(s) { localStorage.setItem(STREAKS_KEY, JSON.stringify(s)); }
-
-function upsertEntries(newEntries) {
-  const data = loadData();
-  let added = 0, updated = 0;
-  newEntries.forEach(entry => {
-    const idx = data.findIndex(d => d.date === entry.date && d.platform === entry.platform);
-    if (idx >= 0) { data[idx].count = entry.count; updated++; }
-    else { data.push(entry); added++; }
-  });
-  saveData(data);
-  return { added, updated, total: added + updated };
-}
 
 // ===================== HELPERS =====================
 function fmt(n) {
@@ -1075,80 +1005,6 @@ function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2500);
-}
-
-// ===================== FILE PARSERS =====================
-function parseLinkedInXLSX(arrayBuffer) {
-  const wb = XLSX.read(arrayBuffer, { type: 'array' });
-  const fs = wb.Sheets['FOLLOWERS'];
-  if (!fs) throw new Error('No FOLLOWERS sheet found.');
-  const rows = XLSX.utils.sheet_to_json(fs, { header: 1 });
-  const total = rows[0] && rows[0][1] ? Number(rows[0][1]) : null;
-  if (!total) throw new Error('Could not find total follower count.');
-  const daily = [];
-  for (let i = 3; i < rows.length; i++) {
-    const row = rows[i]; if (!row || !row[0]) continue;
-    const date = toISO(String(row[0]));
-    if (date) daily.push({ date, newFollowers: Number(row[1]) || 0 });
-  }
-  daily.sort((a, b) => a.date.localeCompare(b.date));
-  const entries = [];
-  let running = total;
-  for (let i = daily.length - 1; i >= 0; i--) {
-    entries.unshift({ date: daily[i].date, platform: 'linkedin', count: running });
-    if (i > 0) running -= daily[i].newFollowers;
-  }
-  return entries;
-}
-
-function parseSubstackCSV(text) {
-  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-  const entries = [];
-  for (const line of lines) {
-    const parts = line.split(','); if (parts.length < 2) continue;
-    const date = toISO(parts[0]), count = parseInt(parts[1]);
-    if (date && !isNaN(count) && count > 0) entries.push({ date, platform: 'substack', count });
-  }
-  return entries;
-}
-
-function parseXCSV(text, currentTotal) {
-  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-  if (lines.length < 2) throw new Error('CSV file appears empty');
-  const header = lines[0].split(',').map(h => h.replace(/"/g, '').trim().toLowerCase());
-  const dateIdx = header.indexOf('date');
-  const newFollowsIdx = header.findIndex(h => h === 'new follows');
-  const unfollowsIdx = header.indexOf('unfollows');
-  if (dateIdx < 0 || newFollowsIdx < 0) throw new Error('Could not find Date or New follows columns');
-  const daily = [];
-  for (let i = 1; i < lines.length; i++) {
-    const parts = []; let cur = '', inQ = false;
-    for (const ch of lines[i]) { if (ch === '"') { inQ = !inQ; continue; } if (ch === ',' && !inQ) { parts.push(cur.trim()); cur = ''; continue; } cur += ch; }
-    parts.push(cur.trim());
-    if (parts.length <= Math.max(dateIdx, newFollowsIdx)) continue;
-    const date = toISO(parts[dateIdx]);
-    const net = (parseInt(parts[newFollowsIdx]) || 0) - (unfollowsIdx >= 0 ? (parseInt(parts[unfollowsIdx]) || 0) : 0);
-    if (date) daily.push({ date, net });
-  }
-  daily.sort((a, b) => a.date.localeCompare(b.date));
-  const entries = [];
-  let running = currentTotal;
-  for (let i = daily.length - 1; i >= 0; i--) {
-    entries.unshift({ date: daily[i].date, platform: 'x', count: running });
-    if (i > 0) running -= daily[i].net;
-  }
-  return entries;
-}
-
-function setupDropZone(zoneId, resultId, handler) {
-  const zone = document.getElementById(zoneId);
-  const input = zone.querySelector('input');
-  const resultEl = document.getElementById(resultId);
-  zone.addEventListener('click', () => input.click());
-  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
-  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-  zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag-over'); if (e.dataTransfer.files.length) handler(e.dataTransfer.files[0], resultEl); });
-  input.addEventListener('change', () => { if (input.files.length) handler(input.files[0], resultEl); input.value = ''; });
 }
 
 // ===================== STREAKS ENGINE =====================
@@ -1837,43 +1693,7 @@ function renderChart(data, platformKey) {
 }
 
 // ===================== HISTORY TABLE =====================
-let currentFilter = 'all';
-function renderHistory() {
-  const data = loadData();
-  const filtered = currentFilter === 'all' ? data : data.filter(d => d.platform === currentFilter);
-  const sorted = filtered.sort((a, b) => b.date.localeCompare(a.date) || a.platform.localeCompare(b.platform));
-  const body = document.getElementById('history-body');
-  const empty = document.getElementById('empty-msg');
-  if (sorted.length === 0) { body.innerHTML = ''; empty.style.display = 'block'; return; }
-  empty.style.display = 'none';
-  const shown = sorted.slice(0, 200);
-  body.innerHTML = shown.map(entry => {
-    const p = PLATFORMS[entry.platform];
-    const all = data.filter(d => d.platform === entry.platform).sort((a, b) => a.date.localeCompare(b.date));
-    const idx = all.findIndex(d => d.date === entry.date);
-    const prev = idx > 0 ? all[idx - 1] : null;
-    let ch = '<span class="badge neutral">--</span>';
-    const prevCount = prev ? prev.count : null;
-    const diff = prev ? entry.count - prev.count : null;
-    if (diff !== null) { ch = `<span class="badge ${diff >= 0 ? 'up' : 'down'}" title="${diff >= 0 ? '+' : ''}${fmtFull(diff)}">${diff >= 0 ? '+' : ''}${fmt(diff)}</span>`; }
-    const editBtn = prev ? `<button class="edit-btn" data-date="${entry.date}" data-platform="${entry.platform}" data-prev-count="${prevCount}" title="Edit change">&#9998;</button>` : '';
-    return `<tr><td>${entry.date}</td><td><span class="platform-tag ${entry.platform}">${p.label}</span></td><td title="${fmtFull(entry.count)}">${fmt(entry.count)}</td><td class="change-cell" data-raw-change="${diff !== null ? diff : ''}">${ch}${editBtn}</td><td><button class="delete-btn" data-date="${entry.date}" data-platform="${entry.platform}">&times;</button></td></tr>`;
-  }).join('');
-  if (sorted.length > 200) body.innerHTML += `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:12px">Showing 200 of ${sorted.length}</td></tr>`;
-}
-
 // ===================== EVENT HANDLERS =====================
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
-    if (btn.dataset.tab === 'dashboard') renderDashboard();
-    if (btn.dataset.tab === 'upload') renderHistory();
-  });
-});
-
 document.querySelectorAll('#chart-tabs .filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('#chart-tabs .filter-btn').forEach(b => b.classList.remove('active'));
@@ -1912,101 +1732,28 @@ document.getElementById('achievements-toggle').addEventListener('click', () => {
   document.getElementById('achievements-body').classList.toggle('open');
 });
 
-document.querySelectorAll('.history-card .filter-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.history-card .filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentFilter = btn.dataset.filter;
-    renderHistory();
-  });
-});
-
-setupDropZone('drop-linkedin', 'result-linkedin', (file, r) => { const reader = new FileReader(); reader.onload = e => { try { const entries = parseLinkedInXLSX(e.target.result); const res = upsertEntries(entries); r.textContent = `Imported ${res.total} days`; r.style.display = 'block'; renderHistory(); showToast(`LinkedIn: ${res.total} entries!`); } catch(err) { showToast('Error: ' + err.message); } }; reader.readAsArrayBuffer(file); });
-setupDropZone('drop-substack', 'result-substack', (file, r) => { const reader = new FileReader(); reader.onload = e => { try { const entries = parseSubstackCSV(e.target.result); if (!entries.length) throw new Error('No data found'); const res = upsertEntries(entries); r.textContent = `Imported ${res.total} days`; r.style.display = 'block'; renderHistory(); showToast(`Substack: ${res.total} entries!`); } catch(err) { showToast('Error: ' + err.message); } }; reader.readAsText(file); });
-setupDropZone('drop-x', 'result-x', (file, r) => { const ct = parseInt(document.getElementById('x-current-count').value); if (!ct || ct <= 0) { showToast('Enter your current X follower count first'); return; } const reader = new FileReader(); reader.onload = e => { try { const entries = parseXCSV(e.target.result, ct); if (!entries.length) throw new Error('No data found'); const res = upsertEntries(entries); r.textContent = `Imported ${res.total} days`; r.style.display = 'block'; renderHistory(); showToast(`X: ${res.total} entries!`); } catch(err) { showToast('Error: ' + err.message); } }; reader.readAsText(file); });
-
-document.getElementById('add-btn').addEventListener('click', () => {
-  const date = document.getElementById('entry-date').value;
-  const platform = document.getElementById('entry-platform').value;
-  const count = parseInt(document.getElementById('entry-count').value);
-  if (!date) { showToast('Select a date'); return; }
-  if (!count && count !== 0) { showToast('Enter a count'); return; }
-  if (count < 0) { showToast('Count must be positive'); return; }
-  const res = upsertEntries([{ date, platform, count }]);
-  document.getElementById('entry-count').value = '';
-  renderHistory();
-  showToast(res.added ? 'Added!' : 'Updated!');
-});
-
-document.getElementById('history-body').addEventListener('click', e => {
-  const btn = e.target.closest('.delete-btn'); if (!btn) return;
-  const data = loadData();
-  const idx = data.findIndex(d => d.date === btn.dataset.date && d.platform === btn.dataset.platform);
-  if (idx >= 0) { data.splice(idx, 1); saveData(data); renderHistory(); showToast('Deleted'); }
-});
-
-// Edit button — transform change cell into inline input
-document.getElementById('history-body').addEventListener('click', e => {
-  const btn = e.target.closest('.edit-btn'); if (!btn) return;
-  const row = btn.closest('tr');
-  const changeCell = row.querySelector('.change-cell');
-  if (changeCell.querySelector('.inline-edit')) return;
-  const rawChange = changeCell.dataset.rawChange;
-  changeCell.innerHTML = `<span class="inline-edit"><input type="number" class="edit-input" value="${rawChange}" data-date="${btn.dataset.date}" data-platform="${btn.dataset.platform}" data-prev-count="${btn.dataset.prevCount}"><button class="save-edit" title="Save">&#10003;</button><button class="cancel-edit" title="Cancel">&#10007;</button></span>`;
-  const input = changeCell.querySelector('.edit-input');
-  input.focus();
-  input.select();
-});
-
-// Save edit — calculate new count from previous count + new change
-document.getElementById('history-body').addEventListener('click', e => {
-  const btn = e.target.closest('.save-edit'); if (!btn) return;
-  const row = btn.closest('tr');
-  const input = row.querySelector('.edit-input');
-  const newChange = parseInt(input.value);
-  if (isNaN(newChange)) { showToast('Enter a valid number'); return; }
-  const prevCount = parseInt(input.dataset.prevCount);
-  const newCount = prevCount + newChange;
-  if (newCount < 0) { showToast('Count cannot go below 0'); return; }
-  upsertEntries([{ date: input.dataset.date, platform: input.dataset.platform, count: newCount }]);
-  renderHistory();
-  renderDashboard();
-  showToast('Updated!');
-});
-
-// Cancel edit
-document.getElementById('history-body').addEventListener('click', e => {
-  const btn = e.target.closest('.cancel-edit'); if (!btn) return;
-  renderHistory();
-});
-
-// Enter to save, Escape to cancel
-document.getElementById('history-body').addEventListener('keydown', e => {
-  if (!e.target.classList.contains('edit-input')) return;
-  if (e.key === 'Enter') {
-    e.target.closest('.inline-edit').querySelector('.save-edit').click();
-  } else if (e.key === 'Escape') {
-    renderHistory();
+// ===================== ASYNC INIT =====================
+async function init() {
+  try {
+    const res = await fetch('data/counts.json');
+    const json = await res.json();
+    const entries = [];
+    const platformKeys = Object.keys(PLATFORMS);
+    for (const row of json) {
+      for (const key of platformKeys) {
+        if (row[key] !== undefined && row[key] !== null) {
+          entries.push({ date: row.date, platform: key, count: row[key] });
+        }
+      }
+    }
+    _cachedData = entries;
+  } catch (e) {
+    console.error('Failed to load data/counts.json:', e);
+    _cachedData = [];
   }
-});
-
-document.getElementById('clear-btn').addEventListener('click', () => {
-  if (confirm('Delete all data? Cannot be undone.')) { saveData([]); renderHistory(); renderDashboard(); showToast('All data cleared'); }
-});
-
-document.getElementById('export-btn').addEventListener('click', () => {
-  const data = loadData();
-  if (!data.length) { showToast('No data'); return; }
-  const rows = [['date','platform','count']];
-  data.sort((a, b) => a.date.localeCompare(b.date) || a.platform.localeCompare(b.platform)).forEach(d => rows.push([d.date, d.platform, d.count]));
-  const blob = new Blob([rows.map(r => r.join(',')).join('\n')], { type: 'text/csv' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'growth_data.csv'; a.click();
-  showToast('Exported!');
-});
-
-document.getElementById('entry-date').value = new Date().toISOString().split('T')[0];
-renderDashboard();
-renderHistory();
+  renderDashboard();
+}
+init();
 </script>
 </body>
 </html>
