@@ -137,15 +137,19 @@ def fetch_substack():
             "maxRequestRetries": 0,
         }
 
-        items = apify_run_and_poll('apify~playwright-scraper', input_data, max_wait=300)
-        if items and items[0].get('count') and items[0]['count'] > 100000:
-            count = items[0]['count']
-            print(f'Substack: {count:,}')
-            return count
+        # Try up to 2 times (Apify residential proxy can be slow)
+        for attempt in range(2):
+            if attempt > 0:
+                print(f'Substack: retrying (attempt {attempt + 1})...', file=sys.stderr)
+            items = apify_run_and_poll('apify~playwright-scraper', input_data, max_wait=300)
+            if items and items[0].get('count') and items[0]['count'] > 100000:
+                count = items[0]['count']
+                print(f'Substack: {count:,}')
+                return count
+            if items:
+                print(f'Substack debug: {json.dumps(items[0])[:300]}', file=sys.stderr)
 
-        if items:
-            print(f'Substack debug: {json.dumps(items[0])[:300]}', file=sys.stderr)
-        print('Substack: could not extract count', file=sys.stderr)
+        print('Substack: could not extract count after retries', file=sys.stderr)
         return None
     except Exception as e:
         print(f'Substack error: {e}', file=sys.stderr)
