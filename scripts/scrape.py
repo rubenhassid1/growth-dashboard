@@ -152,45 +152,27 @@ def fetch_substack():
         return None
 
 
-# ── X: Apify playwright-scraper with residential proxy ──
+# ── X: GraphQL guest API ──
+TWITTER_BEARER = 'AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA'
+
 def fetch_x():
-    """Get follower count by scraping X profile page."""
-    if not APIFY_TOKEN:
-        print('X: APIFY_TOKEN not set, skipping', file=sys.stderr)
-        return None
+    """Get follower count via X's GraphQL guest API."""
     try:
-        page_function = '''async function pageFunction({ page, log }) {
-            await page.waitForTimeout(8000);
-            const text = await page.textContent("body");
-            // X shows "56.2K Followers" in profile
-            const m = text.match(/(\\d[\\d,.]*[KkMm]?)\\s*Follower/);
-            log.info("Match: " + (m ? m[1] : "none"));
-            if (!m) return { count: null, preview: text.slice(0, 400) };
-            let raw = m[1].replace(/,/g, "");
-            let num;
-            if (raw.match(/[Kk]$/)) num = Math.round(parseFloat(raw) * 1000);
-            else if (raw.match(/[Mm]$/)) num = Math.round(parseFloat(raw) * 1000000);
-            else num = parseInt(raw, 10);
-            return { count: num, url: page.url() };
-        }'''
-
-        input_data = {
-            "startUrls": [{"url": f"https://x.com/{X_SCREEN_NAME}"}],
-            "pageFunction": page_function,
-            "proxyConfiguration": {"useApifyProxy": True, "apifyProxyGroups": ["RESIDENTIAL"]},
-            "launchContext": {"launchOptions": {"headless": False}},
-            "maxRequestRetries": 0,
-        }
-
-        items = apify_run_and_poll('apify~playwright-scraper', input_data, max_wait=180)
-        if items and items[0].get('count') and items[0]['count'] > 1000:
-            count = items[0]['count']
+        variables = json.dumps({"screen_name": X_SCREEN_NAME})
+        encoded = urllib.parse.quote(variables)
+        url = f'https://api.twitter.com/graphql/BQ6xjFU6Mgm-WhEP3OiT9w/UserByScreenName?variables={encoded}'
+        req = urllib.request.Request(url, headers={
+            'Authorization': f'Bearer {urllib.parse.unquote(TWITTER_BEARER)}',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+        })
+        with urllib.request.urlopen(req, timeout=15) as r:
+            data = json.loads(r.read())
+        user = data.get('data', {}).get('user', {}).get('result', {}).get('legacy', {})
+        count = user.get('followers_count')
+        if count and isinstance(count, int):
             print(f'X: {count:,}')
             return count
-
-        if items:
-            print(f'X debug: {json.dumps(items[0])[:300]}', file=sys.stderr)
-        print('X: could not extract follower count', file=sys.stderr)
+        print('X: followers_count not found in GraphQL response', file=sys.stderr)
         return None
     except Exception as e:
         print(f'X error: {e}', file=sys.stderr)
