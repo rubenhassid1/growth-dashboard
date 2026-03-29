@@ -45,6 +45,7 @@ def apify_run_and_poll(actor, input_data, max_wait=300):
     dataset_id = run_data['defaultDatasetId']
 
     # Poll for completion
+    status = 'RUNNING'
     for _ in range(max_wait // 10):
         time.sleep(10)
         status_url = f'https://api.apify.com/v2/actor-runs/{run_id}?token={APIFY_TOKEN}'
@@ -54,6 +55,7 @@ def apify_run_and_poll(actor, input_data, max_wait=300):
             break
 
     if status != 'SUCCEEDED':
+        print(f'  Apify run {run_id} ended with status: {status}', file=sys.stderr)
         return None
 
     items_url = f'https://api.apify.com/v2/datasets/{dataset_id}/items?token={APIFY_TOKEN}'
@@ -141,6 +143,8 @@ def fetch_substack():
             print(f'Substack: {count:,}')
             return count
 
+        if items:
+            print(f'Substack debug: {json.dumps(items[0])[:300]}', file=sys.stderr)
         print('Substack: could not extract count', file=sys.stderr)
         return None
     except Exception as e:
@@ -184,9 +188,8 @@ def fetch_x():
             print(f'X: {count:,}')
             return count
 
-        # Log what we got for debugging
         if items:
-            print(f'X: no count found. Preview: {items[0].get("preview", "")[:200]}', file=sys.stderr)
+            print(f'X debug: {json.dumps(items[0])[:300]}', file=sys.stderr)
         print('X: could not extract follower count', file=sys.stderr)
         return None
     except Exception as e:
