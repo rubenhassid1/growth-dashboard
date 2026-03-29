@@ -22,6 +22,7 @@ jobs:
       - name: Run scraper
         env:
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+          SUBSTACK_SID: ${{ secrets.SUBSTACK_SID }}
         run: python scripts/scrape.py
 
       - name: Commit and push

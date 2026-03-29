@@ -2,8 +2,8 @@
 """
 Daily scraper: fetches public follower counts for LinkedIn, Substack, X.
 - LinkedIn: Apify scraper (supreme_coder/linkedin-profile-scraper)
-- Substack: scrapes the public newsletter page
-- X: syndication timeline embed endpoint
+- Substack: Apify playwright-scraper with authenticated cookie
+- X: Apify playwright-scraper via residential proxy
 Appends results to data/counts.json and commits.
 """
 
@@ -19,17 +19,54 @@ from datetime import datetime, timezone
 
 DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'counts.json')
 
-# ── LinkedIn: Apify scraper ──
 APIFY_TOKEN = os.environ.get('APIFY_TOKEN', '')
+SUBSTACK_SID = os.environ.get('SUBSTACK_SID', '')
 LINKEDIN_URL = 'https://www.linkedin.com/in/ruben-hassid/'
+X_SCREEN_NAME = 'RubenHassid'
 
+
+def apify_request(url, data=None, timeout=15):
+    """Helper for Apify API calls."""
+    if data is not None:
+        body = json.dumps(data).encode()
+        req = urllib.request.Request(url, data=body, headers={'Content-Type': 'application/json'})
+    else:
+        req = urllib.request.Request(url)
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return json.loads(r.read())
+
+
+def apify_run_and_poll(actor, input_data, max_wait=300):
+    """Start an Apify actor run and poll until complete."""
+    run_url = f'https://api.apify.com/v2/acts/{actor}/runs?token={APIFY_TOKEN}'
+    result = apify_request(run_url, input_data, timeout=30)
+    run_data = result.get('data', result)
+    run_id = run_data['id']
+    dataset_id = run_data['defaultDatasetId']
+
+    # Poll for completion
+    for _ in range(max_wait // 10):
+        time.sleep(10)
+        status_url = f'https://api.apify.com/v2/actor-runs/{run_id}?token={APIFY_TOKEN}'
+        run_info = apify_request(status_url)['data']
+        status = run_info['status']
+        if status in ('SUCCEEDED', 'FAILED', 'ABORTED'):
+            break
+
+    if status != 'SUCCEEDED':
+        return None
+
+    items_url = f'https://api.apify.com/v2/datasets/{dataset_id}/items?token={APIFY_TOKEN}'
+    return apify_request(items_url)
+
+
+# ── LinkedIn: Apify scraper ──
 def fetch_linkedin():
     """Get follower count via Apify LinkedIn profile scraper."""
     if not APIFY_TOKEN:
         print('LinkedIn: APIFY_TOKEN not set, skipping', file=sys.stderr)
         return None
     try:
-        # Trigger the scraper run and wait for it to finish
         run_url = f'https://api.apify.com/v2/acts/supreme_coder~linkedin-profile-scraper/runs?token={APIFY_TOKEN}&waitForFinish=120'
         body = json.dumps({"urls": [{"url": LINKEDIN_URL}]}).encode()
         req = urllib.request.Request(run_url, data=body, headers={'Content-Type': 'application/json'})
@@ -44,7 +81,6 @@ def fetch_linkedin():
             print(f'LinkedIn: Apify run status={status}', file=sys.stderr)
             return None
 
-        # Fetch results from dataset
         items_url = f'https://api.apify.com/v2/datasets/{dataset_id}/items?token={APIFY_TOKEN}'
         req = urllib.request.Request(items_url)
         with urllib.request.urlopen(req, timeout=15) as r:
@@ -64,46 +100,94 @@ def fetch_linkedin():
         return None
 
 
-# ── Substack: scrape public page ──
+# ── Substack: Apify playwright-scraper with auth cookie ──
 def fetch_substack():
-    """Scrape subscriber count from ruben.substack.com."""
+    """Get exact subscriber count via authenticated Substack dashboard."""
+    if not APIFY_TOKEN or not SUBSTACK_SID:
+        print('Substack: APIFY_TOKEN or SUBSTACK_SID not set, skipping', file=sys.stderr)
+        return None
     try:
-        req = urllib.request.Request(
-            'https://ruben.substack.com/',
-            headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
-        )
-        with urllib.request.urlopen(req, timeout=15) as r:
-            html = r.read().decode('utf-8')
-        match = re.search(r'([\d,]+)\s*subscriber', html, re.IGNORECASE)
-        if match:
-            count = int(match.group(1).replace(',', ''))
+        cookie_json = json.dumps(SUBSTACK_SID)
+        page_function = f'''async function pageFunction({{ page, log }}) {{
+            await page.context().addCookies([{{
+                name: "substack.sid",
+                value: {cookie_json},
+                domain: ".substack.com",
+                path: "/"
+            }}]);
+            log.info("Navigating to subscribers page...");
+            await page.goto("https://ruben.substack.com/publish/subscribers", {{
+                waitUntil: "domcontentloaded",
+                timeout: 60000
+            }});
+            await page.waitForTimeout(10000);
+            const text = await page.textContent("body");
+            const match = text.match(/(\\d[\\d,]+)\\s+subscribers/);
+            const count = match ? parseInt(match[1].replace(/,/g, ""), 10) : null;
+            return {{ count, url: page.url() }};
+        }}'''
+
+        input_data = {
+            "startUrls": [{"url": "https://ruben.substack.com"}],
+            "pageFunction": page_function,
+            "proxyConfiguration": {"useApifyProxy": True, "apifyProxyGroups": ["RESIDENTIAL"]},
+            "launchContext": {"launchOptions": {"headless": False}},
+            "maxRequestRetries": 0,
+        }
+
+        items = apify_run_and_poll('apify~playwright-scraper', input_data, max_wait=300)
+        if items and items[0].get('count') and items[0]['count'] > 100000:
+            count = items[0]['count']
             print(f'Substack: {count:,}')
             return count
-        print('Substack: count not found in page', file=sys.stderr)
+
+        print('Substack: could not extract count', file=sys.stderr)
         return None
     except Exception as e:
         print(f'Substack error: {e}', file=sys.stderr)
         return None
 
 
-# ── X: syndication timeline embed ──
-X_SCREEN_NAME = 'RubenHassid'
-
+# ── X: Apify playwright-scraper with residential proxy ──
 def fetch_x():
-    """Get follower count via X's syndication timeline widget."""
+    """Get follower count by scraping X profile page."""
+    if not APIFY_TOKEN:
+        print('X: APIFY_TOKEN not set, skipping', file=sys.stderr)
+        return None
     try:
-        url = f'https://syndication.twitter.com/srv/timeline-profile/screen-name/{X_SCREEN_NAME}'
-        req = urllib.request.Request(url, headers={
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
-        })
-        with urllib.request.urlopen(req, timeout=15) as r:
-            html = r.read().decode('utf-8')
-        match = re.search(r'"followers_count":(\d+)', html)
-        if match:
-            count = int(match.group(1))
+        page_function = '''async function pageFunction({ page, log }) {
+            await page.waitForTimeout(8000);
+            const text = await page.textContent("body");
+            // X shows "56.2K Followers" in profile
+            const m = text.match(/(\\d[\\d,.]*[KkMm]?)\\s*Follower/);
+            log.info("Match: " + (m ? m[1] : "none"));
+            if (!m) return { count: null, preview: text.slice(0, 400) };
+            let raw = m[1].replace(/,/g, "");
+            let num;
+            if (raw.match(/[Kk]$/)) num = Math.round(parseFloat(raw) * 1000);
+            else if (raw.match(/[Mm]$/)) num = Math.round(parseFloat(raw) * 1000000);
+            else num = parseInt(raw, 10);
+            return { count: num, url: page.url() };
+        }'''
+
+        input_data = {
+            "startUrls": [{"url": f"https://x.com/{X_SCREEN_NAME}"}],
+            "pageFunction": page_function,
+            "proxyConfiguration": {"useApifyProxy": True, "apifyProxyGroups": ["RESIDENTIAL"]},
+            "launchContext": {"launchOptions": {"headless": False}},
+            "maxRequestRetries": 0,
+        }
+
+        items = apify_run_and_poll('apify~playwright-scraper', input_data, max_wait=180)
+        if items and items[0].get('count') and items[0]['count'] > 1000:
+            count = items[0]['count']
             print(f'X: {count:,}')
             return count
-        print('X: followers_count not found in syndication response', file=sys.stderr)
+
+        # Log what we got for debugging
+        if items:
+            print(f'X: no count found. Preview: {items[0].get("preview", "")[:200]}', file=sys.stderr)
+        print('X: could not extract follower count', file=sys.stderr)
         return None
     except Exception as e:
         print(f'X error: {e}', file=sys.stderr)
@@ -133,7 +217,6 @@ def main():
     # Check if we already have an entry for today
     existing = next((e for e in entries if e['date'] == today), None)
     if existing:
-        # Update existing entry with any new data
         if linkedin is not None:
             existing['linkedin'] = linkedin
         if substack is not None:
@@ -152,10 +235,8 @@ def main():
         entries.append(entry)
         print(f'Added new entry for {today}')
 
-    # Sort by date
     entries.sort(key=lambda e: e['date'])
 
-    # Write back
     with open(DATA_FILE, 'w') as f:
         json.dump(entries, f, indent=2)
 
