@@ -47,9 +47,12 @@ def fetch_linkedin():
         return None
 
 
-# ── Substack: public page ──
+# ── Substack: public page (direct or via Apify proxy) ──
+APIFY_TOKEN = os.environ.get('APIFY_TOKEN', '')
+
 def fetch_substack():
     """Get subscriber count from public Substack profile."""
+    # Try direct fetch first
     try:
         req = urllib.request.Request(
             'https://substack.com/@ruben',
@@ -57,17 +60,47 @@ def fetch_substack():
         )
         with urllib.request.urlopen(req, timeout=15) as r:
             html = r.read().decode('utf-8')
-        # Page has: subscriberCountNumber":409000
         match = re.search(r'subscriberCountNumber[^0-9]*(\d+)', html)
         if match:
             count = int(match.group(1))
             if count > 10000:
                 print(f'Substack: {count:,}')
                 return count
-        print('Substack: count not found in page', file=sys.stderr)
+    except Exception as e:
+        print(f'Substack direct: {e}', file=sys.stderr)
+
+    # Fallback: Apify cheerio-scraper (bypasses Cloudflare via proxy)
+    if not APIFY_TOKEN:
+        print('Substack: APIFY_TOKEN not set for fallback', file=sys.stderr)
+        return None
+    try:
+        print('Substack: using Apify proxy fallback...', file=sys.stderr)
+        page_fn = 'async function pageFunction({$}){const h=$.html();const m=h.match(/subscriberCountNumber[^0-9]*(\\d+)/);return{count:m?parseInt(m[1]):null};}'
+        input_data = {
+            "startUrls": [{"url": "https://substack.com/@ruben"}],
+            "pageFunction": page_fn,
+            "proxyConfiguration": {"useApifyProxy": True},
+        }
+        run_url = f'https://api.apify.com/v2/acts/apify~cheerio-scraper/runs?token={APIFY_TOKEN}&waitForFinish=60'
+        body = json.dumps(input_data).encode()
+        req = urllib.request.Request(run_url, data=body, headers={'Content-Type': 'application/json'})
+        with urllib.request.urlopen(req, timeout=70) as r:
+            run = json.loads(r.read())
+        run_data = run.get('data', run)
+        if run_data.get('status') != 'SUCCEEDED':
+            print(f'Substack Apify: status={run_data.get("status")}', file=sys.stderr)
+            return None
+        items_url = f'https://api.apify.com/v2/datasets/{run_data["defaultDatasetId"]}/items?token={APIFY_TOKEN}'
+        with urllib.request.urlopen(items_url, timeout=10) as r:
+            items = json.loads(r.read())
+        if items and items[0].get('count') and items[0]['count'] > 10000:
+            count = items[0]['count']
+            print(f'Substack: {count:,}')
+            return count
+        print('Substack Apify: count not found', file=sys.stderr)
         return None
     except Exception as e:
-        print(f'Substack error: {e}', file=sys.stderr)
+        print(f'Substack Apify error: {e}', file=sys.stderr)
         return None
 
 
