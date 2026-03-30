@@ -1,16 +1,16 @@
-name: Daily follower count scrape
+name: Sync from Google Sheet
 
 on:
   schedule:
-    # Every day at 23:59 Israel time (20:59 UTC during summer / 21:59 UTC during winter)
-    - cron: '59 20 * * *'
-  workflow_dispatch: # Allow manual trigger
+    # Every Monday at 08:00 UTC (11:00 Israel time) — after weekend update
+    - cron: '0 8 * * 1'
+  workflow_dispatch: # Manual trigger
 
 permissions:
   contents: write
 
 jobs:
-  scrape:
+  sync:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,11 +19,8 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Run scraper
-        env:
-          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
-          SUBSTACK_SID: ${{ secrets.SUBSTACK_SID }}
-        run: python scripts/scrape.py
+      - name: Sync from Google Sheet
+        run: python scripts/sync-sheet.py
 
       - name: Commit and push
         run: |
@@ -33,6 +30,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Auto: daily follower counts $(date -u +%Y-%m-%d)"
+            git commit -m "Auto: sync from Google Sheet $(date -u +%Y-%m-%d)"
             git push
           fi
