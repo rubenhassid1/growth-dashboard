@@ -203,6 +203,28 @@ def main():
     else:
         entries = []
 
+    # Sanity check: reject any value that changed more than 20% from the last known value
+    def sanity_check(platform, new_val):
+        if new_val is None:
+            return None
+        prev_entries = [e for e in entries if platform in e]
+        if not prev_entries:
+            return new_val
+        last_val = prev_entries[-1][platform]
+        change_pct = abs(new_val - last_val) / last_val * 100
+        if change_pct > 20:
+            print(f'REJECTED {platform}: {new_val:,} is {change_pct:.1f}% off from last value {last_val:,}', file=sys.stderr)
+            return None
+        return new_val
+
+    linkedin = sanity_check('linkedin', linkedin)
+    substack = sanity_check('substack', substack)
+    x = sanity_check('x', x)
+
+    if linkedin is None and substack is None and x is None:
+        print('All values rejected by sanity check. Exiting.', file=sys.stderr)
+        sys.exit(1)
+
     # Check if we already have an entry for today
     existing = next((e for e in entries if e['date'] == today), None)
     if existing:
