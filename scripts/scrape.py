@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """
 Daily scraper: fetches public follower counts for LinkedIn, Substack, X.
-- LinkedIn: Apify scraper (supreme_coder/linkedin-profile-scraper)
-- Substack: Apify playwright-scraper with authenticated cookie
-- X: Apify playwright-scraper via residential proxy
-Appends results to data/counts.json and commits.
+- LinkedIn: Google Sheet (same source as linkedin-fighter — always works)
+- Substack: public page subscriber count
+- X: GraphQL guest API
 """
 
 import json
 import os
 import re
 import sys
-import time
+import csv
+import io
 import urllib.parse
 import urllib.request
 import urllib.error
@@ -19,137 +19,52 @@ from datetime import datetime, timezone
 
 DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'counts.json')
 
-APIFY_TOKEN = os.environ.get('APIFY_TOKEN', '')
-SUBSTACK_SID = os.environ.get('SUBSTACK_SID', '')
-LINKEDIN_URL = 'https://www.linkedin.com/in/ruben-hassid/'
-X_SCREEN_NAME = 'RubenHassid'
 
+# ── LinkedIn: Google Sheet (proven reliable) ──
+SHEET_ID = '1j_Z8JuukkskQlfgsIzZgiX_XoSGu_rzNuCGLu_asZuo'
 
-def apify_request(url, data=None, timeout=15):
-    """Helper for Apify API calls."""
-    if data is not None:
-        body = json.dumps(data).encode()
-        req = urllib.request.Request(url, data=body, headers={'Content-Type': 'application/json'})
-    else:
-        req = urllib.request.Request(url)
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        return json.loads(r.read())
-
-
-def apify_run_and_poll(actor, input_data, max_wait=300):
-    """Start an Apify actor run and poll until complete."""
-    run_url = f'https://api.apify.com/v2/acts/{actor}/runs?token={APIFY_TOKEN}'
-    result = apify_request(run_url, input_data, timeout=30)
-    run_data = result.get('data', result)
-    run_id = run_data['id']
-    dataset_id = run_data['defaultDatasetId']
-
-    # Poll for completion
-    status = 'RUNNING'
-    for _ in range(max_wait // 10):
-        time.sleep(10)
-        status_url = f'https://api.apify.com/v2/actor-runs/{run_id}?token={APIFY_TOKEN}'
-        run_info = apify_request(status_url)['data']
-        status = run_info['status']
-        if status in ('SUCCEEDED', 'FAILED', 'ABORTED'):
-            break
-
-    if status != 'SUCCEEDED':
-        print(f'  Apify run {run_id} ended with status: {status}', file=sys.stderr)
-        return None
-
-    items_url = f'https://api.apify.com/v2/datasets/{dataset_id}/items?token={APIFY_TOKEN}'
-    return apify_request(items_url)
-
-
-# ── LinkedIn: Apify scraper ──
 def fetch_linkedin():
-    """Get follower count via Apify LinkedIn profile scraper."""
-    if not APIFY_TOKEN:
-        print('LinkedIn: APIFY_TOKEN not set, skipping', file=sys.stderr)
-        return None
+    """Get Ruben's follower count from the Google Sheet."""
     try:
-        run_url = f'https://api.apify.com/v2/acts/supreme_coder~linkedin-profile-scraper/runs?token={APIFY_TOKEN}&waitForFinish=120'
-        body = json.dumps({"urls": [{"url": LINKEDIN_URL}]}).encode()
-        req = urllib.request.Request(run_url, data=body, headers={'Content-Type': 'application/json'})
-        with urllib.request.urlopen(req, timeout=130) as r:
-            run = json.loads(r.read())
-
-        run_data = run.get('data', run)
-        status = run_data.get('status')
-        dataset_id = run_data.get('defaultDatasetId')
-
-        if status != 'SUCCEEDED' or not dataset_id:
-            print(f'LinkedIn: Apify run status={status}', file=sys.stderr)
-            return None
-
-        items_url = f'https://api.apify.com/v2/datasets/{dataset_id}/items?token={APIFY_TOKEN}'
-        req = urllib.request.Request(items_url)
+        url = f'https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv'
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         with urllib.request.urlopen(req, timeout=15) as r:
-            items = json.loads(r.read())
+            text = r.read().decode('utf-8')
 
-        if items and len(items) > 0:
-            count = items[0].get('followerCount')
-            if count and isinstance(count, (int, float)):
-                count = int(count)
-                print(f'LinkedIn: {count:,}')
-                return count
-
-        print('LinkedIn: followerCount not found in Apify response', file=sys.stderr)
+        rows = list(csv.reader(io.StringIO(text)))
+        # Ruben Followers is column E (index 4)
+        for row in reversed(rows[1:]):
+            if len(row) > 4 and row[4].strip():
+                raw = row[4].strip().replace(',', '')
+                if raw.isdigit():
+                    count = int(raw)
+                    print(f'LinkedIn: {count:,}')
+                    return count
+        print('LinkedIn: no valid data in sheet', file=sys.stderr)
         return None
     except Exception as e:
         print(f'LinkedIn error: {e}', file=sys.stderr)
         return None
 
 
-# ── Substack: Apify playwright-scraper with auth cookie ──
+# ── Substack: public page ──
 def fetch_substack():
-    """Get exact subscriber count via authenticated Substack dashboard."""
-    if not APIFY_TOKEN or not SUBSTACK_SID:
-        print('Substack: APIFY_TOKEN or SUBSTACK_SID not set, skipping', file=sys.stderr)
-        return None
+    """Get subscriber count from public Substack profile."""
     try:
-        cookie_json = json.dumps(SUBSTACK_SID)
-        page_function = f'''async function pageFunction({{ page, log }}) {{
-            await page.context().addCookies([{{
-                name: "substack.sid",
-                value: {cookie_json},
-                domain: ".substack.com",
-                path: "/"
-            }}]);
-            log.info("Navigating to subscribers page...");
-            await page.goto("https://ruben.substack.com/publish/subscribers", {{
-                waitUntil: "domcontentloaded",
-                timeout: 60000
-            }});
-            await page.waitForTimeout(10000);
-            const text = await page.textContent("body");
-            const match = text.match(/(\\d[\\d,]+)\\s+subscribers/);
-            const count = match ? parseInt(match[1].replace(/,/g, ""), 10) : null;
-            return {{ count, url: page.url() }};
-        }}'''
-
-        input_data = {
-            "startUrls": [{"url": "https://ruben.substack.com"}],
-            "pageFunction": page_function,
-            "proxyConfiguration": {"useApifyProxy": True, "apifyProxyGroups": ["RESIDENTIAL"]},
-            "launchContext": {"launchOptions": {"headless": False}},
-            "maxRequestRetries": 0,
-        }
-
-        # Try up to 2 times (Apify residential proxy can be slow)
-        for attempt in range(2):
-            if attempt > 0:
-                print(f'Substack: retrying (attempt {attempt + 1})...', file=sys.stderr)
-            items = apify_run_and_poll('apify~playwright-scraper', input_data, max_wait=300)
-            if items and items[0].get('count') and items[0]['count'] > 100000:
-                count = items[0]['count']
+        req = urllib.request.Request(
+            'https://substack.com/@ruben',
+            headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'}
+        )
+        with urllib.request.urlopen(req, timeout=15) as r:
+            html = r.read().decode('utf-8')
+        # Page has: subscriberCountNumber":409000
+        match = re.search(r'subscriberCountNumber[^0-9]*(\d+)', html)
+        if match:
+            count = int(match.group(1))
+            if count > 10000:
                 print(f'Substack: {count:,}')
                 return count
-            if items:
-                print(f'Substack debug: {json.dumps(items[0])[:300]}', file=sys.stderr)
-
-        print('Substack: could not extract count after retries', file=sys.stderr)
+        print('Substack: count not found in page', file=sys.stderr)
         return None
     except Exception as e:
         print(f'Substack error: {e}', file=sys.stderr)
@@ -157,6 +72,7 @@ def fetch_substack():
 
 
 # ── X: GraphQL guest API ──
+X_SCREEN_NAME = 'RubenHassid'
 TWITTER_BEARER = 'AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA'
 
 def fetch_x():
@@ -176,7 +92,7 @@ def fetch_x():
         if count and isinstance(count, int):
             print(f'X: {count:,}')
             return count
-        print('X: followers_count not found in GraphQL response', file=sys.stderr)
+        print('X: followers_count not found in response', file=sys.stderr)
         return None
     except Exception as e:
         print(f'X error: {e}', file=sys.stderr)
@@ -211,9 +127,11 @@ def main():
         if not prev_entries:
             return new_val
         last_val = prev_entries[-1][platform]
+        if last_val == 0:
+            return new_val
         change_pct = abs(new_val - last_val) / last_val * 100
         if change_pct > 20:
-            print(f'REJECTED {platform}: {new_val:,} is {change_pct:.1f}% off from last value {last_val:,}', file=sys.stderr)
+            print(f'REJECTED {platform}: {new_val:,} is {change_pct:.1f}% off from {last_val:,}', file=sys.stderr)
             return None
         return new_val
 
@@ -222,27 +140,21 @@ def main():
     x = sanity_check('x', x)
 
     if linkedin is None and substack is None and x is None:
-        print('All values rejected by sanity check. Exiting.', file=sys.stderr)
+        print('All values failed or rejected. Exiting.', file=sys.stderr)
         sys.exit(1)
 
-    # Check if we already have an entry for today
+    # Save
     existing = next((e for e in entries if e['date'] == today), None)
     if existing:
-        if linkedin is not None:
-            existing['linkedin'] = linkedin
-        if substack is not None:
-            existing['substack'] = substack
-        if x is not None:
-            existing['x'] = x
+        if linkedin is not None: existing['linkedin'] = linkedin
+        if substack is not None: existing['substack'] = substack
+        if x is not None: existing['x'] = x
         print(f'Updated existing entry for {today}')
     else:
         entry = {'date': today}
-        if linkedin is not None:
-            entry['linkedin'] = linkedin
-        if substack is not None:
-            entry['substack'] = substack
-        if x is not None:
-            entry['x'] = x
+        if linkedin is not None: entry['linkedin'] = linkedin
+        if substack is not None: entry['substack'] = substack
+        if x is not None: entry['x'] = x
         entries.append(entry)
         print(f'Added new entry for {today}')
 
@@ -251,7 +163,6 @@ def main():
     with open(DATA_FILE, 'w') as f:
         json.dump(entries, f, indent=2)
 
-    print(f'Saved to {DATA_FILE}')
     print(json.dumps(entries[-1], indent=2))
 
 
